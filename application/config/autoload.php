@@ -90,8 +90,8 @@ $autoload['drivers'] = array();
 */
 // $autoload['helper'] = array();
 // Common
-$autoload['libraries'] = array('database','session','form_validation','user_agent','common');
-$autoload['helper'] = array('html', 'url','path','file', 'form','cookie','common_helper');
+$autoload['libraries'] = array('database','session','form_validation','user_agent','common','curl','csvimport');
+$autoload['helper'] = array('html', 'url', 'file', 'form','cookie','common_helper');
 
 /*
 | -------------------------------------------------------------------
@@ -134,5 +134,5 @@ $autoload['language'] = array();
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array('LoginModel','Maintenance_model','CompanyModel','PersonalSecuredLoansModel','ClubModel');
+$autoload['model'] = array('GlobalModel', 'LoginModel', 'MaintenanceModel', 'Maintenance_model','CompanyModel','PersonalSecuredLoansModel','ClubModel');
 

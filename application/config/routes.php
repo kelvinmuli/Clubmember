@@ -91,3 +91,62 @@ $route['create-database'] = 'admin/CustomerDB/create_database';
 $route['callback'] = 'Mpesa/insertIpay';
 $route['logout'] = 'front/Signup/logout';
 
+/**
+ * MaintenanceController
+ */
+$route['module-setup'] = 'admin/MaintenanceController/moduleSetupView';
+$route['add-module-setup-modal/(:any)'] = 'admin/MaintenanceController/addModuleSetupModal/$1';
+$route['add-module-setup'] = 'admin/MaintenanceController/addModuleSetup';
+$route['add-module-setup/(:any)'] = 'admin/MaintenanceController/addModuleSetup/$1';
+$route['all-maintenance'] = 'admin/MaintenanceController/maintenanceView';
+$route['all-maintenance/(:any)'] = 'admin/MaintenanceController/maintenanceView/$1';
+$route['all-maintenance/(:any)/(:any)'] = 'admin/MaintenanceController/maintenanceView/$1/$2';
+$route['get-maintenance'] = 'admin/MaintenanceController/getMaintenance';
+$route['get-maintenance/(:any)'] = 'admin/MaintenanceController/getMaintenance/$1';
+$route['add-maintenance'] = 'admin/MaintenanceController/addMaintenance';
+$route['add-maintenance-modal/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/addMaintenanceModal/$1/$2/$3';
+$route['add-maintenance-modal/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/addMaintenanceModal/$1/$2/$3/$4/$5';
+$route['edit-maintenance'] = 'admin/MaintenanceController/editMaintenance';
+$route['edit-maintenance-image-modal/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/editMaintenanceImageModal/$1/$2/$3';
+$route['edit-maintenance-image-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/editMaintenanceImageModal/$1/$2/$3/$4';
+$route['edit-maintenance-image-modal/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/editMaintenanceImageModal/$1/$2/$3/$4/$5';
+$route['edit-maintenance-modal/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/editMaintenanceModal/$1/$2/$3';
+$route['edit-maintenance-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/editMaintenanceModal/$1/$2/$3/$4';
+$route['edit-maintenance-modal/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/editMaintenanceModal/$1/$2/$3/$4/$5';
+$route['remove-maintenance'] = 'admin/MaintenanceController/removeMaintenance';
+$route['remove-maintenance-modal/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/removeMaintenanceModal/$1/$2/$3';
+$route['remove-maintenance-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/removeMaintenanceModal/$1/$2/$3/$4';
+$route['remove-maintenance-modal/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/removeMaintenanceModal/$1/$2/$3/$4/$5';
+$route['maintenance-naming'] = 'admin/MaintenanceController/maintenanceNamingView';
+$route['maintenance-naming/(:any)'] = 'admin/MaintenanceController/maintenanceNamingView/$1';
+$route['add-maintenance-naming-modal'] = 'admin/MaintenanceController/addMaintenanceNamingModal';
+$route['add-maintenance-naming'] = 'admin/MaintenanceController/addMaintenanceNaming';
+$route['edit-maintenance-naming-modal/(:any)'] = 'admin/MaintenanceController/editMaintenanceNamingModal/$1';
+$route['edit-maintenance-naming'] = 'admin/MaintenanceController/editMaintenanceNaming';
+$route['maintenance-column-naming'] = 'admin/MaintenanceController/maintenanceColumnNamingView';
+$route['maintenance-column-naming/(:any)'] = 'admin/MaintenanceController/maintenanceColumnNamingView/$1';
+$route['add-maintenance-column-naming-modal'] = 'admin/MaintenanceController/addMaintenanceColumnNamingModal';
+$route['add-maintenance-column-naming'] = 'admin/MaintenanceController/addMaintenanceColumnNaming';
+$route['edit-maintenance-column-naming-modal/(:any)'] = 'admin/MaintenanceController/editMaintenanceColumnNamingModal/$1';
+$route['edit-maintenance-column-naming'] = 'admin/MaintenanceController/editMaintenanceColumnNaming';
+$route['get-maintenance-column-html/(:any)'] = 'admin/MaintenanceController/getMaintenanceColumnHtml/$1';
+$route['get-maintenance-column-html/(:any)/(:any)'] = 'admin/MaintenanceController/getMaintenanceColumnHtml/$1/$2';
+$route['get-table-data/(:any)/(:any)'] = 'admin/MaintenanceController/getTableData/$1/$2';
+$route['get-table-data/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/getTableData/$1/$2/$3';
+$route['get-table-data/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceController/getTableData/$1/$2/$3/$4';
+
+
+/*
+* admin/UserRoleController
+*/
+$route['user-role'] = 'admin/UserRoleController/userRoleView';
+$route['user-role-add/(:any)'] = 'admin/UserRoleController/userRoleAdd/$1';
+$route['user-role-delete/(:any)'] = 'admin/UserRoleController/userRoleDelete/$1';
+$route['user-role-add-edit/(:any)'] = 'admin/UserRoleController/userRoleAddEdit/$1';
+$route['user-sub-menu-role-add-edit/(:any)'] = 'admin/UserRoleController/userSubMenuRoleAddEdit/$1';
+$route['user-module-type-role-add-edit/(:any)'] = 'admin/UserRoleController/userModuleTypeRoleAddEdit/$1';
+$route['user-type-role'] = 'admin/UserRoleController/userTypeRoleView';
+$route['user-type-role-add/(:any)'] = 'admin/UserRoleController/userTypeRoleAdd/$1';
+$route['user-type-role-delete/(:any)'] = 'admin/UserRoleController/userTypeRoleDelete/$1';
+$route['user-type-role-add-edit/(:any)'] = 'admin/UserRoleController/userTypeRoleAddEdit/$1';
+

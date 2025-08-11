@@ -26,54 +26,35 @@ class Login extends CI_Controller {
 
 
 
-	 public function VerifyLogin(){
-	    //Field validation succeeded.  Validate against database
-	    $email = $this->input->post('email');
-        $password = sha1($this->input->post('password'));
-
-	    //query the database
-	    $result = $this->LoginModel->login($email, $password);
-		// $admin=0;	
-	
-	    if ($result) {
-		 $sess_array = array();
-		 
-	    foreach ($result as $row) {
-
-			$sess_array = array(
-				'user_id' => $row->user_id,
-				'user_name' => $row->name,
-				'middle_name' => $row->middle_name,
-				'last_name' => $row->last_name,
-				'email' => $row->email, 
-				'reset' =>$row->reset,
-				'user_type'  =>$row->user_type,
-				'activation_status' =>$row->activation_status,
-				'membership_no' => $row->membership_no,
-                'club_id' => $row->club_id
-			);
-
-	        $this->session->set_userdata('XmR2qDXOJu4ey6vZurlDpncDDDUbINQNffpopp', $sess_array);
-
-	    }
-	}
-        
-        if ($sess_array['user_type']=="5c8786cdf7c16") {
-	    	$this->session->set_flashdata('err', 'User not allowed to login here ');
-        	redirect('control', 'refresh');
-         }
-         
-        // print_r($sess_array);
-	    // exit();
-	        
-	    // if ($sess_array['user_type']=="5c8786cdf7c16") {
-	    // 	$this->session->set_flashdata('err', 'User not allowed to login here ');
-        // 	redirect('control', 'refresh');
-        	
-        // }
-
-        redirect(base_url().'dashboard');
-
+	 public function VerifyLogin()
+	 {
+	    $postData = $this->input->post();
+		$email = $postData['email'];
+		$password = $postData['password'];
+		$userRow = $this->db->select('*')->from('users')->where('email', $email)->get()->row();
+		// print_r($userData->password.'<br><br>');
+		// print_r($password);
+		// exit;
+		if (password_verify($password, $userRow->password))
+		// if ($userData->is_active == 1) 
+		{
+			$user = json_decode(json_encode($userRow), true);
+			$this->session->set_userdata(GlobalModel::SESSION, $user);
+			$description = 'Welcome back ' . $userRow->full_legal_name . '. ✔️';
+			$this->session->set_flashdata('message', $description);
+			$userRightData = $this->db->select('*')->from('user_right')->where('user_type_id', $userRow->user_type_id)->get()->row();
+			$moduleData = $this->db->select('*')->from('m_module')->where('module_id', $userRightData->module_id)->get()->row();
+			// $this->db->insert('system_log', array('system_log_id' => generate_uuid(), 'log_type_id' => '1636952180', 'description' => $email . ' : ' . $description));
+			// redirect($moduleData->path, 'reload');
+			redirect('dashboard', 'reload');
+		} 
+		else 
+		{
+			$description = 'Hello '.$email.' Kindly Contact Next Level Properties for help. Thank You.';
+			$this->session->set_flashdata('message', $description);
+			// $this->db->insert('system_log', array('system_log_id' => generate_uuid(), 'log_type_id' => '1636952180', 'description' => $email . ' : ' . $description));
+			redirect('home', 'reload');
+		}
 	}
 	
 	public function verifyLoginFront(){
@@ -120,7 +101,7 @@ class Login extends CI_Controller {
 				'basic_pay' =>$row->basic_pay
 
 			);
-	        $this->session->set_userdata('XmR2qDXOJu4ey6vZurlDpncDDDUbINQNffpopp', $sess_array);
+	        $this->session->set_userdata(GlobalModel::SESSION, $sess_array);
 	    }
 	    
 		//  print_r($sess_array);
@@ -139,8 +120,8 @@ class Login extends CI_Controller {
     }
 
 
-        public function Logout()
-        {
+	public function Logout()
+	{
         // $this->common->checkSession();
 		$session_data = $this->common->loadSession();
 
@@ -148,7 +129,7 @@ class Login extends CI_Controller {
 
         // $session_data = 'de8786ddf7c161';  48414324554
 
-        $this->session->unset_userdata('XmR2qDXOJu4ey6vZurlDpncDDDUbINQNffpopp');
+        $this->session->unset_userdata(GlobalModel::SESSION);
         session_destroy();
 
         if ($user_type=="de8786ddf7c161") {

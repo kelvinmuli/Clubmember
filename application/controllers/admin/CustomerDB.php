@@ -28,13 +28,20 @@ class CustomerDB extends CI_Controller {
      * map to /index.php/welcome/<method_name>
      * @see https://codeigniter.com/userguide3/general/urls.html
      */
-          public function index() {
+	public function index() 
+	{
+		$this->load->model('ClubModel'); // Load your model
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+		$headerData = $this->common->loadHeaderData('customer-db-config');
+		$data = $headerData;
 
-            $this->load->model('ClubModel'); // Load your model
-            $data['customers'] = $this->ClubModel->get_customers(); // Fetch customers
-            $this->load->view('admin/customer_db_view', $data); // Pass data to view
+		$data['customers'] = $this->ClubModel->get_customers(); // Fetch customers
 
-     }
+		$this->load->view('admin/templates/header_view', $headerData);
+		$this->load->view('admin/customer_db_view', $data); // Pass data to view
+		$this->load->view('admin/templates/footer_view', $data);
+    }
 
 
      public function create_database()

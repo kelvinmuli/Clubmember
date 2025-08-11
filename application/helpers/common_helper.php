@@ -10,6 +10,34 @@
  * @return	type	
  */
  
+if (!function_exists('get_broken_name')) 
+{
+	function get_broken_name($param1 = '', $param2 = ' ', $param3 = 0, $param4=' ', $param5=true) 
+	{
+		$initials = "";
+	 	$initialsExplode = explode($param2, $param1);
+		for ($i=$param3; $i < count($initialsExplode); $i++) 
+		{ 
+			$initials .= (isset($initialsExplode[$i]) ? ($param5 ? ucfirst($initialsExplode[$i].$param4) : $initialsExplode[$i].$param4) : ($param3 == $i ? '#' : $param4));
+		}
+		return $initials;
+	}
+}
+
+if (!function_exists('get_combine_column_to_table')) 
+{
+	function get_combine_column_to_table($column_id, $startName='', $endName='')
+	{
+		$dataCombine = '';
+		$valueExplode = explode('_', substr($column_id, 0,-3));
+		for ($i = 0; $i < count($valueExplode); $i++) 
+		{
+			$dataCombine .= $i >= 1 ? ucfirst($valueExplode[$i]) : $valueExplode[$i];
+		}
+		return $startName.$dataCombine.$endName;
+	}
+}
+
 if (! function_exists('get_user_type_id'))
 {
 	function get_user_type_id($param1= '',$param2= '')
@@ -595,8 +623,8 @@ if (! function_exists('check_rate'))
       }
   } 
 
-      if (! function_exists('check_rate_per_day'))
-      {
+if (! function_exists('check_rate_per_day'))
+{
       function check_rate_per_day($firstday= '')
       {
             $ci =& get_instance();
@@ -616,7 +644,7 @@ if (! function_exists('check_rate'))
 
 ////////////////////
 if (! function_exists('check_rate_per_day_member_type'))
-      {
+{
       function check_rate_per_day_member_type($firstday= '',$rate_name='')
       {
             $ci =& get_instance();
@@ -632,12 +660,9 @@ if (! function_exists('check_rate_per_day_member_type'))
            
       }
 }
-//////////////////////////////
 
-
-
- if (! function_exists('get_total_cost_booking_details'))
-      {
+if (! function_exists('get_total_cost_booking_details'))
+{
       function get_total_cost_booking_details($booking_id= '')
       {
             $ci =& get_instance();
@@ -681,10 +706,180 @@ if (! function_exists('check_rate_per_day_member_type'))
       }
 }
 
+if (!function_exists('get_initial')) 
+{
+	function get_initial($param1 = '') 
+	{
+	 	$initialsExplode = explode(" ", $param1);
+		return (isset($initialsExplode[0]) ? $initialsExplode[0][0] : 'ML').(isset($initialsExplode[1]) ? $initialsExplode[1][0] : '');
+	}
+}
 
+if (!function_exists('get_title_id'))
+{
+	function get_title_id($title, $explode, $separator)
+	{
+		$nameId = '';
+        $name = strtolower(preg_replace('/[^a-zA-Z0-9_ %\[\]\.\(\)%&-]/s', '', $title));
+        $explodeBlog = explode($explode, $name);
+        foreach ($explodeBlog as $key => $value) {
+            $nameId .= $key == 0 ? $value :  $separator.$value;
+        }
+		return $nameId;
+	}
+}
 
+if (!function_exists('get_module_type')) 
+{
+	function get_module_type($param1 = '', $param2 = '')
+	{
+		return get_table('m_module_type', 'module_type_id', $param1, $param2);
+	}
+}
 
+if (!function_exists('get_user_right')) 
+{
+	function get_user_right($param1 = '', $param2 = '', $column = '', $param3 = 0)
+	{
+		$UserRights = array();
+		$ci =& get_instance();
+		$arrayRightsArray = $ci->MaintenanceModel->getTable('user_right');
+		if (!empty($arrayRightsArray)): foreach ($arrayRightsArray as $value):
+			if (!empty($column))
+				$UserRights[$value->user_type_id][$value->module_id][$value->$column] = "X";
+			else
+			$UserRights[$value->user_type_id][$value->module_id] = "X";
+		endforeach; endif;
 
+		if (!empty($column))
+			return isset($UserRights[$param1][$param2][$param3]) ? $UserRights[$param1][$param2][$param3] : NULL;
+		else
+			return isset($UserRights[$param1][$param2]) ? $UserRights[$param1][$param2] : NULL;
+	}
+}
 
+if (!function_exists('get_explode_select')) 
+{
+	function get_explode_select($param1 = '', $param2 = '')
+	{
+		$result = '';
+		$variable = explode(',', $param1);
+		foreach ($variable as $key => $value) {
+			if ($value == $param2) {
+				$result = $value;
+			}
+		}
+		return $result;
+	}
+}
+
+if (!function_exists('get_sys_control')) 
+{
+	function get_sys_control($param1 = '', $column = '', $param3 = 0)
+	{
+		$table = array();
+		$ci =& get_instance();
+		$tableArray = $ci->MaintenanceModel->getTable('s_sys-control');
+		if (isset($tableArray)): foreach ($tableArray as $value):
+			$table[$value->maintenance_id][$value->$column] = $value->$column;
+		endforeach; endif;
+
+		return isset($table[$param1][$param3]) ? $table[$param1][$param3] : 0;
+	}
+}
+
+if (!function_exists('get_maintenance_column')) 
+{
+	function get_maintenance_column($param1 = '', $param2 = '', $param3 = 0)
+	{
+		$table = array();
+		$ci =& get_instance();
+		$tableArray = $ci->MaintenanceModel->getTable('m_maintenance_column');
+		if (isset($tableArray)): foreach ($tableArray as $value):
+			$table[$value->maintenance_id][$value->column_id][$value->toggle] = $value->toggle;
+		endforeach; endif;
+		
+		return isset($table[$param1][$param2][$param3]) ? $table[$param1][$param2][$param3] : NULL;
+	}
+}
+
+if (!function_exists('get_maintenance_naming')) 
+{
+	function get_maintenance_naming($param1 = '', $param2 = '', $param3='')
+	{
+		$ci =& get_instance();
+		$array = $ci->MaintenanceModel->getTable('maintenance_naming');
+		foreach ($array as $value) 
+		{
+			$arrayAssoc[$value->maintenance_naming_id] = !empty($param2) ? $value->$param2 : $value->name;
+			$arrayAssoc[$value->maintenance] = !empty($param2) ? $value->$param2 : $value->name;
+		}
+		return isset($arrayAssoc[$param1]) ? $arrayAssoc[$param1] : ($param3==null ? 'N/A' : $param3.'*');
+	}
+}
+
+if (!function_exists('get_maintenance_column_naming'))
+{
+	function get_maintenance_column_naming($table, $param1 = '', $param2 = '', $param3='')
+	{
+		$ci =& get_instance();
+		$array = $ci->MaintenanceModel->getTable('maintenance_column_naming', '', array('maintenance'=>$table));
+		foreach ($array as $value) 
+		{
+			$arrayAssoc[$value->maintenance_column_naming_id] = !empty($param2) ? $value->$param2 : $value->name;
+			$arrayAssoc[$value->column_name] = !empty($param2) ? $value->$param2 : $value->name;
+		}
+		return isset($arrayAssoc[$param1]) ? $arrayAssoc[$param1] : ($param3==null ? 'N/A' : $param3);
+	}
+}
+
+if (!function_exists('get_table')) 
+{
+	function get_table($table, $column_id, $param1 = '', $param2 = '')
+	{
+		static $cache = [];
+		$ci = &get_instance();
+
+		// Cache key
+		$cacheKey = md5($table . '|' . $column_id . '|' . $param1 . '|' . $param2);
+		if (isset($cache[$cacheKey])) {
+			return $cache[$cacheKey];
+		}
+
+		// If $param2 is empty, return value from list
+		if (empty($param2)) {
+			$result = $ci->MaintenanceModel->getTable($table, $column_id);
+			$arrayAssoc = [];
+
+			foreach ($result as $row) {
+				$arrayAssoc[$row->$column_id] = $row;
+			}
+
+			$cache[$cacheKey] = $arrayAssoc[$param1] ?? 'N/A';
+			return $cache[$cacheKey];
+		}
+
+		// Otherwise, fetch single row and column
+		$row = $ci->MaintenanceModel->getTableRow($table, $column_id, $param1, $param2);
+
+		if (!empty($row) && isset($row->$param2)) {
+			$cache[$cacheKey] = $row->$param2;
+			return $row->$param2;
+		}
+
+		$fallbacks = ['eta_at', 'name'];
+		$cache[$cacheKey] = in_array($param2, $fallbacks) ? '-' : (in_array($param2, array('price_instant', 'price_installment')) ? '0.00' : 'N/A');
+		return $cache[$cacheKey];
+	}
+}
+
+if (!function_exists('generate_uuid')) 
+{
+    function generate_uuid()
+    {
+        $uuid = time();
+        return substr($uuid, 0, 6).mt_rand(substr($uuid, -6), 9000000);
+    }
+}
 
 ?>

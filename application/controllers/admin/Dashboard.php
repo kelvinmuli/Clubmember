@@ -6,7 +6,7 @@ class Dashboard extends CI_Controller {
     public function __construct() {
         parent::__construct();
 
-         $this->load->model('ClubModel');
+        $this->load->model('ClubModel');
         $this->load->library('session');
         $this->load->helper('url');
         $this->load->library('common');
@@ -28,20 +28,22 @@ class Dashboard extends CI_Controller {
      * map to /index.php/welcome/<method_name>
      * @see https://codeigniter.com/userguide3/general/urls.html
      */
-          public function index() {
-            
-    // $this->common->checkSession();
-         // $session_data = $this->common->loadSession();
-         // $headerData = $this->common->loadHeaderData('dashboard');
+    public function index() 
+	{
+    	$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+		$headerData = $this->common->loadHeaderData('dashboard');
 
-    $data['customers'] = $this->db->order_by('created_at', 'DESC')->get('customer')->result();
-    $data['total_customers'] = $this->ClubModel->count_customers();
+		$data['customers'] = $this->db->order_by('created_at', 'DESC')->get('customer')->result();
+		$data['total_customers'] = $this->ClubModel->count_customers();
 
-    $data['success'] = $this->session->flashdata('success');
-    $data['error']   = $this->session->flashdata('error');
+		$data['success'] = $this->session->flashdata('success');
+		$data['error']   = $this->session->flashdata('error');
 
-    $this->load->view('admin/dashboard_view', $data);
-}
+		$this->load->view('admin/templates/header_view', $headerData);
+		$this->load->view('admin/dashboard_view', $data);
+		$this->load->view('admin/templates/footer_view', $data);
+	}
 
 
 
