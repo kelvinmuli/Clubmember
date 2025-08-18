@@ -21,12 +21,17 @@ class UserRoleController extends CI_Controller {
 		parent::__construct();
 	}
 
-	public function userRoleView()
+	public function userRoleView($selected='')
 	{
 		$this->common->checkSession();
 		$session_data = $this->common->loadSession();
 		$headerData = $this->common->loadHeaderData('user-role');
 		$data = $headerData;
+
+		// $data['selected'] = $selected;
+		$data['customerDBSettingRow'] = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		if ($session_data['customer_db_setting_id'] != '1755387775468')
+			$data['userTypeData'] = $this->db->select('*')->from('m_user_type')->where_in('user_type_id', array('4534654653', '1755383886420'))->where('active', 1)->get()->result();
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('admin/user_role_view', $data);
@@ -35,17 +40,21 @@ class UserRoleController extends CI_Controller {
 
 	public function userRoleAddEdit($postData)
 	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
         $postDataExplode = explode('-', $postData);
         $sqlDataExplode = explode('_', $postDataExplode[2]);
-        $userRightData = $this->db->select('*')->from('user_right')->where('user_type_id', $postDataExplode[0])->where('module_id', $postDataExplode[1])->get()->row();
+        $userRightData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user_right')->where('user_type_id', $postDataExplode[0])->where('module_id', $postDataExplode[1])->get()->row();
         if ($userRightData) 
 		{
-			$this->db->update('user_right', array($sqlDataExplode[0]=>$sqlDataExplode[1]), array('user_right_id'=>$userRightData->user_right_id));
+			$this->db->update($customerDBSettingRow->database_name.'.user_right', array($sqlDataExplode[0]=>$sqlDataExplode[1]), array('user_right_id'=>$userRightData->user_right_id));
 			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User role updated successful'));
         } 
 		else 
 		{
-			$this->db->insert('user_right', array('user_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));  
+			$this->db->insert($customerDBSettingRow->database_name.'.user_right', array('user_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));  
 			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User role added successful'));
         }
 		print_r($postDataExplode[0]);
@@ -53,83 +62,24 @@ class UserRoleController extends CI_Controller {
 	
 	public function userRoleAdd($postData)
 	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		$postDataExplode = explode('-', $postData);
-		$this->db->insert('user_right', array('user_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));
-		print_r($postDataExplode[0]);
+		$result = $this->db->insert($customerDBSettingRow->database_name.'.user_right', array('user_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));
+		print_r($result);
 	}
 
 	public function userRoleDelete($postData)
 	{
-		$postDataExplode = explode('-', $postData);
-		$result = $this->db->delete('user_right', array('user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));
-		print_r($postDataExplode[0]);
-	}
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
 
-	public function userTypeRoleAddEdit($postData)
-	{
-        $postDataExplode = explode('-', $postData);
-        $sqlDataExplode = explode('_', $postDataExplode[2]);
-        $userTypeRightData = $this->db->select('*')->from('user_type_right')->where('user_type_id', $postDataExplode[0])->where('ware_house_id', $postDataExplode[1])->get()->row();
-        if ($userTypeRightData) 
-		{
-			$this->db->update('user_type_right', array($sqlDataExplode[0]=>$sqlDataExplode[1]), array('user_type_right_id'=>$userTypeRightData->user_type_right_id));
-			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User type role updated successful'));
-        } 
-		else 
-		{
-			$this->db->insert('user_type_right', array('user_type_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'ware_house_id'=>$postDataExplode[1]));  
-			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User type role added successful'));
-        }
-		print_r($postDataExplode[0]);
-    }
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$postDataExplode = explode('-', $postData);
+		$result = $this->db->delete($customerDBSettingRow->database_name.'.user_right', array('user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));
+		print_r($result);
+	}
 	
-	public function userTypeRoleAdd($postData)
-	{
-		$postDataExplode = explode('-', $postData);
-		$this->db->insert('user_type_right', array('user_type_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'ware_house_id'=>$postDataExplode[1]));
-		print_r($postDataExplode[0]);
-	}
-
-	public function userTypeRoleDelete($postData)
-	{
-		$postDataExplode = explode('-', $postData);
-		$result = $this->db->delete('user_type_right', array('user_type_id'=>$postDataExplode[0], 'ware_house_id'=>$postDataExplode[1]));
-		print_r($postDataExplode[0]);
-	}
-
-	public function userSubMenuRoleAddEdit($postData)
-	{
-        $postDataExplode = explode('-', $postData);
-        $sqlDataExplode = explode('_', $postDataExplode[3]);
-        $userRightData = $this->db->select('*')->from('user_sub_menu_right')->where('user_type_id', $postDataExplode[0])->where('module_id', $postDataExplode[1])->where('record_management_id', $postDataExplode[2])->get()->row();
-        if ($userRightData) 
-		{
-			$this->db->update('user_sub_menu_right', array($sqlDataExplode[0]=>$sqlDataExplode[1]), array('user_sub_menu_right_id'=>$userRightData->user_sub_menu_right_id));
-			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User sub menu role updated successful'));
-        } 
-		else 
-		{
-			$this->db->insert('user_sub_menu_right', array('user_sub_menu_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1], 'record_management_id'=>$postDataExplode[2]));  
-			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User sub menu role added successful'));
-        }
-		print_r($postDataExplode[0]);
-    }
-
-	public function userModuleTypeRoleAddEdit($postData)
-	{
-        $postDataExplode = explode('-', $postData);
-        $sqlDataExplode = explode('_', $postDataExplode[3]);
-        $userRightData = $this->db->select('*')->from('user_module_type_right')->where('user_type_id', $postDataExplode[0])->where('module_id', $postDataExplode[1])->where('module_type_id', $postDataExplode[2])->get()->row();
-        if ($userRightData) 
-		{
-			$this->db->update('user_module_type_right', array($sqlDataExplode[0]=>$sqlDataExplode[1]), array('user_module_type_right_id'=>$userRightData->user_module_type_right_id));
-			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User module type role updated successful'));
-        } 
-		else 
-		{
-			$this->db->insert('user_module_type_right', array('user_module_type_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1], 'module_type_id'=>$postDataExplode[2]));  
-			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User module type role added successful'));
-        }
-		print_r($postDataExplode[0]);
-    }
 }

@@ -35,7 +35,8 @@ class MaintenanceController extends CI_Controller {
 		$headerData = $this->common->loadHeaderData('all-maintenance', 'module-setup');
 		$data = $headerData;
 
-		$data['moduleTypeData'] = $this->db->select('*')->from('m_module_type')->get()->result();
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$data['moduleTypeData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.m_module_type')->get()->result();
 		$maintenanceTableData = [];
 		$allTablesData = $this->db->list_tables();
 		foreach ($allTablesData as $value) 
@@ -46,9 +47,8 @@ class MaintenanceController extends CI_Controller {
 			}
 		}
 
-		$data['maintenanceData'] = $this->db->select('*')->from('maintenance')->get()->result();
 		$maintenanceGroupTableData = []; $maintenanceCheckData = [];
-		$maintenanceArrayData = $this->db->from('maintenance')->order_by('name', 'ASC')->get()->result();
+		$maintenanceArrayData = $this->db->from($customerDBSettingRow->database_name.'.maintenance')->order_by('name', 'ASC')->get()->result();
 		foreach ($maintenanceArrayData as $maintenance) 
 		{
 			$maintenanceCheckData[$maintenance->name] = $maintenance->name;
@@ -76,6 +76,10 @@ class MaintenanceController extends CI_Controller {
 
 	public function addModuleSetupModal($module_type_id)
 	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		$allTablesData = $this->db->list_tables();
 		$finalData = [];
 		foreach ($allTablesData as $key => $value) 
@@ -84,8 +88,8 @@ class MaintenanceController extends CI_Controller {
 			{
 				$valueDataArray = [];
 				$maintenanceTableData[] = $value;
-				$maintenanceFieldData[$value] = $this->db->field_data($value);
-				$valueData = $this->db->select('*')->from($value)->order_by('created_at', 'ASC')->get()->result();
+				$maintenanceFieldData[$value] = $this->db->field_data($customerDBSettingRow->database_name.'.'.$value);
+				$valueData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$value)->order_by('created_at', 'ASC')->get()->result();
 				$maintenanceFieldValueData[$value] = $valueData;
 				foreach ($valueData as $key => $vd) 
 				{
@@ -98,7 +102,7 @@ class MaintenanceController extends CI_Controller {
 		}
 
 		$maintenanceGroupTableData = []; $maintenanceCheckData = [];
-		$maintenanceArrayData = $this->db->from('maintenance')->order_by('name', 'ASC')->get()->result();
+		$maintenanceArrayData = $this->db->from($customerDBSettingRow->database_name.'.maintenance')->order_by('name', 'ASC')->get()->result();
 		foreach ($maintenanceArrayData as $maintenance) 
 		{
 			$maintenanceCheckData[$maintenance->name] = $maintenance->name;
@@ -115,7 +119,7 @@ class MaintenanceController extends CI_Controller {
 				$maintenanceGroupTableData['0123456789'][] = $value;
 		}
 
-		$moduleTypeName = get_table('m_module_type', 'module_type_id',  $module_type_id, 'name');
+		$moduleTypeName = get_table($customerDBSettingRow->database_name.'.m_module_type', 'module_type_id',  $module_type_id, 'name');
 
 		$modal = '<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
@@ -170,16 +174,20 @@ class MaintenanceController extends CI_Controller {
 		$module_type_id = $postData['module_type_id'];
 		$name = $postData['name'];
 		$nameOther = "";
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		foreach ($name as $key => $value) 
 		{
 			$nameOther .= get_maintenance_naming($value, 'name', get_broken_name($value, '_', 1)).', ';
 			$postData['name'] = $value;
-			$maintenanceData = $this->db->select('*')->from('maintenance')->where('name', $value)->get()->row();
+			$maintenanceData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance')->where('name', $value)->get()->row();
 			if (!empty($maintenanceData))
 			{
-				$this->db->delete('maintenance', array('maintenance_id'=>$maintenanceData->maintenance_id));
+				$this->db->update($customerDBSettingRow->database_name.'.maintenance', $postData, array('maintenance_id'=>$maintenanceData->maintenance_id));
 			}
-			$this->db->insert('maintenance', $postData);
+			else
+			{
+				$this->db->insert($customerDBSettingRow->database_name.'.maintenance', $postData);
+			}
 		}
 		$description = $nameOther.' added successfully ✔️';
 		$this->session->set_flashdata('message', $description);
@@ -195,45 +203,47 @@ class MaintenanceController extends CI_Controller {
 		$data = $headerData;
 
 		$finalData = []; $allTableLimitedData = []; $maintenanceModuleTypeData = []; $sustenanceData = []; $maintenanceFieldData = []; $maintenanceFieldValueData = [];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		if (empty($module_type_id))
 		{
-			$allTableLimitedData = $this->db->list_tables();
+			$allTableLimitedData = $this->db->query("SHOW TABLES FROM ".$customerDBSettingRow->database_name)->result_array();//$this->db->list_tables();
 		}
 		else
 		{
-			$maintenanceModuleTypeData = $this->db->from('maintenance')->where('module_type_id', $module_type_id)->order_by('module_type_id', 'ASC')->get()->result();
+			$maintenanceModuleTypeData = $this->db->from($customerDBSettingRow->database_name.'.maintenance')->where('module_type_id', $module_type_id)->order_by('module_type_id', 'ASC')->get()->result();
 			foreach ($maintenanceModuleTypeData as $value) 
 			{
 				$allTableLimitedData[] = $value->name;
 			}
 		}
 
-		foreach ($allTableLimitedData as $key => $value) 
+		foreach ($allTableLimitedData as $value) 
 		{
 			if (in_array(substr($value, 0, 2), array('m_', 's_')))  
 			{
 				$sustenanceData[] = $value;
-				$maintenanceFieldData[$value] = $this->db->field_data($value);
+				$maintenanceFieldData[$value] = $this->db->field_data($customerDBSettingRow->database_name.'.'.$value);
 			}
 		}
 
-		$allTablesData = $this->db->list_tables();
-		foreach ($allTablesData as $value) 
+		$allTablesData = $this->db->query("SHOW TABLES FROM ".$customerDBSettingRow->database_name)->result_array();//$this->db->list_tables();
+		foreach ($allTablesData as $table) 
 		{
+			$value = array_values($table)[0];
 			if (in_array(substr($value, 0, 2), array('m_', 's_')) || in_array($value, array('maintenance')))  
 			{
 				$valueDataArray = [];
 				$maintenanceTableData[] = $value;
-				$maintenanceFieldData[$value] = $this->db->field_data($value);
+				$maintenanceFieldData[$value] = $this->db->field_data($customerDBSettingRow->database_name.'.'.$value);
 				if ($value == 'm_quote') {
-					$valueData = $this->db->select('*')->from($value)->where('module_type_id', $module_type_id)->order_by('created_at', 'DESC')->get()->result();
+					$valueData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$value)->where('module_type_id', $module_type_id)->order_by('created_at', 'DESC')->get()->result();
 				} elseif ($value == 'm_module') {
-					$valueData = $this->db->select('*')->from($value)->order_by('order', 'ASC')->get()->result();
+					$valueData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$value)->order_by('order', 'ASC')->get()->result();
 				} else {
-					$valueData = $this->db->select('*')->from($value)->order_by('created_at', 'ASC')->get()->result();
+					$valueData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$value)->order_by('created_at', 'ASC')->get()->result();
 				}
 				$maintenanceFieldValueData[$value] = $valueData;
-				foreach ($valueData as $key => $vd) 
+				foreach ($valueData as $vd) 
 				{
 					$name = in_array($value, array('maintenance')) ? $value.'_id' : substr($value, 2).'_id';
 					$valueDataArray[$vd->$name] = $vd;
@@ -249,7 +259,7 @@ class MaintenanceController extends CI_Controller {
 		}
 		
 		$maintenanceGroupTableData = []; $maintenanceCheckData = [];
-		$maintenanceArrayData = $this->db->from('maintenance')->order_by('name', 'ASC')->get()->result();
+		$maintenanceArrayData = $this->db->from($customerDBSettingRow->database_name.'.maintenance')->order_by('name', 'ASC')->get()->result();
 		foreach ($maintenanceArrayData as $maintenance) 
 		{
 			$maintenanceCheckData[$maintenance->name] = $maintenance->name;
@@ -288,16 +298,20 @@ class MaintenanceController extends CI_Controller {
 
 	public function addMaintenanceModal($module_id, $module_type_id, $maintenance, $column_id='', $data_id='')
 	{
-		
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
 		$finalData = [];
-		$allTablesData = $this->db->list_tables();
-		foreach ($allTablesData as $value) 
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$allTablesData = $this->db->query("SHOW TABLES FROM ".$customerDBSettingRow->database_name)->result_array();//$this->db->list_tables();
+		foreach ($allTablesData as $table) 
 		{
+			$value = array_values($table)[0];
 			if (in_array(substr($value, 0, 2), array('m_', 's_')))  
 			{
 				$valueDataArray = [];
-				$maintenanceFieldData[$value] = $this->db->field_data($value);
-				$valueData = $this->db->select('*')->from($value)->order_by('created_at', 'ASC')->get()->result();
+				$maintenanceFieldData[$value] = $this->db->field_data($customerDBSettingRow->database_name.'.'.$value);
+				$valueData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$value)->order_by('created_at', 'ASC')->get()->result();
 				foreach ($valueData as $vd) 
 				{
 					$name = substr($value, 2) . '_id';
@@ -308,7 +322,7 @@ class MaintenanceController extends CI_Controller {
 			}
 		}
 		
-		$finalData['maintenanceData'] = $this->db->select('*')->from('maintenance')->order_by('created_at', 'ASC')->get()->result();
+		$finalData['maintenanceData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance')->order_by('created_at', 'ASC')->get()->result();
 
 		$groupStart = false;
 		$counter = 0;
@@ -487,6 +501,7 @@ class MaintenanceController extends CI_Controller {
 
 		$arrayData = $postData;
 		$table = $postData['table'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		$moduleRow = $this->db->select('*')->from('m_module')->where('module_id', $postData['module_id'])->get()->row();
 		$name = isset($postData['name']) ? $postData['name'] : $postData[substr($table, 2).'_id'];
 		$module_type_id = $postData['module_type_id'];
@@ -523,7 +538,7 @@ class MaintenanceController extends CI_Controller {
 			$path = in_array($value, explode(',', get_table('m_column_define', 'column_define_id', '1753654719137', 'multi_column'))) ? "assets/doc/" :"assets/img/";
 			if (isset($_FILES[$value]['name']))
 			{
-				$image = $this->do_file_upload($value, $path);
+				$image = do_file_upload($value, $path);
 				$arrayData[$value] = $path.$image['file']['file_name'];
 			}
 			else
@@ -562,7 +577,7 @@ class MaintenanceController extends CI_Controller {
 			{
 				if (isset($_FILES[$value]['name']))
 				{
-					$image = $this->do_file_upload($value, $path);
+					$image = do_file_upload($value, $path);
 					$arrayData[$value] = $path.$image['file']['file_name'];
 				}
 				else
@@ -575,12 +590,12 @@ class MaintenanceController extends CI_Controller {
 			{
 				for ($i = 0; $i < $how_many; $i++) { 
 					$arrayData[substr($table, 2).'_id'] = generate_uuid();
-					$res = $this->db->insert($table, $arrayData);
+					$res = $this->db->insert($customerDBSettingRow->database_name.'.'.$table, $arrayData);
 				}
 			}
 			else
 			{
-				$res = $this->db->insert($table, $arrayData);
+				$res = $this->db->insert($customerDBSettingRow->database_name.'.'.$table, $arrayData);
 			}
 		}
 
@@ -592,17 +607,22 @@ class MaintenanceController extends CI_Controller {
 
 	public function editMaintenanceModal($module_id, $module_type_id, $maintenance, $unique_id)
 	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
 		$finalData = [];
 		$maintenanceFieldData = [];
-		$allTablesData = $this->db->list_tables();
-		foreach ($allTablesData as $value) 
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$allTablesData = $this->db->query("SHOW TABLES FROM ".$customerDBSettingRow->database_name)->result_array();//$this->db->list_tables();
+		foreach ($allTablesData as $table) 
 		{
+			$value = array_values($table)[0];
 			if (in_array(substr($value, 0, 2), array('m_', 's_')))  
 			{
 				$valueDataArray = [];
-				$maintenanceFieldData[$value] = $this->db->field_data($value);
-				$valueData = $this->db->select('*')->from($value)->order_by('created_at', 'ASC')->get()->result();
-				foreach ($valueData as $key => $vd) 
+				$maintenanceFieldData[$value] = $this->db->field_data($customerDBSettingRow->database_name.'.'.$value);
+				$valueData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$value)->order_by('created_at', 'ASC')->get()->result();
+				foreach ($valueData as $vd) 
 				{
 					$name = substr($value, 2).'_id';
 					$valueDataArray[$vd->$name] = $vd;
@@ -616,7 +636,7 @@ class MaintenanceController extends CI_Controller {
 				$finalData[$dataCombine.'Data'] = $valueDataArray;
 			}
 		}
-		$finalData['maintenanceData'] = $this->db->select('*')->from('maintenance')->order_by('created_at', 'ASC')->get()->result();
+		$finalData['maintenanceData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance')->order_by('created_at', 'ASC')->get()->result();
 
 		$column = $maintenanceFieldData[$maintenance][1]->name; 
 		$maintenance_id = substr($maintenance, 2).'_id';
@@ -762,18 +782,21 @@ class MaintenanceController extends CI_Controller {
 
 	public function removeMaintenanceModal($module_id, $module_type_id, $maintenance, $unique_id)
 	{
-		$allTablesData = $this->db->list_tables();
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
 		$maintenanceFieldData = [];
-		$maintenanceFieldValueData = [];
-		$finalData = [];
-		foreach ($allTablesData as $key => $value) 
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$allTablesData = $this->db->query("SHOW TABLES FROM ".$customerDBSettingRow->database_name)->result_array();//$this->db->list_tables();
+		foreach ($allTablesData as $table) 
 		{
+			$value = array_values($table)[0];
 			if (in_array(substr($value, 0, 2), array('m_', 's_')))  
 			{
 				$valueDataArray = [];
 				$maintenanceTableData[] = $value;
-				$maintenanceFieldData[$value] = $this->db->field_data($value);
-				$valueData = $this->db->select('*')->from($value)->order_by('created_at', 'ASC')->get()->result();
+				$maintenanceFieldData[$value] = $this->db->field_data($customerDBSettingRow->database_name.'.'.$value);
+				$valueData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$value)->order_by('created_at', 'ASC')->get()->result();
 				$maintenanceFieldValueData[$value] = $valueData;
 				foreach ($valueData as $key => $vd) 
 				{
@@ -792,7 +815,7 @@ class MaintenanceController extends CI_Controller {
 
 		$column = $maintenanceFieldData[$maintenance][1]->name; 
 		$maintenance_id = substr($maintenance, 2) . '_id';
-		$maintenanceFieldValue = $this->db->select('*')->from($maintenance)->where($maintenance_id, $unique_id)->order_by('created_at', 'ASC')->get()->row();
+		$maintenanceFieldValue = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$maintenance)->where($maintenance_id, $unique_id)->order_by('created_at', 'ASC')->get()->row();
 
 		$modal ='<div class="modal-dialog modal-sm modal-dialog-centered" role="document">
 					<div class="modal-content">
@@ -845,6 +868,7 @@ class MaintenanceController extends CI_Controller {
 		$module_type_id = $postData['module_type_id'];
 		unset($arrayData['module_id'], $arrayData['module_type_id'], $arrayData['table'], $arrayData['unique_id']);
 		$table = $postData['table'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		$moduleRow = $this->db->select('*')->from('m_module')->where('module_id', $postData['module_id'])->get()->row();
 		if (isset($postData['multi_table'])) {
 			$commaArray = '';
@@ -865,7 +889,7 @@ class MaintenanceController extends CI_Controller {
 			$path = in_array($value, explode(',', get_table('m_column_define', 'column_define_id', '1753654719137', 'multi_column'))) ? "assets/doc/" :"assets/img/";
 			if (isset($_FILES[$value]['name']))
 			{
-				$image = $this->do_file_upload($value, $path);
+				$image = do_file_upload($value, $path);
 				$arrayData[$value] = $path.$image['file']['file_name'];
 			}
 			else
@@ -874,7 +898,7 @@ class MaintenanceController extends CI_Controller {
 			}
 		}
 
-		$this->db->update($table, $arrayData, array(substr($table, 2).'_id'=>$unique_id));
+		$this->db->update($customerDBSettingRow->database_name.'.'.$table, $arrayData, array(substr($table, 2).'_id'=>$unique_id));
 		$description = $name.' records updated successful ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$session_data['user_id'].' : '.$table.' : '.$description));
@@ -883,18 +907,23 @@ class MaintenanceController extends CI_Controller {
 
 	public function editMaintenanceImageModal($module_id, $module_type_id, $maintenance, $unique_id, $table_id='')
 	{
-		$allTablesData = $this->db->list_tables();
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
 		$maintenanceFieldData = [];
-		foreach ($allTablesData as $key => $value) 
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$allTablesData = $this->db->query("SHOW TABLES FROM ".$customerDBSettingRow->database_name)->result_array();//$this->db->list_tables();
+		foreach ($allTablesData as $table) 
 		{
+			$value = array_values($table)[0];
 			if (in_array(substr($value, 0, 2), array('m_', 's_')))  
 			{
 				$valueDataArray = [];
 				$maintenanceTableData[] = $value;
-				$maintenanceFieldData[$value] = $this->db->field_data($value);
-				$valueData = $this->db->select('*')->from($value)->order_by('created_at', 'ASC')->get()->result();
+				$maintenanceFieldData[$value] = $this->db->field_data($customerDBSettingRow->database_name.'.'.$value);
+				$valueData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$value)->order_by('created_at', 'ASC')->get()->result();
 				$maintenanceFieldValueData[$value] = $valueData;
-				foreach ($valueData as $key => $vd) 
+				foreach ($valueData as $vd) 
 				{
 					$name = substr($value, 2) . '_id';
 					$valueDataArray[$vd->$name] = $vd;
@@ -911,7 +940,7 @@ class MaintenanceController extends CI_Controller {
 
 		$column = $maintenanceFieldData[$maintenance][1]->name; 
 		$maintenance_id = substr($maintenance, 2) . '_id';
-		$maintenanceFieldValue = $this->db->select('*')->from($maintenance)->where($maintenance_id, $unique_id)->order_by('created_at', 'ASC')->get()->row();
+		$maintenanceFieldValue = $this->db->select('*')->from($customerDBSettingRow->database_name.'.'.$maintenance)->where($maintenance_id, $unique_id)->order_by('created_at', 'ASC')->get()->row();
 		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
@@ -956,10 +985,11 @@ class MaintenanceController extends CI_Controller {
 		$arrayData = $postData;
 		$module_type_id = $postData['module_type_id'];
 		$table = $postData['table'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		$moduleRow = $this->db->select('*')->from('m_module')->where('module_id', $postData['module_id'])->get()->row();
 		unset($arrayData['module_id'], $arrayData['module_type_id'], $arrayData['table'], $arrayData['unique_id']);
 
-		$this->db->delete($table, array(substr($table, 2).'_id'=>$postData['unique_id']));
+		$this->db->delete($customerDBSettingRow->database_name.'.'.$table, array(substr($table, 2).'_id'=>$postData['unique_id']));
 		$description = $postData['name'].' deleted successful ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$session_data['user_id'].' : '.$table.' : '.$description));
@@ -976,8 +1006,9 @@ class MaintenanceController extends CI_Controller {
 		$headerData = $this->common->loadHeaderData('all-maintenance', 'maintenance-naming');
 		$data = $headerData;
 
-		$data['maintenanceNamingData'] = $this->db->select('*')->from('maintenance_naming')->get()->result();
-		$data['maintenanceData'] = $this->db->select('*')->from('maintenance')->get()->result();
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$data['maintenanceNamingData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance_naming')->get()->result();
+		$data['maintenanceData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance')->get()->result();
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('maintenance_naming_view', $data);
@@ -991,9 +1022,11 @@ class MaintenanceController extends CI_Controller {
 		$headerData = $this->common->loadHeaderData('all-maintenance', 'maintenance-naming');
 		$subModuleMenu = $headerData['subModuleMenu'];
 
-		$allTablesData = $this->db->list_tables();
-		foreach ($allTablesData as $key => $value) 
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$allTablesData = $this->db->query("SHOW TABLES FROM ".$customerDBSettingRow->database_name)->result_array();//$this->db->list_tables();
+		foreach ($allTablesData as $table) 
 		{
+			$value = array_values($table)[0];
 			if (in_array(substr($value, 0, 2), array('m_', 's_')))  
 			{
 				$maintenanceTableData[] = $value;
@@ -1001,7 +1034,7 @@ class MaintenanceController extends CI_Controller {
 		}
 
 		$maintenanceGroupTableData = []; $maintenanceCheckData = [];
-		$maintenanceArrayData = $this->db->from('maintenance')->order_by('name', 'ASC')->get()->result();
+		$maintenanceArrayData = $this->db->from($customerDBSettingRow->database_name.'.maintenance')->order_by('name', 'ASC')->get()->result();
 		foreach ($maintenanceArrayData as $maintenance) 
 		{
 			$maintenanceCheckData[$maintenance->name] = $maintenance->name;
@@ -1075,12 +1108,13 @@ class MaintenanceController extends CI_Controller {
 		$postData = $this->input->post();
 		$maintenance = $postData['maintenance'];
 		$name = $postData['name'];
-		$maintenanceNamingData = $this->db->select('*')->from('maintenance_naming')->where('maintenance', $maintenance)->get()->row();
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$maintenanceNamingData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance_naming')->where('maintenance', $maintenance)->get()->row();
 		if (!empty($maintenanceNamingData))
 		{
 			$this->db->delete('maintenance_naming', array('maintenance_naming_id'=>$maintenanceNamingData->maintenance_naming_id));
 		}
-		$this->db->insert('maintenance_naming', $postData);
+		$this->db->insert($customerDBSettingRow->database_name.'.maintenance_naming', $postData);
 		$description = $name.' linked to '.get_broken_name($maintenance, '_', 1).' successfully ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$session_data['user_id'].' : '.$description));
@@ -1089,7 +1123,11 @@ class MaintenanceController extends CI_Controller {
 
 	public function editMaintenanceNamingModal($maintenance_naming_id)
 	{
-		$maintenanceNaming = $this->db->select('*')->from('maintenance_naming')->where('maintenance_naming_id', $maintenance_naming_id)->get()->row();
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$maintenanceNaming = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance_naming')->where('maintenance_naming_id', $maintenance_naming_id)->get()->row();
 
 		$modal = '<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
@@ -1125,12 +1163,16 @@ class MaintenanceController extends CI_Controller {
 
 	public function editMaintenanceNaming()
 	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
 		$postData = $this->input->post();
 		$maintenance_naming_id = $postData['maintenance_naming_id'];
 		$name = $postData['name'];
 		unset($postData['maintenance_naming_id']);
-
-		$this->db->update('maintenance_naming', $postData, array('maintenance_naming_id'=>$maintenance_naming_id));
+		
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$this->db->update($customerDBSettingRow->database_name.'.maintenance_naming', $postData, array('maintenance_naming_id'=>$maintenance_naming_id));
 		$description = $name.' updated successfully ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$name.' : '.$description));
@@ -1143,9 +1185,10 @@ class MaintenanceController extends CI_Controller {
 		$session_data = $this->common->loadSession();
 		$headerData = $this->common->loadHeaderData('all-maintenance', 'maintenance-column-naming');
 		$data = $headerData;
-
-		$data['maintenanceColumnNamingData'] = $this->db->select('*')->from('maintenance_column_naming')->get()->result();
-		$data['maintenanceData'] = $this->db->select('*')->from('maintenance')->get()->result();
+		
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$data['maintenanceColumnNamingData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance_column_naming')->get()->result();
+		$data['maintenanceData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance')->get()->result();
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('maintenance_column_naming_view', $data);
@@ -1159,9 +1202,11 @@ class MaintenanceController extends CI_Controller {
 		$headerData = $this->common->loadHeaderData('all-maintenance', 'maintenance-column-naming');
 		$subModuleMenu = $headerData['subModuleMenu'];
 
-		$allTablesData = $this->db->list_tables();
-		foreach ($allTablesData as $key => $value) 
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$allTablesData = $this->db->query("SHOW TABLES FROM ".$customerDBSettingRow->database_name)->result_array();//$this->db->list_tables();
+		foreach ($allTablesData as $table) 
 		{
+			$value = array_values($table)[0];
 			if (in_array(substr($value, 0, 2), array('m_', 's_')))  
 			{
 				$maintenanceTableData[] = $value;
@@ -1169,7 +1214,7 @@ class MaintenanceController extends CI_Controller {
 		}
 
 		$maintenanceGroupTableData = []; $maintenanceCheckData = [];
-		$maintenanceArrayData = $this->db->from('maintenance')->order_by('name', 'ASC')->get()->result();
+		$maintenanceArrayData = $this->db->from($customerDBSettingRow->database_name.'.maintenance')->order_by('name', 'ASC')->get()->result();
 		foreach ($maintenanceArrayData as $maintenance) 
 		{
 			$maintenanceCheckData[$maintenance->name] = $maintenance->name;
@@ -1258,13 +1303,14 @@ class MaintenanceController extends CI_Controller {
 		$maintenance = $postData['maintenance'];
 		$name = $postData['name'];
 
-		$maintenanceColumnNamingData = $this->db->select('*')->from('maintenance_column_naming')->where('maintenance', $maintenance)->where('column_name', $postData['column_name'])->get()->row();
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$maintenanceColumnNamingData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance_column_naming')->where('maintenance', $maintenance)->where('column_name', $postData['column_name'])->get()->row();
 		if (!empty($maintenanceColumnNamingData))
 		{
-			$this->db->delete('maintenance_column_naming', array('maintenance_column_naming_id'=>$maintenanceColumnNamingData->maintenance_column_naming_id));
+			$this->db->delete($customerDBSettingRow->database_name.'.maintenance_column_naming', array('maintenance_column_naming_id'=>$maintenanceColumnNamingData->maintenance_column_naming_id));
 		}
 		
-		$this->db->insert('maintenance_column_naming', $postData);
+		$this->db->insert($customerDBSettingRow->database_name.'.maintenance_column_naming', $postData);
 		$description = $name.' linked to '.get_broken_name($maintenance, '_', 1).' successfully ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$session_data['user_id'].' : '.$description));
@@ -1273,7 +1319,11 @@ class MaintenanceController extends CI_Controller {
 
 	public function editMaintenanceColumnNamingModal($maintenance_column_naming_id)
 	{
-		$maintenanceColumnNaming = $this->db->select('*')->from('maintenance_column_naming')->where('maintenance_column_naming_id', $maintenance_column_naming_id)->get()->row();
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$maintenanceColumnNaming = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance_column_naming')->where('maintenance_column_naming_id', $maintenance_column_naming_id)->get()->row();
 
 		$modal = '<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
@@ -1308,12 +1358,16 @@ class MaintenanceController extends CI_Controller {
 
 	public function editMaintenanceColumnNaming()
 	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
 		$postData = $this->input->post();
 		$maintenance_column_naming_id = $postData['maintenance_column_naming_id'];
 		$name = $postData['name'];
 		unset($postData['maintenance_column_naming_id']);
 
-		$this->db->update('maintenance_column_naming', $postData, array('maintenance_column_naming_id'=>$maintenance_column_naming_id));
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$this->db->update($customerDBSettingRow->database_name.'.maintenance_column_naming', $postData, array('maintenance_column_naming_id'=>$maintenance_column_naming_id));
 		$description = $name.' updated successfully ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$name.' : '.$description));
@@ -1322,7 +1376,11 @@ class MaintenanceController extends CI_Controller {
 
 	public function getMaintenanceColumnHtml($table, $includeSelect=1)
 	{
-		$maintenanceArrayData = $this->db->select('*')->from('maintenance')->order_by('name', 'ASC')->get()->result();
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$maintenanceArrayData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance')->order_by('name', 'ASC')->get()->result();
 
 		if ($includeSelect == 1) {
 			$modal ='<label class="form-label">Columns for '.get_maintenance_naming($table, 'name', get_broken_name($table, '_', 1)).'</label>

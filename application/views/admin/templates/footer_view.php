@@ -133,8 +133,8 @@
 						if (fieldData && fieldData.length > 1) {
 							fieldData.forEach((maintenanceField, pos) => {
 								const name = maintenanceField.name;
-								if (![<?=json_encode(explode(',', get_table('m_column_define', 'column_define_id', '1753658383444', 'multi_column')))?>].includes(name) && pos != 1) {
-									if ([<?=json_encode(explode(',', get_table('m_column_define', 'column_define_id', '1753528816500', 'multi_column')))?>].includes(name)) {
+								if (!<?=json_encode(explode(',', get_table('m_column_define', 'column_define_id', '1753658383444', 'multi_column')))?>.includes(name) && pos != 1) {
+									if (<?=json_encode(explode(',', get_table('m_column_define', 'column_define_id', '1753528816500', 'multi_column')))?>.includes(name)) {
 										CKEDITOR.replace('input_' + maintenance + '_' + name, {
 											versionCheck : false,
 											height: (['icon', ''].includes(name)) ? 80 : 320,
@@ -189,8 +189,8 @@
 							const column = fieldData[1].name;
 							fieldData.forEach((maintenanceField, pos) => {
 								const name = maintenanceField.name;
-								if (![<?=json_encode(explode(',', get_table('m_column_define', 'column_define_id', '1753658383444', 'multi_column')))?>].includes(name) && pos != 1) {
-									if ([<?=json_encode(explode(',', get_table('m_column_define', 'column_define_id', '1753528816500', 'multi_column')))?>].includes(name)) {
+								if (!<?=json_encode(explode(',', get_table('m_column_define', 'column_define_id', '1753658383444', 'multi_column')))?>.includes(name) && pos != 1) {
+									if (<?=json_encode(explode(',', get_table('m_column_define', 'column_define_id', '1753528816500', 'multi_column')))?>.includes(name)) {
 										CKEDITOR.replace('edit_' + maintenance + '_' + name + '_' + unique_id, {
 											versionCheck : false,
 											height: (['icon', ''].includes(name)) ? 80 : 320,

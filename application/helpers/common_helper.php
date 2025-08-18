@@ -737,13 +737,39 @@ if (!function_exists('get_module_type'))
 	}
 }
 
+if (!function_exists('do_file_upload')) 
+{
+	function do_file_upload($filename, $path='assets/img/')
+	{
+		$ci =& get_instance();
+		$config['upload_path'] = './'.$path;
+		$config['allowed_types'] = 'gif|jpg|jpeg|png|iso|dmg|zip|rar|doc|docx|xls|xlsx|xlsm|ppt|pptx|csv|ods|odt|odp|pdf|rtf|sxc|sxi|txt|exe|avi|mpeg|mp3|mp4|3gp';
+		$config['max_size'] = 100000;
+		$config['overwrite'] = TRUE;
+		$config['encrypt_name'] = TRUE;
+		$config['remove_spaces'] = TRUE;
+
+		$ci->load->library('upload', $config);
+		if (!$ci->upload->do_upload($filename)) 
+		{
+			return array('error' => $ci->upload->display_errors());
+		} 
+		else 
+		{
+			return array('file' => $ci->upload->data());
+		}
+	}
+}
+
 if (!function_exists('get_user_right')) 
 {
 	function get_user_right($param1 = '', $param2 = '', $column = '', $param3 = 0)
 	{
 		$UserRights = array();
 		$ci =& get_instance();
-		$arrayRightsArray = $ci->MaintenanceModel->getTable('user_right');
+		$session_data = $ci->session->userdata(GlobalModel::SESSION);
+		$databaseName = get_table('customer_db_setting', 'customer_db_setting_id', $session_data['customer_db_setting_id'], 'database_name');
+		$arrayRightsArray = $ci->MaintenanceModel->getTable($databaseName.'.user_right');
 		if (!empty($arrayRightsArray)): foreach ($arrayRightsArray as $value):
 			if (!empty($column))
 				$UserRights[$value->user_type_id][$value->module_id][$value->$column] = "X";

@@ -9,26 +9,6 @@
                 <h2 class="page-title">Database Listing</h2>
               </div>
 
-              
-              <?php
-                            $success = $this->session->flashdata('success');
-                            $error = $this->session->flashdata('error');
-                            ?>
-
-                            <?php if ($success): ?>
-                              <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                <?= $success ?>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                              </div>
-                            <?php endif; ?>
-
-                            <?php if ($error): ?>
-                              <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <?= $error ?>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                              </div>
-                            <?php endif; ?>
-
 
               <!-- Page title actions -->
               <div class="col-auto ms-auto d-print-none">
@@ -147,82 +127,22 @@
                           <thead>
                             <tr>
                               <th class="w-1">#</th>
-                              <th class="w-1"> </th>
-                              <th>
-                                <button class="table-sort d-flex justify-content-between" data-sort="sort-name">Customer Name</button>
-                              </th>
-                              <th>
-                                <button class="table-sort d-flex justify-content-between" data-sort="sort-city">Database</button>
-                              </th>
-                              <th>
-                                <button class="table-sort d-flex justify-content-between" data-sort="sort-date">Username Address</button>
-                              </th>
-                              <th>
-                                <button class="table-sort d-flex justify-content-between" data-sort="sort-tags">Password</button>
-                              </th>
-                              <th>
-                                <button class="table-sort d-flex justify-content-between" data-sort="sort-category">Subdomain</button>
-                              </th>
-                              <th>
-                                <button class="table-sort d-flex justify-content-between" data-sort="sort-status">Status</button>
-                              </th>
-                              <th>
-                                <button class="table-sort d-flex justify-content-between" data-sort="sort-status"></button>
-                              </th>
+                              <th><button class="table-sort d-flex justify-content-between" data-sort="sort-name">Customer Name</button></th>
+                              <th><button class="table-sort d-flex justify-content-between" data-sort="sort-category">Subdomain</button></th>
+                              <th><button class="table-sort d-flex justify-content-between" data-sort="sort-status">Database Name</button></th>
+															<th>Actions</th>
                             </tr>
                           </thead>
                           <tbody class="table-tbody">
-
-
-                            <?php foreach ($customers as $index => $customer): ?>
-                                <tr>
-                                    <td><?= $index + 1 ?></td>
-                                    <td>
-                                        <span class="avatar avatar-xs me-2" style="background-image: url('<?= base_url('assets/uploads/' . $customer->logo) ?>')"></span>
-                                    </td>
-                                    <td><?= $customer->name ?></td>
-                                    <td><?= $customer->reg_no ?></td>
-                                    <td><?= $customer->email ?></td>
-                                    <td><?= $customer->tel_no ?></td>
-                                    <td><?= $customer->country ?></td>
-                                   
-                                    <td>
-                                        <?php if (strtolower($customer->status) === 'active'): ?>
-                                            <span class="badge bg-success-lt"><?= $customer->status ?></span>
-                                        <?php else: ?>
-                                            <span class="badge bg-danger-lt"><?= $customer->status ?></span>
-                                        <?php endif; ?>
-                                    </td>
-
-
-                                    <td class="text-end">
-                                        <span class="dropdown">
-                                          <button class="btn dropdown-toggle align-text-top show" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="true">Actions</button>
-                                        <div class="dropdown-menu dropdown-menu-end" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(0px, 38px);">
-                                        <a class="dropdown-item" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#editModal" 
-                                            data-customer_id="<?= $customer->customer_id ?>" 
-                                            data-name="<?= $customer->name ?>" 
-                                            data-short_name="<?= $customer->short_name ?>"
-                                            data-type="<?= $customer->type ?>" 
-                                            data-email="<?= $customer->email ?>"
-                                            data-physical_address="<?= $customer->physical_address ?>"
-                                            data-postal_address="<?= $customer->postal_address ?>" 
-                                            data-reg_no="<?= $customer->reg_no ?>" 
-                                            data-tel_no="<?= $customer->tel_no ?>" 
-                                            data-country="<?= $customer->country ?>" 
-                                            data-status="<?= $customer->status ?>">
-                                               Update
-                                        </a>
-
-                                        <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deleteModal" data-customer-id="<?= $customer->customer_id ?>" data-name="<?= $customer->name ?>"> Delete </a>
-                                      </div>
-                                    </span>
-                                  </td>
-                                </tr>
-                                <?php endforeach; ?>
-      
+                            <?php $c = 0; if (isset($customerDBSettingData)): foreach ($customerDBSettingData as $customerDBSetting): ?>
+															<tr>
+																<td><?=++$c?></td>
+																<td><?=get_table('customer', 'customer_id', $customerDBSetting->customer_id, 'full_legal_name')?></td>
+																<td><?=$customerDBSetting->sub_domain ?></td>
+																<td><?=$customerDBSetting->database_name?></td>
+																<td></td>
+															</tr>
+														<?php endforeach; endif; ?>
                           </tbody>
                         </table>
                       </div>
@@ -360,6 +280,7 @@
         <!-- END PAGE BODY -->
       </div>
     </div>
+
     <!-- BEGIN PAGE MODALS -->
     <div class="modal modal-blur fade" id="modal-report" tabindex="-1" role="dialog" aria-hidden="true">
       <div class="modal-dialog modal-lg" role="document">
@@ -369,94 +290,61 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
 
-          <form action="<?= base_url('create-database') ?>" method="post" enctype="multipart/form-data">
-          <div class="modal-body">
-            <div class="row">
-          <div class="col-lg-6">
-            <div class="mb-3">
-              <label class="form-label">Customer Name <span style="color: red;">*</span></label>
-              <select class="form-select" name="customer_id" required>
-                <option value="">-- Select Customer --</option>
-                <?php foreach ($customers as $customer): ?>
-                  <option value="<?= htmlspecialchars($customer->customer_id) ?>">
-                    <?= htmlspecialchars($customer->name) ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            </div>
-          </div>
+          <form action="<?=base_url('create-customer-database')?>" method="post" enctype="multipart/form-data">
+						<div class="modal-body">
+							<div class="row">
+								<div class="col-lg-6">
+									<div class="mb-3">
+										<label class="form-label">Customer Name <span style="color: red;">*</span></label>
+										<select class="form-select" name="customer_id" required>
+											<option value="" selected disabled>-- Select Customer --</option>
+											<?php if (isset($customerData)): foreach ($customerData as $customer): ?>
+												<option value="<?=$customer->customer_id?>"><?=$customer->full_legal_name?></option>
+											<?php endforeach; endif; ?>
+										</select>
+									</div>
+								</div>
 
-          <div class="col-lg-6">
-             <div class="mb-3">
-              <label class="form-label">Sub domain </label>
-              <input type="text" class="form-control" name="sub_domain" placeholder="Enter Subdomain" />
-            </div>
-          </div>
-        </div>
-                        
-            <div class="row">
+								<div class="col-lg-6">
+									<div class="mb-3">
+										<label class="form-label">Sub domain </label>
+										<input type="text" class="form-control" name="sub_domain" placeholder="Enter Subdomain" />
+									</div>
+								</div>
+							</div>				
+						</div>
 
-              <div class="col-lg-4">
-             <div class="mb-3">
-              <label class="form-label">Database Name </label>
-              <input type="text" class="form-control" name="database_name" placeholder="Enter Database Name" />
-            </div>
-          </div>
+						<div class="modal-body">
+							<div class="row">
+								<div class="col-lg-6">
+									<div class="mb-3">
+										<label class="form-label">Database Name </label>
+										<input type="text" class="form-control" name="database_name" placeholder="Enter Database Name" />
+									</div>
+								</div>
 
-              <div class="col-lg-4">
-                <div class="mb-3">
-                  <label class="form-label">Database User <span style="color: red;">*</span></label>
-                  <input type="text" class="form-control" name="database_user" placeholder="Enter Username" required />
-                </div>
-              </div>
-
-              <div class="col-lg-4">
-                <div class="mb-3">
-                  <label class="form-label">Password <span style="color: red;">*</span></label>
-                  <input type="number" class="form-control" name="database_pwd" placeholder="Enter password" required />
-                </div>
-              </div>
-
-               <div class="col-lg-12">
-                <div class="mb-3">
-                  <label class="form-label">Status <span style="color: red;">*</span></label>
-                  <select class="form-select" name="status" required>
-                    <option value="Active" selected>Active</option>
-                    <option value="Inactive">Inactive</option>
-                    <option value="Trial">Trial</option>
-                    <option value="Suspended">Suspended</option>
-                  </select>
-                </div>
-              </div>
-
-
-            </div>
-          </div>
-         
-          <div class="modal-footer">
-            <a href="#" class="btn btn-link link-secondary btn-3" data-bs-dismiss="modal"> Cancel </a>
-
-             <button type="submit" class="btn btn-primary">
-               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="icon icon-2"
-              >
-                <path d="M12 5l0 14" />
-                <path d="M5 12l14 0" />
-              </svg>
-      Create Database
-    </button>
-
-          </div>
-      </form>
+								<div class="col-lg-6">
+									<div class="mb-3">
+										<label class="form-label">Status <span style="color: red;">*</span></label>
+										<select name="database_status_id" class="form-select" required>
+											<option value="" selected disabled>-- Select Database Status --</option>
+											<?php if (isset($databaseStatusData)): foreach ($databaseStatusData as $databaseStatus): ?>
+												<option value="<?=$databaseStatus->database_status_id?>"><?=$databaseStatus->name?></option>
+											<?php endforeach; endif; ?>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+					
+						<div class="modal-footer">
+							<a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
+							<button href="#" type="submit" class="btn btn-primary ms-auto btn-pill">
+								<svg xmlns="http://www.w3.org/200/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="10" y1="14" x2="21" y2="3" /><path d="M21 3l-6.5 18a0.55 .55 0 0 1 -1 0l-3.5 -7l-7 -3.5a0.55 .55 0 0 1 0 -1l18 -6.5" /></svg>
+								Add Database
+							</button>
+						</div>
+      		</form>
         </div>
       </div>
     </div>

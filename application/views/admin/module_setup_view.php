@@ -98,7 +98,7 @@
                                         <label class="form-label">Module Type</label>
                                         <select class="form-select" id="module_type_id" name="module_type_id" required>
                                             <option value="0" selected disabled>Select Module Type</option>
-                                            <?php if(!empty($moduleTypeData)): foreach($moduleTypeData as $key => $data): ?>
+                                            <?php if(isset($moduleTypeData)): foreach($moduleTypeData as $key => $data): ?>
                                                 <option value="<?=$data->module_type_id?>"><?=$data->name?></option>
                                             <?php endforeach; endif; ?>
                                         </select>
@@ -109,9 +109,9 @@
                                         <label class="form-label">Maintenance</label>
                                         <select id="name" name="name[]" class="form-select" style="width: 100%;" multiple required>
 											<!-- <option value="" selected disabled>Select Maintenance</option> -->
-                                            <?php if(!empty($maintenanceGroupTableData)): foreach($maintenanceGroupTableData as $key => $maintenanceGroup): ?>
+                                            <?php if (isset($maintenanceGroupTableData)): foreach($maintenanceGroupTableData as $key => $maintenanceGroup): ?>
 												<optgroup label="<?=get_table('m_module_type', 'module_type_id', $key, 'name')?>">
-													<?php if(!empty($maintenanceGroup)): foreach($maintenanceGroup as $maintenance): ?>
+													<?php if (isset($maintenanceGroup)): foreach($maintenanceGroup as $maintenance): ?>
 														<option value="<?=$maintenance?>" required><?=get_maintenance_naming($maintenance, 'name', get_broken_name($maintenance, '_', 1))?></option>
 													<?php endforeach; endif; ?>
 												</optgroup>
@@ -141,47 +141,6 @@
 			$('#name').select2({
 				dropdownParent: $("#modal-module-setup")
 			});
-			$('#module-setup-datatable').DataTable({
-				// order: [[ 3, 'desc' ]],
-				processing: true,
-				iDisplayLength: 10,
-				paging: true,
-				searching: true,
-				info: true,
-				// pagingType: "simple",
-				language: 
-                {
-                    emptyTable:     '<span class="badge bg-red-lt">No <?=$subModuleMenu->name?> available</span>',
-                    zeroRecords:    '<span class="badge bg-red-lt">Nothing found. Please change your search term</span>',
-                    paginate: 
-                    {
-                        previous: 	'<ul class="pagination">'+
-                                        '<li class="page-item disabled">'+
-                                            '<a class="page-link" href="#" tabindex="-1" aria-disabled="true">'+
-                                                '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="15 6 9 12 15 18" /></svg>'+
-                                            'Prev </a>'+
-                                        '</li>'+
-                                    '</ul>',
-									
-                            next: 	'<ul class="pagination">'+
-                                        '<li class="page-item">'+
-                                            '<a class="page-link" href="#"> Next'+
-                                                '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><polyline points="9 6 15 12 9 18" /></svg>'+
-                                            '</a>'+
-                                        '</li>'+
-                                    '</ul>',
-                    },
-                    sLengthMenu:    '<div class="text-muted py-3">Show<div class="mx-1 d-inline-block">'+
-                                        '<select class="form-select">'+
-                                            "<option value='10'>10</option>"+
-                                            "<option value='50'>50</option>"+
-                                            "<option value='100'>100</option>"+
-                                            "<option value='-1'>All</option>"+
-                                        "</select>"+
-                                    '</div>entries</div>'
-
-				}
-				// "buttons" : [ 'copy', 'csv', 'excel', 'pdf', 'print' ]
-			});
+			loadDatatable('module-setup-datatable');
 		});
 	</script>

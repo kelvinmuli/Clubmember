@@ -241,7 +241,7 @@
 				<!-- END NAVBAR TOGGLER -->
 				<!-- BEGIN NAVBAR LOGO -->
 				<div class="navbar-brand navbar-brand-autodark">
-					<h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3"><?=$systemRow->name?></h1>
+					<h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3"><?=get_table('customer', 'customer_id', get_table('customer_db_setting', 'customer_db_setting_id', $customer_db_setting_id, 'customer_id'), 'full_legal_name')?></h1>
 				</div>
 
 				
@@ -280,11 +280,11 @@
 						</div>
 
 					<div class="nav-item dropdown">
-						<a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="<?=$first_name?>">
+						<a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="<?=$full_legal_name?>">
 							<!-- <span class="avatar avatar-sm" style="adminground-image: url(<?=base_url()?>assets/static/avatars/000m.jpg)"></span> -->
-							<span class="avatar"><?=get_initial($first_name)?></span>
+							<span class="avatar"><?=get_initial($full_legal_name)?></span>
 							<div class="d-none d-xl-block ps-2">
-								<div><?=$first_name?></div>
+								<div><?=$full_legal_name?></div>
 								<div class="mt-1 small text-muted"><?=get_table('m_user_type', 'user_type_id', $user_type_id, 'name')?></div>
 							</div>
 						</a>

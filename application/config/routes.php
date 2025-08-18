@@ -58,6 +58,22 @@ $route['login'] = 'auth/Login';
 $route['adminlogout'] = 'auth/Login/Logout';
 $route['admindologin'] = 'auth/Login/VerifyLogin';
 // $route['front-login'] = 'auth/Login/verifyLoginFront';
+
+/*
+* admin/DatabaseController
+*/
+$route['all-user/(:any)'] = 'admin/UserController/userView/$1';
+$route['all-user/(:any)/(:any)'] = 'admin/UserController/userView/$1/$2';
+$route['profile'] = 'admin/UserController/profileView';
+$route['profile/(:any)'] = 'admin/UserController/profileView/$1';
+$route['profile/(:any)/(:any)'] = 'admin/UserController/profileView/$1/$2';
+$route['profile/(:any)/(:any)/(:any)'] = 'admin/UserController/profileView/$1/$2/$3';
+$route['get-user-list/(:any)/(:any)'] = 'admin/UserController/getUserList/$1/$2';
+$route['add-user-modal/(:any)'] = 'admin/UserController/addUserModal/$1';
+$route['add-user-modal/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2';
+$route['add-user'] = 'admin/UserController/addUser';
+
+
 $route['sign-up'] = 'auth/Register';
 $route['register'] = 'auth/Register/put';
 $route['verify/(:any)'] = 'auth/Register/verify/$1';
@@ -78,18 +94,30 @@ $route['register-user'] = 'front/Register/register_user';
 
 
 // Back-end routes
-$route['dashboard'] = 'admin/Dashboard';
-$route['create-customer'] = 'admin/Dashboard/create';
-$route['customers-update'] = 'admin/Dashboard/update';
-$route['customers-delete'] = 'admin/Dashboard/delete';
-$route['customer-db-config'] = 'admin/CustomerDB';
-$route['customer-db-setup'] = 'admin/CustomerDB/create';
-$route['create-database'] = 'admin/CustomerDB/create_database';
+$route['dashboard'] = 'admin/HomeController';
 
+
+/*
+* admin/CustomerController
+*/
+
+$route['add-customer-modal'] = 'admin/CustomerController/addCustomerModal';
+$route['add-customer-modal/(:any)'] = 'admin/CustomerController/addCustomerModal/$1';
+$route['add-customer'] = 'admin/CustomerController/addCustomer';
+$route['edit-customer-modal'] = 'admin/CustomerController/editCustomerModal';
+$route['edit-customer-modal/(:any)'] = 'admin/CustomerController/editCustomerModal/$1';
+$route['edit-customer'] = 'admin/CustomerController/editCustomer';
+$route['remove-customer'] = 'admin/CustomerController/removeCustomer';
+$route['remove-customer-modal'] = 'admin/CustomerController/removeCustomerModal';
 
 
 $route['callback'] = 'Mpesa/insertIpay';
 $route['logout'] = 'front/Signup/logout';
+
+/*
+* admin/DatabaseController
+*/
+$route['customer'] = 'admin/CustomerController';
 
 /**
  * MaintenanceController
@@ -140,6 +168,7 @@ $route['get-table-data/(:any)/(:any)/(:any)/(:any)'] = 'admin/MaintenanceControl
 * admin/UserRoleController
 */
 $route['user-role'] = 'admin/UserRoleController/userRoleView';
+$route['user-role/(:any)'] = 'admin/UserRoleController/userRoleView/$1';
 $route['user-role-add/(:any)'] = 'admin/UserRoleController/userRoleAdd/$1';
 $route['user-role-delete/(:any)'] = 'admin/UserRoleController/userRoleDelete/$1';
 $route['user-role-add-edit/(:any)'] = 'admin/UserRoleController/userRoleAddEdit/$1';
@@ -149,4 +178,13 @@ $route['user-type-role'] = 'admin/UserRoleController/userTypeRoleView';
 $route['user-type-role-add/(:any)'] = 'admin/UserRoleController/userTypeRoleAdd/$1';
 $route['user-type-role-delete/(:any)'] = 'admin/UserRoleController/userTypeRoleDelete/$1';
 $route['user-type-role-add-edit/(:any)'] = 'admin/UserRoleController/userTypeRoleAddEdit/$1';
+
+
+/*
+* admin/DatabaseController
+*/
+$route['customer-db-config'] = 'admin/DatabaseController';
+$route['create-customer-database'] = 'admin/DatabaseController/createCustomerDatabase';
+$route['customer-db-setup'] = 'admin/DatabaseController/create';
+$route['create-database'] = 'admin/DatabaseController/create_database';
 
