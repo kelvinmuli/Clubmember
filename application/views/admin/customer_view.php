@@ -71,7 +71,7 @@
 												<?php if ($editUserRight || $removeUserRight): ?>
 													<td class="text-end">
 														<span class="dropdown">
-															<button class="btn dropdown-toggle align-text-top" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="true">Actions</button>
+															<button class="btn dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="true">Actions</button>
 															<div class="dropdown-menu dropdown-menu-end" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(0px, 38px);">
 																<?php if ($editUserRight): ?>
 																	<a class="dropdown-item" onclick="editCustomerModal('<?=$customer->customer_id?>')">Update</a>

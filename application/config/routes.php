@@ -71,6 +71,7 @@ $route['profile/(:any)/(:any)/(:any)'] = 'admin/UserController/profileView/$1/$2
 $route['get-user-list/(:any)/(:any)'] = 'admin/UserController/getUserList/$1/$2';
 $route['add-user-modal/(:any)'] = 'admin/UserController/addUserModal/$1';
 $route['add-user-modal/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2';
+$route['add-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2/$3';
 $route['add-user'] = 'admin/UserController/addUser';
 
 
@@ -95,6 +96,7 @@ $route['register-user'] = 'front/Register/register_user';
 
 // Back-end routes
 $route['dashboard'] = 'admin/HomeController';
+$route['overview-card'] = 'admin/HomeController/overviewCard';
 
 
 /*
@@ -118,6 +120,12 @@ $route['logout'] = 'front/Signup/logout';
 * admin/DatabaseController
 */
 $route['customer'] = 'admin/CustomerController';
+
+/*
+* admin/DatabaseController
+*/
+$route['important-document'] = 'admin/ClubHQController';
+$route['notice-board'] = 'admin/ClubHQController';
 
 /**
  * MaintenanceController

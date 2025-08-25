@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-class CustomerController extends CI_Controller {
+class ClubHQController extends CI_Controller {
 
 	/**
 	 * Index Page for this controller.
@@ -29,11 +29,37 @@ class CustomerController extends CI_Controller {
 		$headerData = $this->common->loadHeaderData('customer');
 		$data = $headerData;
 
+
+		$this->load->view('admin/templates/header_view', $headerData);
+		$this->load->view('admin/500_view', $data);
+		$this->load->view('admin/templates/footer_view', $data);
+    }
+
+	public function importantDocumentView() 
+	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+		$headerData = $this->common->loadHeaderData('important-document');
+		$data = $headerData;
+
 		$data['customerData'] = $this->db->select('*')->from('customer')->where('active', 1)->get()->result();
 		$data['databaseStatusData'] = $this->db->select('*')->from('m_database_status')->where('active', 1)->get()->result();
 
 		$this->load->view('admin/templates/header_view', $headerData);
-		$this->load->view('admin/customer_view', $data);
+		$this->load->view('admin/important_document_view', $data);
+		$this->load->view('admin/templates/footer_view', $data);
+    }
+
+	public function noticeBoardView() 
+	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+		$headerData = $this->common->loadHeaderData('notice-board');
+		$data = $headerData;
+
+
+		$this->load->view('admin/templates/header_view', $headerData);
+		$this->load->view('admin/notice_board_view', $data);
 		$this->load->view('admin/templates/footer_view', $data);
     }
 

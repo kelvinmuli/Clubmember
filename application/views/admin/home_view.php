@@ -22,100 +22,121 @@
 	<!-- BEGIN PAGE BODY -->
 	<div class="page-body">
 		<div class="container-fluid">
-		<div class="row row-deck row-cards">
-
-			<div class="col-12">
-			<div class="row row-cards">
-				<div class="col-sm-6 col-lg-3">
-				<div class="card card-sm">
-					<div class="card-body">
-					<div class="row align-items-center">
-						<div class="col-auto">
-						<span class="bg-primary text-white avatar"
-							><!-- Download SVG icon from http://tabler.io/icons/icon/currency-dollar -->
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
-							<path d="M20.925 13.163a8.998 8.998 0 0 0 -8.925 -10.163a9 9 0 0 0 0 18"></path>
-							<path d="M9 10h.01"></path>
-							<path d="M15 10h.01"></path>
-							<path d="M9.5 15c.658 .64 1.56 1 2.5 1s1.842 -.36 2.5 -1"></path>
-							<path d="M15 19l2 2l4 -4"></path>
-							</svg></span>
-						</div>
-						<div class="col">
-						<div class="font-weight-medium">Welcome back <?=$full_legal_name?></div>
-
-						</div>
-					</div>
-					</div>
-				</div>
-				</div>
-				
-				<div class="col-sm-6 col-lg-3">
-				<div class="card card-sm">
-					<div class="card-body">
-					<div class="row align-items-center">
-						<div class="col-auto">
-						<span class="bg-x text-white avatar"
-							><!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
-							<path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9z"></path>
-							<path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
-							</svg></span>
-						</div>
-						<div class="col">
-						<div class="font-weight-medium"><?=$total_customers ?> Customers</div>
-						<div class="text-secondary">Total Registered Customers</div>
-						</div>
-					</div>
-					</div>
-				</div>
-				</div>
-
-				<div class="col-sm-6 col-lg-3">
-				<div class="card card-sm">
-					<div class="card-body">
-					<div class="row align-items-center">
-						<div class="col-auto">
-						<span class="bg-green text-white avatar"
-							><!-- Download SVG icon from http://tabler.io/icons/icon/shopping-cart -->
-							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
-							<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
-							<path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
-							<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-							<path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
-							</svg></span>
-						</div>
-						<div class="col">
-						<div class="font-weight-medium">0 Customer Users</div>
-						<div class="text-secondary">Total Customer Users</div>
-						</div>
-					</div>
-					</div>
-				</div>
-				</div>
-
-				<div class="col-sm-6 col-lg-3">
-					<div class="card card-sm">
-						<div class="card-body">
-							<div class="row align-items-center">
-								<div class="col-auto">
-									<span class="bg-facebook text-white avatar"
-										><!-- Download SVG icon from http://tabler.io/icons/icon/brand-facebook -->
-										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
-										<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
-										<path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
-										<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-										<path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
-										</svg></span>
-									</div>
-									<div class="col">
-										<div class="font-weight-medium">0 System Users</div>
-										<div class="text-secondary">Total System Users</div> 
+			<div class="row row-deck row-cards">
+				<div class="col-12">
+				<div class="row row-cards">
+					<?php if (in_array($user_type_id, array(GlobalModel::ADMIN_TYPE, GlobalModel::CLUB_ADMIN_TYPE))): ?>
+						<div id="overview-card" class="row row-cards"></div>
+					<?php else: ?>
+						<div class="col-sm-6 col-lg-3">
+							<div class="card card-sm">
+								<div class="card-body">
+									<div class="row align-items-center">
+										<div class="col-auto">
+											<span class="bg-primary text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/currency-dollar -->
+												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+													<path d="M20.925 13.163a8.998 8.998 0 0 0 -8.925 -10.163a9 9 0 0 0 0 18"></path>
+													<path d="M9 10h.01"></path>
+													<path d="M15 10h.01"></path>
+													<path d="M9.5 15c.658 .64 1.56 1 2.5 1s1.842 -.36 2.5 -1"></path>
+													<path d="M15 19l2 2l4 -4"></path>
+												</svg>
+											</span>
+										</div>
+										<div class="col">
+											<div class="font-weight-medium">Welcome back <?=$full_legal_name?></div>
+										</div>
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
+						<div class="col-sm-6 col-lg-3">
+							<div class="card card-sm">
+								<div class="card-body">
+									<div class="row align-items-center">
+										<div class="col-auto">
+										<span class="bg-x text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+												<path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9z"></path>
+												<path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
+											</svg>
+										</span>
+										</div>
+										<div class="col">
+											<div class="font-weight-medium"><?=count($bookingData ?? [])?> My Bookings</div>
+											<div class="text-secondary">Total Bookings</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6 col-lg-3">
+							<div class="card card-sm">
+								<div class="card-body">
+									<div class="row align-items-center">
+										<div class="col-auto">
+											<span class="bg-green text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/shopping-cart -->
+												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+												<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
+												<path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+												<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+												<path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
+												</svg>
+											</span>
+										</div>
+										<div class="col">
+											<div class="font-weight-medium"><?=count($productData ?? [])?> Shops</div>
+											<div class="text-secondary">Total Registered Customers</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6 col-lg-3">
+							<div class="card card-sm">
+								<div class="card-body">
+									<div class="row align-items-center">
+										<div class="col-auto">
+											<span class="bg-facebook text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/brand-facebook -->
+												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+												<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
+												<path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+												<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+												<path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
+												</svg>
+											</span>
+										</div>
+										<div class="col">
+											<div class="font-weight-medium"><?=count($subcriptionData ?? [])?> Subcriptions</div>
+											<div class="text-secondary">Total Subcriptions</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm-6 col-lg-3">
+							<div class="card card-sm">
+								<div class="card-body">
+									<div class="row align-items-center">
+										<div class="col-auto">
+											<span class="bg-facebook text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/brand-facebook -->
+												<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+												<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"></path>
+												<path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"></path>
+												<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+												<path d="M21 21v-2a4 4 0 0 0 -3 -3.85"></path>
+												</svg>
+											</span>
+										</div>
+										<div class="col">
+											<div class="font-weight-medium"><?=count($joiningFeeData ?? [])?> Joining Fees</div>
+											<div class="text-secondary">Total Joining Fees</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					<?php endif; ?>
 				</div>
 			</div>
 
@@ -124,8 +145,13 @@
 					<div class="card-header">
 						<div class="row w-full">
 							<div class="col">
-								<h3 class="card-title mb-0">Newly Added Customers</h3>
-								<p class="text-secondary m-0">Listing all Newly Added Customers.</p>
+								<?php if (in_array($user_type_id, array(GlobalModel::ADMIN_TYPE))): ?>
+									<h3 class="card-title mb-0">Newly Added Customers</h3>
+									<p class="text-secondary m-0">Listing all Newly Added Customers.</p>
+								<?php else: ?>
+									<h3 class="card-title mb-0">Club</h3>
+									<p class="text-secondary m-0">Listing</p>
+								<?php endif; ?>
 							</div>
 						</div>
 					</div>
@@ -166,3 +192,18 @@
 			</div>
 		</div>
 	</div>
+
+	<script>
+		$(document).ready(function() {
+			overviewCard();
+		});
+
+		function overviewCard() {
+			$.ajax({
+				url: base_url + "overview-card",
+				success: function(response) {
+					document.getElementById('overview-card').innerHTML = response;
+				}
+			});
+		}
+	</script>

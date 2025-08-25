@@ -19,13 +19,18 @@
 				<div class="col-auto ms-auto d-print-none">
 					<div class="btn-list">
 						<?php if ($inputUserRight): ?>
-							<a class="btn btn-success d-none d-sm-inline-block btn-pill" onclick="addUserModal('<?=$userTypeId?>')">
-								<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-								Add New <?=$userTypeName?>
-							</a>
-							<a class="btn btn-success d-sm-none btn-icon btn-pill" onclick="addUserModal('<?=$userTypeId?>')" aria-label="Add New <?=$userTypeName?>">
-								<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-							</a>
+							<div class="col-lg-5">
+								<span class="dropdown">
+									<button class="btn btn-success dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown">Add New <?=$userTypeName?></button>
+									<div class="dropdown-menu dropdown-menu-end">
+										<?php if (isset($membershipTypeData)): foreach ($membershipTypeData as $key => $value): ?>
+											<a href="#" class="dropdown-item" onclick="addUserModal('<?=$userTypeId?>', '<?=$value->membership_type_id?>')">
+												<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> Add <?=$value->name?>
+											</a>
+										<?php endforeach; endif; ?>
+									</div>
+								</span>
+							</div>
 						<?php endif; ?>
 					</div>
               	</div>
@@ -61,6 +66,8 @@
 											<th>Full Legal Name</th>
 											<th>Phone Number</th>
 											<th>Email</th>
+											<th>Membership No.</th>
+											<th>Residental Address</th>
 											<th>Created At</th>									
 											<th>Actions</th>
 										</tr>
@@ -132,9 +139,9 @@
 			});
 		}
 
-		function addUserModal(user_type_id) {
+		function addUserModal(user_type_id, membership_type_id) {
 			$.ajax({
-				url: base_url + "add-user-modal/" + user_type_id + "/" + $('#customer_db_setting_id').val(),
+				url: base_url + "add-user-modal/" + user_type_id + "/" + membership_type_id + "/" + $('#customer_db_setting_id').val(),
 				success: function(response) {
 					document.getElementById('modal-view-edit-print-user').innerHTML = response;
 					$('#modal-view-edit-print-user').modal('show');

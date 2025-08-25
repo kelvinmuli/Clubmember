@@ -40,10 +40,11 @@ class UserController extends CI_Controller {
 		$headerData = $this->common->loadHeaderData('all-user');
 		
 		$data['userTypeId'] = $userTypeId;
-		$data['customerDBSettingId'] = $customer_db_setting_id ?? GlobalModel::DEFAULT_CORE_DB_SETTING;
+		$data['customerDBSettingId'] = empty($customer_db_setting_id) ? GlobalModel::DEFAULT_CORE_DB_SETTING : $customer_db_setting_id;
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		$data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', $userTypeId)->get()->result();
 		$data['userTypeData'] = $this->db->select('*')->from('m_user_type')->where('active', 1)->get()->result();
+		$data['membershipTypeData'] = $this->db->select('*')->from('m_membership_type')->where('active', 1)->get()->result();
 		$data['customerDBSettingData'] = $this->db->select('*')->from('customer_db_setting')->where('active', 1)->get()->result();
 		
 
@@ -85,71 +86,76 @@ class UserController extends CI_Controller {
 								</span>	
 							</td>';
 			endif;
-			$userDataArray[] = array(++$u.'.', $user->full_legal_name, $user->phone_number, $user->email, $user->created_at, $actions);
+			$userDataArray[] = array(++$u.'.', $user->full_legal_name, $user->phone_number, $user->email, ($user->membership_no ?? '-'), $user->residential_address, $user->created_at, $actions);
 		}
 
 		print_r(json_encode(array("draw"=>1, "recordsTotal"=>count($userDataArray), "recordsFiltered"=>count($userDataArray), "data"=>$userDataArray)));
 	}
 
-	public function addUserModal($user_type_id, $customer_db_setting_id)
+	public function addUserModal($user_type_id, $membership_type_id, $customer_db_setting_id)
 	{
 		$this->common->checkSession(array('dialog'=>1));
 
+		$membershipTypeRow = $this->db->select('*')->from('m_membership_type')->where('membership_type_id', $membership_type_id)->get()->row();
 		$userTypeRow = $this->db->select('*')->from('m_user_type')->where('user_type_id', $user_type_id)->get()->row();
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->where('active', 1)->get()->result();
 		$genderData = $this->db->select('*')->from('m_gender')->where('active', 1)->get()->result();
 		$countryData = $this->db->select('*')->from('m_country')->where('active', 1)->get()->result();
+		$titleData = $this->db->select('*')->from('m_title')->where('active', 1)->get()->result();
+		if ($customer_db_setting_id != GlobalModel::DEFAULT_CORE_DB_SETTING) {
+			$memberTypeData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.m_member_type')->where('active', 1)->get()->result();
+		}
+		
 
 		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h5 class="modal-title">Add New '.$userTypeRow->name.'</h5>
+							<h5 class="modal-title">Add New '.$userTypeRow->name.' To '.get_table('customer', 'customer_id', $customerDBSettingRow->customer_id, 'full_legal_name').'</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 
 						<form action="'.base_url('add-user').'" method="POST" enctype="multipart/form-data">	
 							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>
 							<input id="user_id" name="user_id" type="text" value="'.generate_uuid().'" hidden>		
-							<input id="user_type_id" name="user_type_id" type="text" value="'.$user_type_id.'" hidden>		
+							<input id="user_type_id" name="user_type_id" type="text" value="'.$user_type_id.'" hidden>	
+							<input id="membership_type_id" name="membership_type_id" type="text" value="'.$membership_type_id.'" hidden>
+							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>	
 							<div class="modal-body">
 								<div class="row">
-									<div class="col-lg-6">
+									<div class="col-lg-6">	
 										<div class="mb-3">
-											<label class="form-label">Customer</label>
-											<select id="customer_db_setting_id" name="gender_id" class="form-select btn-pill" required>
-												<option selected disabled>Select Customer</option>';
-												if (isset($customerDBSettingData)): foreach($customerDBSettingData as $customerDBSetting):
-													$modal .= '<option value="'.$customerDBSetting->customer_db_setting_id.'" '.($customerDBSetting->customer_db_setting_id == $customer_db_setting_id ? 'selected' : '').'>'.get_table('customer', 'customer_id', $customerDBSetting->customer_id, 'full_legal_name').'</option>';
+											<label class="form-label">'.$membershipTypeRow->name.' Photo</label>
+											<input id="url" name="url" type="file" class="form-control btn-pill" placeholder="Upload Your Photo">
+										</div>	
+									</div>
+									<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
+										<div class="mb-3">
+											<label class="form-label">Title</label>
+											<select id="title_id" name="title_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+												<option selected disabled>Select Title</option>';
+												if (isset($titleData)): foreach($titleData as $data):
+													$modal .= '<option value="'.$data->title_id.'">'.$data->name.'</option>';
 												endforeach; endif;
 											$modal .= '</select>
 										</div>
 									</div>
-								</div>
-							</div>		
-							<div class="modal-body">
-								<div class="row">
 									<div class="col-lg-6">	
 										<div class="mb-3">
-											<label class="form-label">Photo</label>
-											<input id="url" name="url" type="file" class="form-control btn-pill" placeholder="Upload Your Photo">
-										</div>	
-									</div>
-									<div class="col-lg-6">	
-										<div class="mb-3">
-											<label class="form-label">Full Legal Name*</label>
+											<label class="form-label">'.$membershipTypeRow->name.' Full Legal Name*</label>
 											<input id="full_legal_name" name="full_legal_name" type="text" class="form-control btn-pill" placeholder="Your Full Legal Name" required>
 										</div>	
 									</div>	
 									<div class="col-lg-6">	
 										<div class="mb-3">
-											<label class="form-label">Phone Number*</label>
+											<label class="form-label">'.$membershipTypeRow->name.' Phone Number*</label>
 											<input id="phone_number" name="phone_number" type="number" class="form-control btn-pill" placeholder="Enter your phone number" required>
 										</div>	
 									</div>
-									<div class="col-lg-6">
+									<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
 										<div class="mb-3">
 											<label class="form-label">Gender</label>
-											<select id="gender_id" name="gender_id" class="form-select btn-pill" required>
+											<select id="gender_id" name="gender_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
 												<option selected disabled>Select Gender</option>';
 												if (isset($genderData)): foreach($genderData as $data):
 													$modal .= '<option value="'.$data->gender_id.'">'.$data->name.'</option>';
@@ -157,10 +163,10 @@ class UserController extends CI_Controller {
 											$modal .= '</select>
 										</div>
 									</div>
-									<div class="col-lg-6">							
+									<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>							
 										<div class="mb-3">
 											<label class="form-label">Date of Birth</label>
-											<input id="birth" name="birth" type="date" class="form-control btn-pill" required>
+											<input id="birth" name="birth" type="date" class="form-control btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
 										</div>
 									</div>
 									<div class="col-lg-6">							
@@ -169,42 +175,67 @@ class UserController extends CI_Controller {
 											<input id="email" name="email" type="email" class="form-control btn-pill" placeholder="Enter your email address">
 										</div>	
 									</div>
-									<div class="col-lg-6">	
+									<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>	
 										<div class="mb-3">
 											<label class="form-label">ID Number / Passport Number</label>
 											<input id="id_no" name="id_no" type="number" class="form-control btn-pill" placeholder="Enter your id number">
 										</div>	
-									</div>
-									<div class="col-lg-6">							
-										<div class="mb-3">
-											<label class="form-label">Residential Address</label>
-											<input id="residential_address" name="residential_address" type="text" class="form-control btn-pill" placeholder="Enter Residential Address">
-										</div>	
-									</div>
-									<div class="col-lg-6">							
-										<div class="mb-3">
-											<label class="form-label">Postal Address</label>
-											<input id="postal_address" name="postal_address" type="text" class="form-control btn-pill" placeholder="Enter Postal Address">
-										</div>	
-									</div>
-									<div class="col-lg-6">							
-										<div class="mb-3">
-											<label class="form-label">Postal Code</label>
-											<input id="postal_code" name="postal_code" type="text" class="form-control btn-pill" placeholder="Enter Postal Code">
-										</div>	
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label class="form-label">Country</label>
-											<select id="country_id" name="country_id" class="form-select btn-pill" required>
-												<option selected disabled>Select Country</option>';
-												if (isset($countryData)): foreach($countryData as $data):
-													$modal .= '<option value="'.$data->country_id.'">'.$data->name.'</option>';
-												endforeach; endif;
-											$modal .= '</select>
+									</div>';
+									if (!in_array($user_type_id, array('4734656482', '4534654653'))):
+										$modal .= '<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Residential Address</label>
+												<input id="residential_address" name="residential_address" type="text" class="form-control btn-pill" placeholder="Enter Residential Address">
+											</div>	
 										</div>
-									</div>
-								</div>
+										<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Postal Address</label>
+												<input id="postal_address" name="postal_address" type="text" class="form-control btn-pill" placeholder="Enter Postal Address">
+											</div>	
+										</div>
+										<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Postal Code</label>
+												<input id="postal_code" name="postal_code" type="text" class="form-control btn-pill" placeholder="Enter Postal Code">
+											</div>	
+										</div>
+										<div class="col-lg-6">
+											<div class="mb-3">
+												<label class="form-label">Country</label>
+												<select id="country_id" name="country_id" class="form-select btn-pill" required>
+													<option selected disabled>Select Country</option>';
+													if (isset($countryData)): foreach($countryData as $data):
+														$modal .= '<option value="'.$data->country_id.'">'.$data->name.'</option>';
+													endforeach; endif;
+												$modal .= '</select>
+											</div>
+										</div>
+										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>							
+											<div class="mb-3">
+												<label class="form-label">Town</label>
+												<input id="town_id" name="town_id" type="text" class="form-control btn-pill" placeholder="Enter Town">
+											</div>	
+										</div>
+										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>							
+											<div class="mb-3">
+												<label class="form-label">Joining Date</label>
+												<input id="joining_at" name="joining_at" type="date" class="form-control btn-pill" placeholder="Enter Joining Date">
+											</div>	
+										</div>
+										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
+											<div class="mb-3">
+												<label class="form-label">Member Type</label>
+												<select id="member_type_id" name="member_type_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+													<option selected disabled>Select Member Type</option>';
+													if (isset($memberTypeData)): foreach($memberTypeData as $data):
+														$modal .= '<option value="'.$data->member_type_id.'">'.$data->name.'</option>';
+													endforeach; endif;
+												$modal .= '</select>
+											</div>
+										</div>';
+									endif;
+								$modal .='</div>
 							</div>';
 							if (in_array($user_type_id, array('4734656482', '4534654653'))):
 								$modal .='<div class="modal-body">
@@ -218,42 +249,50 @@ class UserController extends CI_Controller {
 									</div>
 								</div>';
 							endif;
-							$modal .='<div class="modal-body">
-								<div class="row">
-									<div class="col-lg-6">							
-										<div class="mb-3">
-											<label class="form-label">Contact Name</label>
-											<input id="contact_name" name="contact_name" type="text" class="form-control btn-pill" placeholder="Enter Contact Name">
-										</div>	
+							if (!in_array($user_type_id, array('4734656482', '4534654653'))):
+								$modal .='<div class="modal-body" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
+									<div class="row">
+										<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Membership No.</label>
+												<input id="membership_no" name="membership_no" type="text" class="form-control btn-pill" placeholder="Enter Membership No.">
+											</div>	
+										</div>
+										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>							
+											<div class="mb-3">
+												<label class="form-label">Sub Reference No.</label>
+												<input id="sub_reference_no" name="sub_reference_no" type="text" class="form-control btn-pill" placeholder="Enter Sub Reference No.">
+											</div>	
+										</div>
 									</div>
-									<div class="col-lg-6">							
-										<div class="mb-3">
-											<label class="form-label">Contact No.</label>
-											<input id="contact_phone_no" name="contact_phone_no" type="text" class="form-control btn-pill" placeholder="Enter Contact No.">
-										</div>	
+								</div>';
+							endif;
+							$modal .='<div class="modal-body">
+									<div class="row">
+										<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Contact Name</label>
+												<input id="contact_name" name="contact_name" type="text" class="form-control btn-pill" placeholder="Enter Contact Name">
+											</div>	
+										</div>
+										<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Contact No.</label>
+												<input id="contact_phone_no" name="contact_phone_no" type="number" class="form-control btn-pill" placeholder="Enter Contact No.">
+											</div>	
+										</div>
 									</div>
 								</div>
-							</div>';
-							$modal .='<div class="modal-body">
-								<div class="row">
-									<div class="col-lg-6">							
-										<div class="mb-3">
-											<label class="form-label">Sub Reference No.</label>
-											<input id="sub_reference_no" name="sub_reference_no" type="text" class="form-control btn-pill" placeholder="Enter Sub Reference No.">
-										</div>	
+								<div class="modal-body">
+									<div class="row">
+										<div class="col-lg-12">							
+											<div class="mb-3">
+												<label class="form-label">Notes</label>
+												<textarea id="remark" name="remark" type="text" class="form-control" placeholder="Enter Notes"></textarea>
+											</div>	
+										</div>
 									</div>
 								</div>
-							</div>';
-							$modal .='<div class="modal-body">
-								<div class="row">
-									<div class="col-lg-12">							
-										<div class="mb-3">
-											<label class="form-label">Notes</label>
-											<textarea id="remark" name="remark" type="text" class="form-control" placeholder="Enter Notes"></textarea>
-										</div>	
-									</div>
-								</div>
-							</div>
 							<div class="modal-footer">
 								<a href="#" class="btn btn-link link-secondary " data-bs-dismiss="modal">Cancel</a>
 								<button href="#" type="submit" class="btn btn-primary ms-auto btn-pill">
