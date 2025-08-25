@@ -37,6 +37,7 @@ class HomeController extends CI_Controller {
 		{
 			$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 			$customerData = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->where('active', 1)->get()->result();
+			$data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->get()->result();
 		}
 		$data['customerData'] = $customerData;
 		$data['total_customers'] = count($customerData);

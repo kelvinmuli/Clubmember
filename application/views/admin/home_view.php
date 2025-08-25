@@ -146,8 +146,61 @@
 			</div>
 
 			<?php if (!in_array($user_type_id, array(GlobalModel::MEMBER_TYPE))): ?>
-				<div class="card">
-					<div class="card-table">
+				<div class="col-12">
+					<div class="card">
+						<div class="card-table">
+							<div class="card-header">
+								<div class="row w-full">
+									<div class="col">
+										<?php if (in_array($user_type_id, array(GlobalModel::ADMIN_TYPE))): ?>
+											<h3 class="card-title mb-0">Newly Added Customers</h3>
+											<p class="text-secondary m-0">Listing all Newly Added Customers.</p>
+										<?php else: ?>
+											<h3 class="card-title mb-0">Club</h3>
+											<p class="text-secondary m-0">Listing</p>
+										<?php endif; ?>
+									</div>
+								</div>
+							</div>
+
+							<div class="card-body border-bottom py-3">
+								<table id="customer-datatable" class="table card-table table-vcenter text-nowrap datatable" style="width: 100%;">
+									<thead>
+										<tr>
+											<th class="w-1">#</th>
+											<th>Logo</th>
+											<th>Customer Name</th>
+											<th>Reg. No.</th>
+											<th>Email Address</th>
+											<th>Tel No.</th>
+											<th>Country</th>
+											<th>Agreement</th>
+											<th>Status</th>
+										</tr>
+									</thead>
+									<tbody class="table-tbody">
+										<?php $c = 0; if (isset($customerData)): foreach ($customerData as $customer): ?>
+											<tr>
+												<td><?=++$c?>.</td>
+												<td><span class="avatar avatar-xs me-2" style="background-image: url('<?=base_url($customer->logo)?>')"></span></td>
+												<td><?=$customer->full_legal_name?></td>
+												<td><?=$customer->reg_no?></td>
+												<td><?=$customer->email?></td>
+												<td><?=$customer->phone_number?></td>
+												<td><?=get_table('m_country', 'country_id', $customer->country_id, 'name')?></td>
+												<td><a href="<?=base_url($customer->agreement)?>" target="_blank">Download</a></td>
+												<td><?=get_table('m_customer_status', 'customer_status_id', $customer->customer_status_id, 'name')?></td>
+											</tr>
+										<?php endforeach; endif; ?> 
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-12">
+					<div class="card">
 						<div class="card-header">
 							<div class="row w-full">
 								<div class="col">
@@ -155,7 +208,7 @@
 										<h3 class="card-title mb-0">Newly Added Customers</h3>
 										<p class="text-secondary m-0">Listing all Newly Added Customers.</p>
 									<?php else: ?>
-										<h3 class="card-title mb-0">Club</h3>
+										<h3 class="card-title mb-0">Club Members</h3>
 										<p class="text-secondary m-0">Listing</p>
 									<?php endif; ?>
 								</div>
@@ -163,36 +216,36 @@
 						</div>
 
 						<div class="card-body border-bottom py-3">
-							<table id="customer-datatable" class="table card-table table-vcenter text-nowrap datatable" style="width: 100%;">
-								<thead>
-									<tr>
-										<th class="w-1">#</th>
-										<th>Logo</th>
-										<th>Customer Name</th>
-										<th>Reg. No.</th>
-										<th>Email Address</th>
-										<th>Tel No.</th>
-										<th>Country</th>
-										<th>Agreement</th>
-										<th>Status</th>
-									</tr>
-								</thead>
-								<tbody class="table-tbody">
-									<?php $c = 0; if (isset($customerData)): foreach ($customerData as $customer): ?>
+							<div class="table-responsive">
+								<table id="user-datatable" class="table table-vcenter text-nowrap">
+									<thead>
 										<tr>
-											<td><?=++$c?></td>
-											<td><span class="avatar avatar-xs me-2" style="background-image: url('<?=base_url($customer->logo)?>')"></span></td>
-											<td><?=$customer->full_legal_name?></td>
-											<td><?=$customer->reg_no?></td>
-											<td><?=$customer->email?></td>
-											<td><?=$customer->phone_number?></td>
-											<td><?=get_table('m_country', 'country_id', $customer->country_id, 'name')?></td>
-											<td><a href="<?=base_url($customer->agreement)?>" target="_blank">Download</a></td>
-											<td><?=get_table('m_customer_status', 'customer_status_id', $customer->customer_status_id, 'name')?></td>
+											<th class="w-1">#</th>											
+											<th>Full Legal Name</th>
+											<th>Phone Number</th>
+											<th>Email</th>
+											<th>Membership No.</th>
+											<th>Residental Address</th>
+											<th>Created At</th>									
+											<th>Actions</th>
 										</tr>
-									<?php endforeach; endif; ?> 
-								</tbody>
-							</table>
+									</thead>
+									<tbody class="table-tbody">
+										<?php $u = 0; if (isset($userData)): foreach ($userData as $user): ?>
+											<tr>
+												<td><?=++$u?>.</td>
+												<td><?=$user->full_legal_name?></td>
+												<td><?=$user->phone_number?></td>
+												<td><?=$user->email?></td>
+												<td><?=$user->membership_no?></td>
+												<td><?=$user->residental_address?></td>
+												<td><?=$user->created_at?></td>
+												<td></td>
+											</tr>
+										<?php endforeach; endif; ?> 
+									</tbody>
+								</table>
+							</div>
 						</div>
 					</div>
 				</div>
