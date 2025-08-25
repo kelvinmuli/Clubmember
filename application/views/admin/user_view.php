@@ -48,7 +48,6 @@
 							<div class="col-auto ms-auto d-print-none">
 								<div class="btn-list">		
 										<select id="customer_db_setting_id" name="customer_db_setting_id" class="form-select btn-pill">
-											<option selected disabled>Select Customer</option>
 											<?php if (isset($customerDBSettingData)): foreach($customerDBSettingData as $customerDBSetting): ?>
 												<option value="<?=$customerDBSetting->customer_db_setting_id?>" <?=($customerDBSetting->customer_db_setting_id == $customerDBSettingId) ? 'selected' : ''?>><?=get_table('customer', 'customer_id', $customerDBSetting->customer_id, 'full_legal_name')?></option>
 											<?php  endforeach; endif; ?>
@@ -85,7 +84,7 @@
 
 	<script>
 		$(document).ready(function() {
-			loadUserDatatable('<?=$customerDBSettingId?>');
+			loadUserDatatable($("#customer_db_setting_id").val());
 			$("#customer_db_setting_id").change(function() {
 				loadUserDatatable($(this).val());
 			});

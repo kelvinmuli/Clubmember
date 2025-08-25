@@ -2,6 +2,7 @@
 
 class MaintenanceModel extends GlobalModel 
 {
+
 	public function getTable($table, $column_id='', $where = NULL, $order = NULL) 
 	{
         $this->db->select('*');
@@ -24,6 +25,43 @@ class MaintenanceModel extends GlobalModel
                 $this->db->where($column_id, $where);
             }
         }
+        return $this->db->get()->result();
+    }
+
+	public function getTableResult($table, $where = NULL, $where_in = NULL, $order = NULL) 
+	{
+        $this->db->select('*');
+        $this->db->from($table);
+        if ($where !== NULL) 
+		{
+            if (is_array($where)) 
+			{
+                foreach ($where as $field=>$value) 
+				{
+                    $this->db->where($field, $value);
+                }
+            } 
+        }
+		if ($where_in !== NULL) 
+		{
+			if (is_array($where_in)) 
+			{
+                foreach ($where_in as $field=>$value) 
+				{
+                    $this->db->where_in($field, $value);
+                }
+            }
+        }
+		if ($order !== NULL) 
+		{
+			if (is_array($order)) 
+			{
+                foreach ($order as $field=>$value) 
+				{
+                    $this->db->where($field, $value);
+                }
+            } 
+		}
         return $this->db->get()->result();
     }
 

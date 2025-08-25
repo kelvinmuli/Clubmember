@@ -743,7 +743,7 @@ if (!function_exists('do_file_upload'))
 	{
 		$ci =& get_instance();
 		$config['upload_path'] = './'.$path;
-		$config['allowed_types'] = 'gif|jpg|jpeg|png|iso|dmg|zip|rar|doc|docx|xls|xlsx|xlsm|ppt|pptx|csv|ods|odt|odp|pdf|rtf|sxc|sxi|txt|exe|avi|mpeg|mp3|mp4|3gp';
+		$config['allowed_types'] = 'gif|jpg|jpeg|png|iso|dmg|zip|rar|doc|docx|xls|xlsx|xlsm|ppt|pptx|csv|ods|odt|odp|pdf|rtf|sxc|sxi|txt|exe|avi|mpeg|mp3|mp4|3gp|webp|svg';
 		$config['max_size'] = 100000;
 		$config['overwrite'] = TRUE;
 		$config['encrypt_name'] = TRUE;

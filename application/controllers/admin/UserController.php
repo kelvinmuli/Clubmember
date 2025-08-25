@@ -45,8 +45,11 @@ class UserController extends CI_Controller {
 		$data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', $userTypeId)->get()->result();
 		$data['userTypeData'] = $this->db->select('*')->from('m_user_type')->where('active', 1)->get()->result();
 		$data['membershipTypeData'] = $this->db->select('*')->from('m_membership_type')->where('active', 1)->get()->result();
-		$data['customerDBSettingData'] = $this->db->select('*')->from('customer_db_setting')->where('active', 1)->get()->result();
-		
+		if (in_array($session_data['user_type_id'], array(GlobalModel::ADMIN_TYPE)))
+			$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->where('active', 1)->get()->result();
+		else
+			$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->where('active', 1)->get()->result();
+		$data['customerDBSettingData'] = $customerDBSettingData;
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('admin/user_view', $data);
@@ -111,7 +114,7 @@ class UserController extends CI_Controller {
 		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
 						<div class="modal-header">
-							<h5 class="modal-title">Add New '.$userTypeRow->name.' To '.get_table('customer', 'customer_id', $customerDBSettingRow->customer_id, 'full_legal_name').'</h5>
+							<h5 class="modal-title">Add New '.$membershipTypeRow->name.' '.$userTypeRow->name.' To '.get_table('customer', 'customer_id', $customerDBSettingRow->customer_id, 'full_legal_name').'</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 
@@ -125,7 +128,7 @@ class UserController extends CI_Controller {
 								<div class="row">
 									<div class="col-lg-6">	
 										<div class="mb-3">
-											<label class="form-label">'.$membershipTypeRow->name.' Photo</label>
+											<label class="form-label">Photo</label>
 											<input id="url" name="url" type="file" class="form-control btn-pill" placeholder="Upload Your Photo">
 										</div>	
 									</div>
@@ -142,13 +145,13 @@ class UserController extends CI_Controller {
 									</div>
 									<div class="col-lg-6">	
 										<div class="mb-3">
-											<label class="form-label">'.$membershipTypeRow->name.' Full Legal Name*</label>
+											<label class="form-label">Full Legal Name*</label>
 											<input id="full_legal_name" name="full_legal_name" type="text" class="form-control btn-pill" placeholder="Your Full Legal Name" required>
 										</div>	
 									</div>	
 									<div class="col-lg-6">	
 										<div class="mb-3">
-											<label class="form-label">'.$membershipTypeRow->name.' Phone Number*</label>
+											<label class="form-label">Phone Number*</label>
 											<input id="phone_number" name="phone_number" type="number" class="form-control btn-pill" placeholder="Enter your phone number" required>
 										</div>	
 									</div>
@@ -338,5 +341,49 @@ class UserController extends CI_Controller {
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$email.' : User for '.$description));
 		redirect('all-user/'.$user_type_id.'/'.$customer_db_setting_id, 'refresh');
+	}
+
+	public function addUserMuthaiga()
+	{
+		// 'title' => $title,
+		// 'fulllegalname' => $fulllegalname,
+		// 'email' => $email,
+		// 'mobile_no' => $mobile_no,
+		// 'member_type' => $member_type,
+		// 'membership_no' => $membership_no,
+		// 'id_passport_no' => $id_passport_no,
+		// 'regular_lr_no' => $regular_lr_no,
+		// 'proffesionbussiness' => $proffesionbussiness,
+		// 'physical_address' => $physical_address,
+		// 'postal_code' => $postal_code,
+		// 'postal_address' => $postal_address,
+		// 'notes' => $notes
+
+		//'email'=>$postData['proffesionbussiness']
+
+		$postData = $this->input->post();
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', '1705386384290')->get()->row();
+		$titleRow = $this->db->select('*')->from('m_title')->where('name', $postData['title'])->get()->row();
+		$res = $this->db->insert($customerDBSettingRow->database_name.'.user', array('title_id'=>$titleRow->title_id ?? $postData['title'], 'full_legal_name'=>$postData['fulllegalname'], 'email'=>$postData['email'], 'phone_number'=>$postData['mobile_no'], 'membership_type_id'=>$postData['member_type'], 'membership_no'=>$postData['membership_no'], 'id_no'=>$postData['id_passport_no'], 'sub_reference_no'=>$postData['regular_lr_no'], 'residential_address'=>$postData['physical_address'], 'postal_code'=>$postData['postal_code'], 'postal_address'=>$postData['postal_address'], 'remark'=>$postData['notes'] ));
+		if ($res)
+		{
+			return $this->output
+				->set_content_type('application/json')
+				->set_status_header(200)
+				->set_output(json_encode(array(
+					'code'=>200,
+					'state'=>'success'
+				)));
+		}
+		else
+		{
+			return $this->output
+				->set_content_type('application/json')
+				->set_status_header(401)
+				->set_output(json_encode(array(
+					'code'=>401,
+					'state'=>'failed'
+				)));
+		}
 	}
 }

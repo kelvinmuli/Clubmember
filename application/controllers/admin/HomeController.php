@@ -50,6 +50,9 @@ class HomeController extends CI_Controller {
 	{
 		$this->common->checkSession();
 		$session_data = $this->common->loadSession();
+		$user_type_id = $session_data['user_type_id'];
+
+		$paymentStatusData = $this->db->select('*')->from('m_payment_status')->where('active', 1)->get()->result();
 
 		$modal ='<div class="col-sm-6 col-lg-3">
 					<div class="card card-sm">
@@ -73,8 +76,8 @@ class HomeController extends CI_Controller {
 						</div>
 					</div>
 				</div>';
-		$paymentStatusData = $this->db->select('*')->from('m_payment_status')->where('active', 1)->get()->result();
-		foreach ($paymentStatusData as $paymentStatus):
+		
+		if (!empty(get_user_right($user_type_id, '17872306643', 'view', 1))): foreach ($paymentStatusData as $paymentStatus):
 			$modal .='<div class="col-sm-6 col-lg-3">
 						<div class="card card-sm">
 							<div class="card-body">
@@ -95,9 +98,9 @@ class HomeController extends CI_Controller {
 							</div>
 						</div>
 					</div>';
-		endforeach;
+		endforeach; endif;
 
-		foreach ($paymentStatusData as $paymentStatus):
+		if (!empty(get_user_right($user_type_id, '17072386410', 'view', 1))): foreach ($paymentStatusData as $paymentStatus):
 			$modal .='<div class="col-sm-6 col-lg-3">
 						<div class="card card-sm">
 							<div class="card-body">
@@ -118,9 +121,9 @@ class HomeController extends CI_Controller {
 							</div>
 						</div>
 					</div>';
-		endforeach;
+		endforeach; endif;
 
-		foreach ($paymentStatusData as $paymentStatus):
+		if (!empty(get_user_right($user_type_id, '17092385318', 'view', 1))): foreach ($paymentStatusData as $paymentStatus):
 			$modal .='<div class="col-sm-6 col-lg-3">
 						<div class="card card-sm">
 							<div class="card-body">
@@ -141,9 +144,9 @@ class HomeController extends CI_Controller {
 							</div>
 						</div>
 					</div>';
-		endforeach;
+		endforeach; endif;
 
-		foreach ($paymentStatusData as $paymentStatus):
+		if (!empty(get_user_right($user_type_id, '17002375931', 'view', 1))): foreach ($paymentStatusData as $paymentStatus):
 			$modal .='<div class="col-sm-6 col-lg-3">
 						<div class="card card-sm">
 							<div class="card-body">
@@ -164,7 +167,7 @@ class HomeController extends CI_Controller {
 							</div>
 						</div>
 					</div>';
-		endforeach;
+		endforeach; endif;
 
 		print_r($modal);
 	}

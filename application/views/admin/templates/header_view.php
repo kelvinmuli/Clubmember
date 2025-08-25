@@ -87,9 +87,10 @@
 			</button>
 			<!-- END NAVBAR TOGGLER -->
 			<!-- BEGIN NAVBAR LOGO -->
-			<div class="navbar-brand navbar-brand-autodark">
+			 <?php $customerRow = get_table('customer', 'customer_id', get_table('customer_db_setting', 'customer_db_setting_id', $customer_db_setting_id, 'customer_id'));?>
+			<div class="navbar-brand">
 				<a href="<?=base_url('home')?>">
-					<img src="<?=base_url('assets/static/logo.png')?>" width="110" height="50" alt="<?=get_table('customer', 'customer_id', get_table('customer_db_setting', 'customer_db_setting_id', $customer_db_setting_id, 'customer_id'), 'full_legal_name')?>" class="navbar-brand-image" style="font-size: 10px;">
+					<img src="<?=base_url($customerRow->logo)?>" width="110" height="50" alt="<?=$customerRow->full_legal_name?>" class="navbar-brand-image" style="font-size: 10px;">
 				</a>
 			</div>
 
@@ -207,7 +208,7 @@
 											<?php } elseif ($subModule->module_id == '62306723120') { ?>
 												<!-- <div class="hr-text"><?=$subModule->name?></div> -->
 												<?php $ut = 0; if (isset($userTypeData)): foreach($userTypeData as $userType): ?>
-													<a class="dropdown-item <?=($userType->user_type_id == $userTypeId ? 'active' : '')?>" href="<?=base_url($subModule->path).'/'.$userType->user_type_id?>"><?=++$ut.'. '.$userType->name.str_repeat('&nbsp;', 5)?><span class="badge badge-pill bg-primary text-primary-fg ms-auto"><?=(isset($userCount[$userType->user_type_id]) ? $userCount[$userType->user_type_id] : 0)?></span></a>
+													<a class="dropdown-item <?=($userType->user_type_id == $userTypeId ? 'active' : '')?>" href="<?=base_url($subModule->path).'/'.$userType->user_type_id?>"><?=++$ut.'. '.$userType->name.str_repeat('&nbsp;', 5)?></a>
 												<?php endforeach; endif; ?>
 											<?php } elseif (in_array($subModule->module_id, array('1666345984110'))) { ?>
 												<div class="hr-text"><?=$subModule->name?></div>

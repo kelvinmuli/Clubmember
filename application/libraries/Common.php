@@ -33,7 +33,12 @@ class Common
         $headerData['moduleData'] = $this->ci->MaintenanceModel->getTable('m_module', 'module_id', array('platform_id'=>'1662835632755'), 'ASC');
 		$headerData['subModuleData'] = $this->ci->MaintenanceModel->getTable('m_module', 'module_id', array('platform_id'=>'1662835632755', 'sub'=>1));
 		$headerData['numericSelectData'] = $this->ci->MaintenanceModel->getTable('m_numeric_select', 'numeric_select_id', array('active'=>1));
-		$headerData['userTypeData'] = $this->ci->MaintenanceModel->getTable('m_user_type', 'user_type_id', array('active'=>1));
+		if (in_array($user_type_id, array(GlobalModel::CLUB_ADMIN_TYPE)))
+			$headerData['userTypeData'] = $this->ci->MaintenanceModel->getTableResult('m_user_type', NULL, array('user_type_id'=>array(GlobalModel::CLUB_ADMIN_TYPE, GlobalModel::MEMBER_TYPE)));
+		elseif (in_array($user_type_id, array(GlobalModel::MEMBER_TYPE)))
+			$headerData['userTypeData'] = $this->ci->MaintenanceModel->getTableResult('m_user_type', array('user_type_id'=>GlobalModel::MEMBER_TYPE));
+		else
+			$headerData['userTypeData'] = $this->ci->MaintenanceModel->getTable('m_user_type', 'user_type_id', array('active'=>1));
 		$headerData['paymentStatusData'] = $this->ci->MaintenanceModel->getTable('m_payment_status', 'payment_status_id', array('active'=>1));
 		$headerData['moduleTypeData'] = $this->ci->MaintenanceModel->getTable('m_module_type', 'module_type_id', array('active'=>1));
 		$headerData['platformData'] = $this->ci->MaintenanceModel->getTable('m_platform', 'platform_id', array('active'=>1));

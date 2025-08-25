@@ -73,6 +73,7 @@ $route['add-user-modal/(:any)'] = 'admin/UserController/addUserModal/$1';
 $route['add-user-modal/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2';
 $route['add-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2/$3';
 $route['add-user'] = 'admin/UserController/addUser';
+$route['api/add-user-muthaiga'] = 'admin/UserController/addUserMuthaiga';
 
 
 $route['sign-up'] = 'auth/Register';
