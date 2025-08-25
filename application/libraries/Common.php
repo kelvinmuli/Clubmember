@@ -19,6 +19,7 @@ class Common
     {	
         $session_data = $this->loadSession();
 		$user_type_id = $session_data['user_type_id'];
+		$customer_db_setting_id = $session_data['customer_db_setting_id'];
 		$headerData = $session_data;
 
 		$moduleMenu = $this->ci->MaintenanceModel->getTableRow('m_module', 'module_id', array('path'=>$toolBarMenu));
@@ -68,7 +69,7 @@ class Common
 		$headerData['paymentStatusId'] = '';
 		$headerData['userTypeId'] = '';
 		$headerData['moduleTypeId'] = '';
-
+		$headerData['customerDBSettingId'] = $customer_db_setting_id;
         return $headerData;
     }
 

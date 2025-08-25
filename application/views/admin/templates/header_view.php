@@ -89,7 +89,7 @@
 			<!-- BEGIN NAVBAR LOGO -->
 			<div class="navbar-brand navbar-brand-autodark">
 				<a href="<?=base_url('home')?>">
-					<img src="<?=base_url('assets/static/logo.png')?>" width="110" height="50" alt="<?=$systemRow->name?>" class="navbar-brand-image">
+					<img src="<?=base_url('assets/static/logo.png')?>" width="110" height="50" alt="<?=get_table('customer', 'customer_id', get_table('customer_db_setting', 'customer_db_setting_id', $customer_db_setting_id, 'customer_id'), 'full_legal_name')?>" class="navbar-brand-image" style="font-size: 10px;">
 				</a>
 			</div>
 
