@@ -76,14 +76,13 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	// 'hostname' => '10.244.21.34:3306',
-	// 'username' => 'rsl213968_newmuthaiga',
-	// 'password' => 'BV!~@lM}2wyH',
-	// 'database' => 'rsl213968_newmuthaigaresidentsassociation',
 	'hostname' => 'localhost',
 	'username' => 'root',
 	'password' => '',
 	'database' => 'ccm',
+	// 'username' => 'root',
+	// 'password' => 'QpJ&PrZ5N7eZ0GaO',
+	// 'database' => 'ccm',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
