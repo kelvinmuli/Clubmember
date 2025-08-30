@@ -179,6 +179,15 @@ class Common
     //     }
     // }
 
+---------------------------------------------------------------------------------------------------------
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.postmarkapp.com';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'your-postmark-server-token'; // Replace with your Postmark Server API Token
+    $mail->Password   = 'your-postmark-server-token'; // Same token is used as password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use TLS encryption
+    $mail->Port       = 587;
+-----------------------------------------------------------------------------------------------------------
     function sendMail($to,$subject,$message){
 
         $smtpConfig = $this->ci->ClubModel->getSmtp();

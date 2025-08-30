@@ -249,6 +249,57 @@
 						</div>
 					</div>
 				</div>
+
+				<div class="col-12">
+					<div class="card">
+						<div class="card-header">
+							<div class="row w-full">
+								<div class="col">
+									<?php if (in_array($user_type_id, array(GlobalModel::ADMIN_TYPE))): ?>
+										<h3 class="card-title mb-0">Newly Added Customers</h3>
+										<p class="text-secondary m-0">Listing all Newly Added Customers.</p>
+									<?php else: ?>
+										<h3 class="card-title mb-0">Club Corporate</h3>
+										<p class="text-secondary m-0">Listing</p>
+									<?php endif; ?>
+								</div>
+							</div>
+						</div>
+
+						<div class="card-body border-bottom py-3">
+							<div class="table-responsive">
+								<table id="user-datatable" class="table table-vcenter text-nowrap">
+									<thead>
+										<tr>
+											<th class="w-1">#</th>											
+											<th>Full Legal Name</th>
+											<th>Phone Number</th>
+											<th>Email</th>
+											<th>Membership No.</th>
+											<th>Residental Address</th>
+											<th>Created At</th>									
+											<th>Actions</th>
+										</tr>
+									</thead>
+									<tbody class="table-tbody">
+										<?php $u = 0; if (isset($corporateData)): foreach ($corporateData as $user): ?>
+											<tr>
+												<td><?=++$u?>.</td>
+												<td><?=$user->full_legal_name?></td>
+												<td><?=$user->phone_number?></td>
+												<td><?=$user->email?></td>
+												<td><?=$user->membership_no?></td>
+												<td><?=$user->residental_address?></td>
+												<td><?=$user->created_at?></td>
+												<td></td>
+											</tr>
+										<?php endforeach; endif; ?> 
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
 			<?php endif; ?>
 		</div>
 	</div>

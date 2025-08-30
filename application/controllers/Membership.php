@@ -13,20 +13,7 @@ class Membership extends CI_Controller {
 
    public function submit_regular()
 {
-	$recaptchaToken = $this->input->post('g-recaptcha-response');
-$secretKey = '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';
-$remoteIp = $this->input->ip_address();
-
-// Validate reCAPTCHA
-$verify = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaToken}&remoteip={$remoteIp}");
-$response = json_decode($verify);
-
-if (!($response->success && $response->score >= 0.5)) {
-    // Block or show error
-    $this->session->set_flashdata('error', 'reCAPTCHA failed. Please try again.');
-    redirect('https://newmuthaigaresidentsassociation.com/');
-    return;
-}
+	
    
 	   
     // Get form data
@@ -119,20 +106,7 @@ function sendMail($to, $subject, $message)
     public function submit_corporate()
 {
 		
-		$recaptchaToken = $this->input->post('g-recaptcha-response');
-$secretKey = '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';
-$remoteIp = $this->input->ip_address();
-
-// Validate reCAPTCHA
-$verify = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$secretKey}&response={$recaptchaToken}&remoteip={$remoteIp}");
-$response = json_decode($verify);
-
-if (!($response->success && $response->score >= 0.5)) {
-    // Block or show error
-    $this->session->set_flashdata('error', 'reCAPTCHA failed. Please try again.');
-    redirect('https://newmuthaigaresidentsassociation.com/');
-    return;
-}
+		
    
     // Get form data
     $postData = $this->input->post();

@@ -361,10 +361,28 @@ class UserController extends CI_Controller {
 
 		//'email'=>$postData['proffesionbussiness']
 
-		$postData = $this->input->post();
+		// $postData = $this->input->post();
+
+		    $phpInput = file_get_contents("php://input");
+			$phpPost = $this->input->post();
+			$phpStream = $this->input->raw_input_stream;
+			$postedString = '';
+			if ($phpInput != null) {
+				$postedString = $phpInput;
+			} elseif ($phpPost != null) {
+				$postedString = $phpPost;
+			} elseif ($phpStream != null) {
+				$postedString = $phpStream;
+			}
+
+			$postData = json_decode($postedString, true);
+
+		// print_r($postData);
+		// exit;
+
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', '1705386384290')->get()->row();
 		$titleRow = $this->db->select('*')->from('m_title')->where('name', $postData['title'])->get()->row();
-		$res = $this->db->insert($customerDBSettingRow->database_name.'.user', array('title_id'=>$titleRow->title_id ?? $postData['title'], 'full_legal_name'=>$postData['fulllegalname'], 'email'=>$postData['email'], 'phone_number'=>$postData['mobile_no'], 'membership_type_id'=>$postData['member_type'], 'membership_no'=>$postData['membership_no'], 'id_no'=>$postData['id_passport_no'], 'sub_reference_no'=>$postData['regular_lr_no'], 'residential_address'=>$postData['physical_address'], 'postal_code'=>$postData['postal_code'], 'postal_address'=>$postData['postal_address'], 'remark'=>$postData['notes'] ));
+		$res = $this->db->insert($customerDBSettingRow->database_name.'.user', array('user_id'=>generate_uuid(),'user_type_id'=>'1755383886420','title_id'=>$titleRow->title_id ?? $postData['title'], 'full_legal_name'=>$postData['fulllegalname'], 'email'=>$postData['email'], 'phone_number'=>$postData['mobile_no'], 'membership_type_id'=>$postData['member_type'], 'membership_no'=>$postData['membership_no'], 'id_no'=>$postData['id_passport_no'], 'sub_reference_no'=>$postData['regular_lr_no'], 'residential_address'=>$postData['physical_address'], 'postal_code'=>$postData['postal_code'], 'postal_address'=>$postData['postal_address'], 'remark'=>$postData['notes'] ));
 		if ($res)
 		{
 			return $this->output
@@ -382,7 +400,8 @@ class UserController extends CI_Controller {
 				->set_status_header(401)
 				->set_output(json_encode(array(
 					'code'=>401,
-					'state'=>'failed'
+					'state'=>'failed',
+					'error'=>$res
 				)));
 		}
 	}
