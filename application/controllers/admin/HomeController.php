@@ -22,7 +22,7 @@ class HomeController extends CI_Controller {
      * map to /index.php/welcome/<method_name>
      * @see https://codeigniter.com/userguide3/general/urls.html
      */
-    public function index() 
+   	public function index() 
 	{
 		$this->common->checkSession();
 		$session_data = $this->common->loadSession();
@@ -45,6 +45,7 @@ class HomeController extends CI_Controller {
 				$userArrayData[$value->membership_type_id == 'N/A' ? '1755813965588' : $value->membership_type_id][] = $value;
 			}
 		}
+
 		if ($session_data['user_type_id'] == GlobalModel::CLUB_ADMIN_TYPE)
 		{
 			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('active', 1)->get()->result();
