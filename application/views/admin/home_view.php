@@ -249,7 +249,7 @@
 																<button class="btn dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="true">Actions</button>
 																<div class="dropdown-menu dropdown-menu-end" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(0px, 38px);">
 																	<?php if ($approveUserRight): ?>
-																		<a class="dropdown-item" onclick="approveUserModal('<?=$user->user_id?>', '<?=$membership->membership_type_id?>', '<?=$customer_db_setting_id?>', 'home')">Approve</a>
+																		<a class="dropdown-item" onclick="approveUserModal('<?=$user->user_id?>', '<?=$membership->membership_type_id?>', '<?=$customer_db_setting_id?>', 'dashboard')">Approve</a>
 																	<?php endif; if ($editUserRight): ?>
 																		<a class="dropdown-item" onclick="editUserModal('<?=$user->user_id?>')">Update</a>
 																	<?php endif; if ($removeUserRight): ?>
