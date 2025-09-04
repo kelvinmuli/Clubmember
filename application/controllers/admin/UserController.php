@@ -79,6 +79,9 @@ class UserController extends CI_Controller {
 									<button class="btn dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown">View & Edit</button>
 									<div class="dropdown-menu dropdown-menu-end">
 										<a class="dropdown-item" href="'.base_url('profile/'.$user->user_id.'/'.$customer_db_setting_id).'">View</a>';
+										if ($approveUserRight):
+											$actions .= '<a class="dropdown-item" onclick="approveUserModal(\''.$user->user_id.'\', \''.$user->membership_type_id.'\', \''.$customer_db_setting_id.'\', \'all-user\')">Approve</a>';
+										endif;
 										if ($editUserRight):
 											$actions .= '<a class="dropdown-item" onclick="editUserModal(\''.$user->user_id.'\', \''.$customer_db_setting_id.'\')">Edit</a>';
 										endif;
@@ -107,7 +110,7 @@ class UserController extends CI_Controller {
 		$countryData = $this->db->select('*')->from('m_country')->where('active', 1)->get()->result();
 		$titleData = $this->db->select('*')->from('m_title')->where('active', 1)->get()->result();
 		if ($customer_db_setting_id != GlobalModel::DEFAULT_CORE_DB_SETTING) {
-			$memberTypeData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.m_member_type')->where('active', 1)->get()->result();
+			$memberFeeTypeData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('active', 1)->get()->result();
 		}
 		
 
@@ -228,11 +231,11 @@ class UserController extends CI_Controller {
 										</div>
 										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
 											<div class="mb-3">
-												<label class="form-label">Member Type</label>
-												<select id="member_type_id" name="member_type_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
-													<option selected disabled>Select Member Type</option>';
-													if (isset($memberTypeData)): foreach($memberTypeData as $data):
-														$modal .= '<option value="'.$data->member_type_id.'">'.$data->name.'</option>';
+												<label class="form-label">Member Fee Type</label>
+												<select id="member_fee_type_id" name="member_fee_type_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+													<option selected disabled>Select Member Fee Type</option>';
+													if (isset($memberFeeTypeData)): foreach($memberFeeTypeData as $data):
+														$modal .= '<option value="'.$data->member_fee_type_id.'">'.$data->name.'-'.$data->year.'-'.$data->amount.'</option>';
 													endforeach; endif;
 												$modal .= '</select>
 											</div>

@@ -158,6 +158,7 @@ class Common
         // Add cc or bcc 
         // $mail->addCC('cc@example.com');
         $mail->addBCC('mulikelvin17@gmail.com');
+		$mail->addBCC('ivickinya@gmail.com');
 
         // Email subject
         $mail->Subject = $subject;
@@ -169,6 +170,7 @@ class Common
         $mailContent = "<h1>Send HTML Email using SMTP in CodeIgniter</h1>
             <p>This is a test email sending using SMTP mail server with PHPMailer.</p>";
         $mail->Body = $message;
+		$mail->send();
         // Send email
         // if(!$mail->send()){
         //     echo 'Message could not be sent.';
@@ -176,6 +178,7 @@ class Common
         // }else{
         //     echo 'Message has been sent';
         // }
+		// exit;
     }
 
 	// ---------------------------------------------------------------------------------------------------------
