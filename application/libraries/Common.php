@@ -136,29 +136,87 @@ class Common
     }
     
 	
-	// function sendMail($to,$subject,$message){
+	function sendMail($to,$subject,$message){
+        $this->ci->load->library('phpmailer_lib');
+        $mail = $this->ci->phpmailer_lib->load();
+
+        // SMTP configuration
+        $mail->isSMTP();
+        $mail->Host     = 'ssl://smtp.googlemail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'zidii.info@gmail.com';
+        $mail->Password = 'imhejvzsffysxguc';
+        $mail->SMTPSecure = 'ssl';
+        $mail->Port     = 465;
+
+        $mail->setFrom('zidii.info@gmail.com', 'Zidii Club Manager');
+        $mail->addReplyTo('zidii.info@gmail.com', 'Zidii Club Manager');
+
+        // Add a recipient
+        $mail->addAddress($to);
+
+        // Add cc or bcc 
+        // $mail->addCC('cc@example.com');
+        $mail->addBCC('mulikelvin17@gmail.com');
+
+        // Email subject
+        $mail->Subject = $subject;
+
+        // Set email format to HTML
+        $mail->isHTML(true);
+
+        // Email body content
+        $mailContent = "<h1>Send HTML Email using SMTP in CodeIgniter</h1>
+            <p>This is a test email sending using SMTP mail server with PHPMailer.</p>";
+        $mail->Body = $message;
+        // Send email
+        // if(!$mail->send()){
+        //     echo 'Message could not be sent.';
+        //     echo 'Mailer Error: ' . $mail->ErrorInfo;
+        // }else{
+        //     echo 'Message has been sent';
+        // }
+    }
+
+	// ---------------------------------------------------------------------------------------------------------
+	//     $mail->isSMTP();
+	//     $mail->Host       = 'smtp.postmarkapp.com';
+	//     $mail->SMTPAuth   = true;
+	//     $mail->Username   = 'your-postmark-server-token'; // Replace with your Postmark Server API Token
+	//     $mail->Password   = 'your-postmark-server-token'; // Same token is used as password
+	//     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use TLS encryption
+	//     $mail->Port       = 587;
+	// -----------------------------------------------------------------------------------------------------------
+
+    // function sendMail($to,$subject,$message){
+
+    //     $smtpConfig = $this->ci->ClubModel->getSmtp();
+
     //     $this->ci->load->library('phpmailer_lib');
+
     //     $mail = $this->ci->phpmailer_lib->load();
 
-    //     // SMTP configuration
     //     $mail->isSMTP();
-    //     $mail->Host     = 'ssl://smtp.googlemail.com';
-    //     $mail->SMTPAuth = true;
-    //     $mail->Username = 'zidii.info@gmail.com';
-    //     $mail->Password = 'imhejvzsffysxguc';
-    //     $mail->SMTPSecure = 'ssl';
-    //     $mail->Port     = 465;
+    //     $mail->Host     = $smtpConfig[0]->host;
+    //     $mail->SMTPAuth = $smtpConfig[0]->smtpauth;
+    //     $mail->Username = $smtpConfig[0]->username;
+    //     $mail->Password = $smtpConfig[0]->password;
+    //     $mail->SMTPSecure = $smtpConfig[0]->smtpsecure;
+    //     // $mail->SMTPAutoTLS = $smtpConfig[0]->smtp_auto_tls;
+    //     $mail->Port     = $smtpConfig[0]->port;
 
-    //     $mail->setFrom('zidii.info@gmail.com', 'Zidii Club Manager');
-    //     $mail->addReplyTo('zidii.info@gmail.com', 'Zidii Club Manager');
+    //     $mail->setFrom($smtpConfig[0]->email_from, 'ClubMemberApp');
+    //     $mail->addReplyTo($smtpConfig[0]->reply_to_email, 'ClubMemberApp');
 
     //     // Add a recipient
     //     $mail->addAddress($to);
 
     //     // Add cc or bcc 
     //     // $mail->addCC('cc@example.com');
-    //     $mail->addBCC('zidii.info@gmail.com');
-
+    //     // $mail->addBCC('updates@clubmember.app');
+    //     $mail->addBCC($smtpConfig[0]->bcc_email);
+    //     $mail->addBCC($smtpConfig[0]->bcc_email_1);
+    //     $mail->addBCC($smtpConfig[0]->bcc_email_2);
     //     // Email subject
     //     $mail->Subject = $subject;
 
@@ -175,67 +233,9 @@ class Common
     //         echo 'Message could not be sent.';
     //         echo 'Mailer Error: ' . $mail->ErrorInfo;
     //     }else{
-    //         echo 'Message has been sent';
+    //         // echo 'Message has been sent';
     //     }
-    // }
-
----------------------------------------------------------------------------------------------------------
-    $mail->isSMTP();
-    $mail->Host       = 'smtp.postmarkapp.com';
-    $mail->SMTPAuth   = true;
-    $mail->Username   = 'your-postmark-server-token'; // Replace with your Postmark Server API Token
-    $mail->Password   = 'your-postmark-server-token'; // Same token is used as password
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Use TLS encryption
-    $mail->Port       = 587;
------------------------------------------------------------------------------------------------------------
-    function sendMail($to,$subject,$message){
-
-        $smtpConfig = $this->ci->ClubModel->getSmtp();
-
-        $this->ci->load->library('phpmailer_lib');
-
-        $mail = $this->ci->phpmailer_lib->load();
-
-        $mail->isSMTP();
-        $mail->Host     = $smtpConfig[0]->host;
-        $mail->SMTPAuth = $smtpConfig[0]->smtpauth;
-        $mail->Username = $smtpConfig[0]->username;
-        $mail->Password = $smtpConfig[0]->password;
-        $mail->SMTPSecure = $smtpConfig[0]->smtpsecure;
-        // $mail->SMTPAutoTLS = $smtpConfig[0]->smtp_auto_tls;
-        $mail->Port     = $smtpConfig[0]->port;
-
-        $mail->setFrom($smtpConfig[0]->email_from, 'ClubMemberApp');
-        $mail->addReplyTo($smtpConfig[0]->reply_to_email, 'ClubMemberApp');
-
-        // Add a recipient
-        $mail->addAddress($to);
-
-        // Add cc or bcc 
-        // $mail->addCC('cc@example.com');
-        // $mail->addBCC('updates@clubmember.app');
-        $mail->addBCC($smtpConfig[0]->bcc_email);
-        $mail->addBCC($smtpConfig[0]->bcc_email_1);
-        $mail->addBCC($smtpConfig[0]->bcc_email_2);
-        // Email subject
-        $mail->Subject = $subject;
-
-        // Set email format to HTML
-        $mail->isHTML(true);
-
-        // Email body content
-        $mailContent = "<h1>Send HTML Email using SMTP in CodeIgniter</h1>
-            <p>This is a test email sending using SMTP mail server with PHPMailer.</p>";
-        $mail->Body = $message;
-
-        // Send email
-        if(!$mail->send()){
-            echo 'Message could not be sent.';
-            echo 'Mailer Error: ' . $mail->ErrorInfo;
-        }else{
-            // echo 'Message has been sent';
-        }
-    }
+    //}
 
 
     function sendMailDynamic($to,$subject,$message,$club_id){

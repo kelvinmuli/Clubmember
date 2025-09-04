@@ -24,8 +24,6 @@ class Login extends CI_Controller {
         // $this->load->view('front/templates/footer_view');
 	}
 
-
-
 	 public function VerifyLogin()
 	 {
 	    $postData = $this->input->post();
@@ -141,6 +139,34 @@ class Login extends CI_Controller {
 
     }
 
+	public function resetPassword($user_id, $customer_db_setting_id)
+	{
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$data['userRow'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+		$data['customer_db_setting_id'] = $customer_db_setting_id;
+		$this->load->view('auth/reset_password_view', $data);
+	}
+
+	public function resetNowPassword()
+	{
+		$user_id = $this->input->post('user_id');
+		$new_password = $this->input->post('new_password');
+		$confirm_new_password = $this->input->post('confirm_new_password');
+		$customer_db_setting_id = $this->input->post('customer_db_setting_id');
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+
+		if ($new_password === $confirm_new_password) {
+			// Update the user's password in the database
+			$this->db->set('password', password_hash($new_password, PASSWORD_DEFAULT));
+			$this->db->where('user_id', $user_id);
+			$this->db->update($customerDBSettingRow->database_name.'.user');
+			$this->session->set_flashdata('message', 'Password reset successfully.');
+			redirect('login', 'refresh');
+		} else {
+			$this->session->set_flashdata('err', 'Passwords do not match.');
+			redirect('reset/'.$user_id.'/'.$customer_db_setting_id, 'refresh');
+		}
+	}
 
 	public function Logout()
 	{

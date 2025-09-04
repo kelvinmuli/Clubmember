@@ -405,4 +405,74 @@ class UserController extends CI_Controller {
 				)));
 		}
 	}
+
+	public function approveUserModal($user_id, $membership_type_id, $customer_db_setting_id, $header='all-user')
+	{
+		$this->common->checkSession(array('dialog'=>1));
+
+		$membershipTypeRow = $this->db->select('*')->from('m_membership_type')->where('membership_type_id', $membership_type_id)->get()->row();
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+		$userTypeRow = $this->db->select('*')->from('m_user_type')->where('user_type_id', $userRow->user_type_id)->get()->row();
+		$activeData = $this->db->select('*')->from('m_active')->where('active', 1)->get()->result();
+
+		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Approve '.$membershipTypeRow->name.' '.$userTypeRow->name.' To '.get_table('customer', 'customer_id', $customerDBSettingRow->customer_id, 'full_legal_name').'</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+
+						<form action="'.base_url('approve-user').'" method="POST" enctype="multipart/form-data">	
+							<input id="user_id" name="user_id" type="text" value="'.$user_id.'" hidden>
+							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>
+							<input id="header" name="header" type="text" value="'.$header.'" hidden>
+							<div class="modal-body">
+								<div class="row">
+									<div class="col-lg-6">
+										<div class="mb-3">
+											<label class="form-label">Approval</label>
+											<select id="active" name="active" class="form-select btn-pill">
+												<option selected disabled>Select Approval</option>';
+												if (isset($activeData)): foreach($activeData as $data):
+													$modal .= '<option value="'.$data->num.'">'.$data->name_two.'</option>';
+												endforeach; endif;
+											$modal .= '</select>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<a href="#" class="btn btn-link link-secondary " data-bs-dismiss="modal">Cancel</a>
+								<button href="#" type="submit" class="btn btn-primary ms-auto btn-pill">
+									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+									Approve '.$userRow->full_legal_name.'
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>';
+		print_r($modal);
+	}
+
+	public function approveUser()
+	{
+		$postData = $this->input->post();
+		$header = $postData['header'];
+		$customer_db_setting_id = $postData['customer_db_setting_id'];
+		$user_id = $postData['user_id'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+
+		$html = $this->load->view('admin/club_member_temp', array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
+        $this->common->sendMail($userRow->email, 'Approval Notification', $html);
+
+		unset($postData['customer_db_setting_id'], $postData['header']);
+		$this->db->update($customerDBSettingRow->database_name.'.user', $postData, array('user_id'=>$postData['user_id']));
+		$description = $userRow->full_legal_name.' Approved Successfully. ✔️';
+		$this->session->set_flashdata('message', $description);
+		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$user_id.' : User for '.$description));
+		redirect($header.'/'.$userRow->user_type_id.'/'.$customer_db_setting_id, 'refresh');
+	}
 }

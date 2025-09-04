@@ -55,12 +55,14 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['control'] = 'auth/Login';
 $route['login'] = 'auth/Login'; 
+$route['reset/(:any)/(:any)'] = 'auth/Login/resetPassword/$1/$2';
+$route['reset-now'] = 'auth/Login/resetNowPassword';
 $route['adminlogout'] = 'auth/Login/Logout';
 $route['admindologin'] = 'auth/Login/VerifyLogin';
 // $route['front-login'] = 'auth/Login/verifyLoginFront';
 
 /*
-* admin/DatabaseController
+* admin/UserController
 */
 $route['all-user/(:any)'] = 'admin/UserController/userView/$1';
 $route['all-user/(:any)/(:any)'] = 'admin/UserController/userView/$1/$2';
@@ -73,6 +75,10 @@ $route['add-user-modal/(:any)'] = 'admin/UserController/addUserModal/$1';
 $route['add-user-modal/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2';
 $route['add-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2/$3';
 $route['add-user'] = 'admin/UserController/addUser';
+$route['approve-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/approveUserModal/$1/$2/$3';
+$route['approve-user-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/UserController/approveUserModal/$1/$2/$3/$4';
+$route['approve-user'] = 'admin/UserController/approveUser';
+$route['edit-user-modal/(:any)'] = 'admin/UserController/editUserModal/$1';
 $route['api/add-user-muthaiga'] = 'admin/UserController/addUserMuthaiga';
 
 
@@ -103,7 +109,6 @@ $route['overview-card'] = 'admin/HomeController/overviewCard';
 /*
 * admin/CustomerController
 */
-
 $route['add-customer-modal'] = 'admin/CustomerController/addCustomerModal';
 $route['add-customer-modal/(:any)'] = 'admin/CustomerController/addCustomerModal/$1';
 $route['add-customer'] = 'admin/CustomerController/addCustomer';
@@ -112,6 +117,17 @@ $route['edit-customer-modal/(:any)'] = 'admin/CustomerController/editCustomerMod
 $route['edit-customer'] = 'admin/CustomerController/editCustomer';
 $route['remove-customer'] = 'admin/CustomerController/removeCustomer';
 $route['remove-customer-modal'] = 'admin/CustomerController/removeCustomerModal';
+
+/*
+* admin/SubscriptionController
+*/
+$route['subscription'] = 'admin/SubscriptionController';
+$route['add-subscription-modal'] = 'admin/SubscriptionController/addSubscriptionModal';
+$route['add-subscription'] = 'admin/SubscriptionController/addSubscription';
+$route['add-membership-fee-type'] = 'admin/SubscriptionController/addMembershipFeeType';
+$route['add-membership-fee-type-modal'] = 'admin/SubscriptionController/addMembershipFeeTypeModal';
+$route['get-membership-fee-type/(:any)'] = 'admin/SubscriptionController/getMembershipFeeType/$1';
+
 
 
 $route['callback'] = 'Mpesa/insertIpay';

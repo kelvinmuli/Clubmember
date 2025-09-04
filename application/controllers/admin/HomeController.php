@@ -35,12 +35,28 @@ class HomeController extends CI_Controller {
 		}
 		else
 		{
+			$userArrayData = [];
 			$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 			$customerData = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->where('active', 1)->get()->result();
-			$data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where_in('membership_type_id',array('1755813965588','N/A'))->get()->result();
-			$data['corporateData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('membership_type_id','1755816508873')->get()->result();
+			// $data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where_in('membership_type_id',array('1755813965588','N/A'))->get()->result();
+			$data['membershipTypeData'] = $this->db->select('*')->from('m_membership_type')->where('active',1)->get()->result();
+			$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->get()->result();
+			foreach ($userData as $value) {
+				$userArrayData[$value->membership_type_id == 'N/A' ? '1755813965588' : $value->membership_type_id][] = $value;
+			}
 		}
+		if ($session_data['user_type_id'] == GlobalModel::CLUB_ADMIN_TYPE)
+		{
+			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('active', 1)->get()->result();
+		}
+		elseif ($session_data['user_type_id'] == GlobalModel::MEMBER_TYPE)
+		{
+			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('user_id', $session_data['user_id'])->where('active', 1)->get()->result();
+		}
+		$data['subscriptionData'] = $subscriptionData;
+		$data['customer_db_setting_id'] = $session_data['customer_db_setting_id'];
 		$data['customerData'] = $customerData;
+		$data['userArrayData'] = $userArrayData;
 		$data['total_customers'] = count($customerData);
 
 		$this->load->view('admin/templates/header_view', $headerData);
