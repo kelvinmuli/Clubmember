@@ -473,6 +473,6 @@ class UserController extends CI_Controller {
 		$description = $userRow->full_legal_name.' Approved Successfully. ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$user_id.' : User for '.$description));
-		redirect($header.'/'.$userRow->user_type_id.'/'.$customer_db_setting_id, 'refresh');
+		redirect($header == 'dashboard' ? $header : $header.'/'.$userRow->user_type_id.'/'.$customer_db_setting_id, 'refresh');
 	}
 }
