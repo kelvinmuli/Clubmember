@@ -40,12 +40,15 @@ class Common
 		else
 			$headerData['userTypeData'] = $this->ci->MaintenanceModel->getTable('m_user_type', 'user_type_id', array('active'=>1));
 		$headerData['paymentStatusData'] = $this->ci->MaintenanceModel->getTable('m_payment_status', 'payment_status_id', array('active'=>1));
+		$headerData['membershipTypeData'] = $this->ci->MaintenanceModel->getTable('m_membership_type', 'membership_type_id', array('active'=>1));
 		$headerData['moduleTypeData'] = $this->ci->MaintenanceModel->getTable('m_module_type', 'module_type_id', array('active'=>1));
 		$headerData['platformData'] = $this->ci->MaintenanceModel->getTable('m_platform', 'platform_id', array('active'=>1));
 		$headerData['systemRow'] =$this->ci->MaintenanceModel->getTableRow('m_system', 'system_id', '1670861690788');
 		$stateData = $this->ci->MaintenanceModel->getTable('m_state', 'state_id', array('active'=>1));
 		$activeData = $this->ci->MaintenanceModel->getTable('m_active', 'active_id', array('active'=>1));
 		$userRightData = $this->ci->MaintenanceModel->getTable('user_right');
+
+		// print_r(json_encode($headerData['membershipTypeData'])); exit;
 
 		$headerData['viewUserRight'] = !empty(get_user_right($user_type_id, $moduleMenu->module_id, 'view', 1)); 
 		// $headerData['figureUserRight'] = !empty(get_user_right($user_type_id, $moduleMenu->module_id, 'figure', 1)); 

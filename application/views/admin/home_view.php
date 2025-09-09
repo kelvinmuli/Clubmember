@@ -146,7 +146,7 @@
 			</div>
 
 			<?php if (!in_array($user_type_id, array(GlobalModel::MEMBER_TYPE))): ?>
-				<div class="col-12">
+				<div class="col-12" hidden>
 					<div class="card">
 						<div class="card-table">
 							<div class="card-header">
@@ -226,8 +226,9 @@
 												<th>Phone Number</th>
 												<th>Email</th>
 												<th>Membership No.</th>
-												<th>Residental Address</th>
-												<th>Created At</th>	
+												<th>Residental Address</th>	
+												<th>Status</th>
+												<th>Created At</th>
 												<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
 													<th>Actions</th>	
 												<?php endif; ?>
@@ -242,7 +243,8 @@
 													<td><?=$user->email?></td>
 													<td><?=$user->membership_no?></td>
 													<td><?=$user->residential_address?></td>
-													<td><?=$user->created_at?></td>
+													<td><?=get_table('m_active', 'num', $user->active, 'name_two')?></td>
+													<td><?=date_format(date_create($user->created_at),"y M d H:i:s")?></td>
 													<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
 														<td class="text-end">
 															<span class="dropdown">

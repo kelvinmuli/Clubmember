@@ -66,6 +66,7 @@ $route['admindologin'] = 'auth/Login/VerifyLogin';
 */
 $route['all-user/(:any)'] = 'admin/UserController/userView/$1';
 $route['all-user/(:any)/(:any)'] = 'admin/UserController/userView/$1/$2';
+$route['member/(:any)/(:any)'] = 'admin/UserController/memberView/$1/$2';
 $route['profile'] = 'admin/UserController/profileView';
 $route['profile/(:any)'] = 'admin/UserController/profileView/$1';
 $route['profile/(:any)/(:any)'] = 'admin/UserController/profileView/$1/$2';

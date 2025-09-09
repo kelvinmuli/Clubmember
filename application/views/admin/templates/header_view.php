@@ -90,7 +90,7 @@
 			 <?php $customerRow = get_table('customer', 'customer_id', get_table('customer_db_setting', 'customer_db_setting_id', $customer_db_setting_id, 'customer_id'));?>
 			<div class="navbar-brand">
 				<a href="<?=base_url('home')?>">
-					<img src="<?=base_url($customerRow->logo)?>" width="110" height="50" alt="<?=$customerRow->full_legal_name?>" class="navbar-brand-image" style="font-size: 10px;">
+					<img src="<?=base_url($customerRow->logo)?>" alt="<?=$customerRow->full_legal_name?>" class="navbar-brand-image" style="font-size: 10px;">
 				</a>
 			</div>
 
@@ -182,6 +182,12 @@
 											<?php if ($module->module_id == '73833067810') { ?>
 												<?php $ps = 0; if (isset($paymentStatusData)): foreach($paymentStatusData as $paymentStatus): ?>
 													<a class="dropdown-item <?=($paymentStatus->payment_status_id == $paymentStatusId ? 'active' : '')?>" href="<?=base_url($subModule->path).'/'.$paymentStatus->payment_status_id?>"><?=++$ps.'. '.$paymentStatus->name?></a>	
+												<?php endforeach; endif; ?>
+											<?php } elseif ($subModule->module_id == '17023064062') { ?>
+												<?php if (isset($membershipTypeData)): foreach($membershipTypeData as $membershipType): ?>
+													<a class="dropdown-item" href="<?=base_url($module->path).'/'.$membershipType->membership_type_id.'/0'?>"><?='Pending '.$membershipType->name?></a>	
+												<?php endforeach; endif; if (isset($membershipTypeData)): foreach($membershipTypeData as $membershipType): ?>
+													<a class="dropdown-item" href="<?=base_url($module->path).'/'.$membershipType->membership_type_id.'/1'?>"><?=$membershipType->name?></a>	
 												<?php endforeach; endif; ?>
 											<?php } elseif ($subModule->module_id == '1744206515594') { ?>
 												<?php $pt = 0;  if (isset($propertyTypeData)): foreach($propertyTypeData as $propertyType): ?>

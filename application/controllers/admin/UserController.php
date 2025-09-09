@@ -56,6 +56,29 @@ class UserController extends CI_Controller {
 		$this->load->view('admin/templates/footer_view', $data);
 	}
 
+	public function memberView($membership_type_id, $active)
+	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+		$headerData = $this->common->loadHeaderData('member');
+		
+		$data['userTypeId'] = GlobalModel::MEMBER_TYPE;
+		$data['customerDBSettingId'] = $session_data['customer_db_setting_id'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		$data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('membership_type_id', $membership_type_id)->where('active', $active)->get()->result();
+		$data['userTypeData'] = $this->db->select('*')->from('m_user_type')->where('active', 1)->get()->result();
+		$data['membershipTypeData'] = $this->db->select('*')->from('m_membership_type')->where('active', 1)->get()->result();
+		if (in_array($session_data['user_type_id'], array(GlobalModel::ADMIN_TYPE)))
+			$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->where('active', 1)->get()->result();
+		else
+			$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->where('active', 1)->get()->result();
+		$data['customerDBSettingData'] = $customerDBSettingData;
+
+		$this->load->view('admin/templates/header_view', $headerData);
+		$this->load->view('admin/member_view', $data);
+		$this->load->view('admin/templates/footer_view', $data);
+	}
+
 	public function getUserList($user_type_id, $customer_db_setting_id)
 	{
 		$this->common->checkSession();

@@ -40,7 +40,7 @@ class HomeController extends CI_Controller {
 			$customerData = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->where('active', 1)->get()->result();
 			// $data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where_in('membership_type_id',array('1755813965588','N/A'))->get()->result();
 			$data['membershipTypeData'] = $this->db->select('*')->from('m_membership_type')->where('active',1)->get()->result();
-			$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->get()->result();
+			$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('active', 0)->limit(5)->order_by('created_at', 'DESC')->get()->result();
 			foreach ($userData as $value) {
 				$userArrayData[$value->membership_type_id == 'N/A' ? '1755813965588' : $value->membership_type_id][] = $value;
 			}
@@ -54,7 +54,7 @@ class HomeController extends CI_Controller {
 		{
 			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('user_id', $session_data['user_id'])->where('active', 1)->get()->result();
 		}
-		$data['subscriptionData'] = $subscriptionData;
+		$data['subscriptionData'] = $subscriptionData ?? [];
 		$data['customer_db_setting_id'] = $session_data['customer_db_setting_id'];
 		$data['customerData'] = $customerData;
 		$data['userArrayData'] = $userArrayData;
@@ -72,6 +72,7 @@ class HomeController extends CI_Controller {
 		$user_type_id = $session_data['user_type_id'];
 
 		$paymentStatusData = $this->db->select('*')->from('m_payment_status')->where('active', 1)->get()->result();
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 
 		$modal ='<div class="col-sm-6 col-lg-3">
 					<div class="card card-sm">
@@ -120,6 +121,11 @@ class HomeController extends CI_Controller {
 		endforeach; endif;
 
 		if (!empty(get_user_right($user_type_id, '17072386410', 'view', 1))): foreach ($paymentStatusData as $paymentStatus):
+			$subscriptionPaymentHistoryData = [];
+			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->get()->result();
+			foreach ($subscriptionData as $value) {
+				$subscriptionPaymentHistoryData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('module_id', '17072386410')->where('universal_id', $value->subscription_id)->where('payment_status_id', $paymentStatus->payment_status_id)->get()->result();
+			}
 			$modal .='<div class="col-sm-6 col-lg-3">
 						<div class="card card-sm">
 							<div class="card-body">
@@ -133,7 +139,7 @@ class HomeController extends CI_Controller {
 										</span>
 									</div>
 									<div class="col">
-										<div class="font-weight-medium">0</div>
+										<div class="font-weight-medium">'.count($subscriptionPaymentHistoryData ?? []).'</div>
 										<div class="text-secondary">Total '.$paymentStatus->name.' Subscriptions</div>
 									</div>
 								</div>
