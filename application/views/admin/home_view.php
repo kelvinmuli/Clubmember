@@ -209,7 +209,7 @@
 											<h3 class="card-title mb-0">Newly Added Customers</h3>
 											<p class="text-secondary m-0">Listing all Newly Added Customers.</p>
 										<?php else: ?>
-											<h3 class="card-title mb-0">Club <?=$membership->name?></h3>
+											<h3 class="card-title mb-0">Pending Member - <?=$membership->name?></h3>
 											<p class="text-secondary m-0">Listing</p>
 										<?php endif; ?>
 									</div>

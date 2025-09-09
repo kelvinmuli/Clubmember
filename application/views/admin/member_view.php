@@ -9,9 +9,6 @@
 						<li class="breadcrumb-item"><a href="<?=base_url()?>">Website</a></li>
 						<li class="breadcrumb-item"><a href="<?=base_url('home')?>">Home</a></li>
 						<li class="breadcrumb-item"><a href="#"><?=$moduleMenu->name?></a></li>
-						<?php if (isset($userTypeId)): ?>
-							<li class="breadcrumb-item active" aria-current="page"><?=$userTypeName?></li>
-						<?php endif; ?>
 					</ol>
               	</div>
 
@@ -24,7 +21,7 @@
 									<button class="btn btn-success dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown">Add New <?=$userTypeName?></button>
 									<div class="dropdown-menu dropdown-menu-end">
 										<?php if (isset($membershipTypeData)): foreach ($membershipTypeData as $key => $value): ?>
-											<a href="#" class="dropdown-item" onclick="addUserModal('<?=$userTypeId?>', '<?=$value->membership_type_id?>')">
+											<a href="#" class="dropdown-item" onclick="addUserModal('1755383886420', '<?=$value->membership_type_id?>')">
 												<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> Add <?=$value->name?>
 											</a>
 										<?php endforeach; endif; ?>
@@ -46,13 +43,7 @@
 						<div class="card-header">
 							<h3 class="card-title"><?=isset($userTypeId) ? 'All '.$userTypeName.'s' : $moduleMenu->name?></h3>
 							<div class="col-auto ms-auto d-print-none">
-								<div class="btn-list">		
-										<select id="customer_db_setting_id" name="customer_db_setting_id" class="form-select btn-pill">
-											<?php if (isset($customerDBSettingData)): foreach($customerDBSettingData as $customerDBSetting): ?>
-												<option value="<?=$customerDBSetting->customer_db_setting_id?>" <?=($customerDBSetting->customer_db_setting_id == $customerDBSettingId) ? 'selected' : ''?>><?=get_table('customer', 'customer_id', $customerDBSetting->customer_id, 'full_legal_name')?></option>
-											<?php  endforeach; endif; ?>
-										</select>
-								</div>
+								<div class="btn-list"></div>
 							</div>
 						</div>
 
@@ -67,8 +58,10 @@
 											<th>Email</th>
 											<th>Membership No.</th>
 											<th>Residental Address</th>
-											<th>Created At</th>									
-											<th>Actions</th>
+											<th>Created At</th>	
+											<?php if ($editUserRight || $removeUserRight): ?>								
+												<th>Actions</th>
+											<?php endif; ?>
 										</tr>
 									</thead>
 									<tbody>
@@ -81,15 +74,20 @@
 												<td><?=$user->membership_no?></td>
 												<td><?=$user->residential_address?></td>
 												<td><?=$user->created_at?></td>
-												<td>
-													<span class="dropdown">
-														<button class="btn dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-														<div class="dropdown-menu dropdown-menu-end">
-															<a class="dropdown-item" href="#" onclick="editUserModal('<?=$user->user_id?>')">Edit</a>
-															<a class="dropdown-item" href="#" onclick="deleteUserModal('<?=$user->user_id?>')">Delete</a>
-														</div>
-													</span>
-												</td>
+												<?php if ($editUserRight || $removeUserRight): ?>
+													<td>
+														<span class="dropdown">
+															<button class="btn dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
+															<div class="dropdown-menu dropdown-menu-end">
+																<?php if ($editUserRight): ?>
+																	<a class="dropdown-item" href="#" onclick="editUserModal('<?=$user->user_id?>')">Edit</a>
+																<?php endif; if ($removeUserRight): ?>
+																	<a class="dropdown-item" href="#" onclick="deleteUserModal('<?=$user->user_id?>')">Delete</a>
+																<?php endif; ?>
+															</div>
+														</span>
+													</td>
+												<?php endif; ?>
 											</tr>
 										<?php endforeach; endif; ?>
 									</tbody>
@@ -111,7 +109,7 @@
 
 		function addUserModal(user_type_id, membership_type_id) {
 			$.ajax({
-				url: base_url + "add-user-modal/" + user_type_id + "/" + membership_type_id + "/" + $('#customer_db_setting_id').val(),
+				url: base_url + "add-user-modal/" + user_type_id + "/" + membership_type_id + "/<?=$customer_db_setting_id?>",
 				success: function(response) {
 					document.getElementById('modal-view-edit-print-user').innerHTML = response;
 					$('#modal-view-edit-print-user').modal('show');

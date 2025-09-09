@@ -132,6 +132,7 @@ class UserController extends CI_Controller {
 		$genderData = $this->db->select('*')->from('m_gender')->where('active', 1)->get()->result();
 		$countryData = $this->db->select('*')->from('m_country')->where('active', 1)->get()->result();
 		$titleData = $this->db->select('*')->from('m_title')->where('active', 1)->get()->result();
+		$memberFeeTypeData = [];
 		if ($customer_db_setting_id != GlobalModel::DEFAULT_CORE_DB_SETTING) {
 			$memberFeeTypeData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('active', 1)->get()->result();
 		}
@@ -255,10 +256,10 @@ class UserController extends CI_Controller {
 										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
 											<div class="mb-3">
 												<label class="form-label">Member Fee Type</label>
-												<select id="member_fee_type_id" name="member_fee_type_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+												<select id="membership_fee_type" name="membership_fee_type" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
 													<option selected disabled>Select Member Fee Type</option>';
 													if (isset($memberFeeTypeData)): foreach($memberFeeTypeData as $data):
-														$modal .= '<option value="'.$data->member_fee_type_id.'">'.$data->name.'-'.$data->year.'-'.$data->amount.'</option>';
+														$modal .= '<option value="'.$data->membership_fee_type.'">'.$data->name.'-'.$data->year.'-'.$data->amount.'</option>';
 													endforeach; endif;
 												$modal .= '</select>
 											</div>
