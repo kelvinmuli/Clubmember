@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Aug 25, 2025 at 07:40 PM
--- Server version: 10.11.11-MariaDB-0+deb12u1
--- PHP Version: 7.4.33
+-- Host: 127.0.0.1
+-- Generation Time: Sep 12, 2025 at 01:41 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -155,6 +155,51 @@ CREATE TABLE `document` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `maintenance`
+--
+
+CREATE TABLE `maintenance` (
+  `id` int(11) NOT NULL,
+  `maintenance_id` varchar(255) NOT NULL,
+  `module_type_id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `state` int(11) NOT NULL DEFAULT 1,
+  `active` int(11) NOT NULL DEFAULT 1,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `membership_fee_type`
+--
+
+CREATE TABLE `membership_fee_type` (
+  `id` int(11) NOT NULL,
+  `membership_fee_type_id` varchar(255) NOT NULL,
+  `membership_type_id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `amount` varchar(255) NOT NULL,
+  `currency_id` varchar(255) NOT NULL,
+  `year` varchar(255) NOT NULL,
+  `active` int(11) NOT NULL DEFAULT 1,
+  `state` int(11) NOT NULL DEFAULT 1,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `membership_fee_type`
+--
+
+INSERT INTO `membership_fee_type` (`id`, `membership_fee_type_id`, `membership_type_id`, `name`, `amount`, `currency_id`, `year`, `active`, `state`, `updated_at`, `created_at`) VALUES
+(1, '1756946445499', '1755813965588', 'Regular Membership', '2500', '1543602048', '2025', 1, 1, '2025-09-04 00:00:05', '2025-09-04 00:00:05'),
+(2, '1756946951606', '1755816508873', 'Corporate Membership', '10000', '1543602048', '2025', 1, 1, '2025-09-04 00:01:35', '2025-09-04 00:01:35');
 
 -- --------------------------------------------------------
 
@@ -499,19 +544,32 @@ CREATE TABLE `payment_history` (
   `user_id` varchar(255) NOT NULL,
   `customer_id` varchar(255) NOT NULL,
   `booking_id` varchar(255) NOT NULL DEFAULT 'N/A',
+  `module_id` varchar(255) NOT NULL,
+  `universal_id` varchar(255) NOT NULL,
   `subscription_id` varchar(255) NOT NULL DEFAULT 'N/A',
   `joining_fee_id` varchar(255) NOT NULL DEFAULT 'N/A',
   `product_id` varchar(255) NOT NULL DEFAULT 'N/A',
   `transaction_code` varchar(255) NOT NULL,
+  `currency_id` varchar(255) NOT NULL,
   `bill_amount` varchar(255) NOT NULL DEFAULT '0.00',
   `paid_amount` varchar(255) NOT NULL DEFAULT '0.00',
   `payment_method_id` varchar(255) NOT NULL,
   `payment_status_id` varchar(255) NOT NULL,
+  `remark` text DEFAULT NULL,
   `state` int(11) NOT NULL DEFAULT 1,
   `active` int(11) DEFAULT 1,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `payment_history`
+--
+
+INSERT INTO `payment_history` (`id`, `payment_history_id`, `user_id`, `customer_id`, `booking_id`, `module_id`, `universal_id`, `subscription_id`, `joining_fee_id`, `product_id`, `transaction_code`, `currency_id`, `bill_amount`, `paid_amount`, `payment_method_id`, `payment_status_id`, `remark`, `state`, `active`, `updated_at`, `created_at`) VALUES
+(1, '1757625959354', '1757021666873', '1754388821', 'N/A', '17072386410', '1757624286389', 'N/A', 'N/A', 'N/A', '5uioiuaya', '1543602048', '1000', '1000', '1700743964240', '1732371146921', 'Testing Payment', 1, 1, '2025-09-11 22:16:51', '2025-09-11 21:27:03'),
+(2, '1757637189326', '1757598675013', '1754388821', 'N/A', '17072386410', '1757636374608', 'N/A', 'N/A', 'N/A', '', '1543602048', '1500', '0.00', '', '1732351802222', NULL, 1, 1, '2025-09-11 22:48:49', '2025-09-11 22:48:49'),
+(3, '1757632546057', '1757598675013', '1754388821', 'N/A', '17072386410', '1757632103903', 'N/A', 'N/A', 'N/A', '', '1543602048', '3000', '0.00', '', '1732351802222', NULL, 1, 1, '2025-09-11 23:27:17', '2025-09-11 23:27:17');
 
 -- --------------------------------------------------------
 
@@ -551,14 +609,26 @@ CREATE TABLE `subscription` (
   `user_id` varchar(255) NOT NULL,
   `member_id` varchar(255) NOT NULL,
   `membership_fee_type_id` varchar(255) NOT NULL,
+  `start_at` varchar(255) NOT NULL,
+  `payment_at` varchar(255) NOT NULL,
   `due_at` varchar(255) NOT NULL,
   `currency_id` varchar(255) NOT NULL,
   `amount` varchar(255) NOT NULL,
+  `remark` text DEFAULT NULL,
   `state` int(11) NOT NULL DEFAULT 1,
   `active` int(11) NOT NULL DEFAULT 1,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `subscription`
+--
+
+INSERT INTO `subscription` (`id`, `subscription_id`, `user_id`, `member_id`, `membership_fee_type_id`, `start_at`, `payment_at`, `due_at`, `currency_id`, `amount`, `remark`, `state`, `active`, `updated_at`, `created_at`) VALUES
+(1, '1757624286389', '1757021666873', '1770383887643', '1756946445499', '2025-09-12', '2025-09-12', '2025-09-12', '1543602048', '1000', 'Testing', 1, 1, '2025-09-11 21:27:03', '2025-09-11 21:27:03'),
+(2, '1757636374608', '1757598675013', '1770383887643', '1756946445499', '2025-09-12', '2025-09-12', '2025-09-12', '1543602048', '1500', 'Testing', 1, 1, '2025-09-11 22:48:49', '2025-09-11 22:48:49'),
+(3, '1757632103903', '1757598675013', '1770383887643', '1756946445499', '2025-09-12', '2025-09-12', '2025-09-12', '1543602048', '3000', '3000', 1, 1, '2025-09-11 23:27:17', '2025-09-11 23:27:17');
 
 -- --------------------------------------------------------
 
@@ -607,6 +677,7 @@ CREATE TABLE `user` (
   `membership_id` varchar(255) DEFAULT NULL,
   `membership_no` varchar(255) DEFAULT NULL,
   `member_type_id` varchar(255) NOT NULL,
+  `membership_fee_type_id` varchar(255) NOT NULL,
   `contact_name` varchar(255) DEFAULT NULL,
   `contact_phone_no` varchar(255) DEFAULT NULL,
   `sub_reference_no` varchar(255) DEFAULT NULL,
@@ -619,7 +690,7 @@ CREATE TABLE `user` (
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `reset` int(11) NOT NULL DEFAULT 0,
   `state` int(11) NOT NULL DEFAULT 1,
-  `active` int(11) NOT NULL DEFAULT 1,
+  `active` int(11) NOT NULL DEFAULT 0,
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
@@ -628,9 +699,17 @@ CREATE TABLE `user` (
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id`, `user_id`, `user_type_id`, `url`, `title_id`, `full_legal_name`, `phone_number`, `email`, `gender_id`, `birth`, `country_id`, `id_no`, `residential_address`, `postal_address`, `postal_code`, `town_id`, `city_id`, `remark`, `password`, `membership_id`, `membership_no`, `member_type_id`, `contact_name`, `contact_phone_no`, `sub_reference_no`, `designation_id`, `citizenship_id`, `membership_type_id`, `sms_code`, `activation_token`, `joining_at`, `email_verified_at`, `reset`, `state`, `active`, `updated_at`, `created_at`) VALUES
-(1, '1770383887643', '4534654653', 'assets/img/', '', 'Kelvin Muli', NULL, 'nmclubadmin@gmail.com', '', '', '', '', NULL, '', '', '', '', '', '$2y$10$ACOr5mQDDRtDrRsRfDJ3kOqn7VlxomzFt5Sq9AA7RKzdrl3K4lkL.', '', '', '', '', '', '', '', '', 'N/A', NULL, NULL, '', NULL, 1, 1, 1, '2025-08-24 23:11:16', '2025-08-16 23:55:24'),
-(2, '177038753942', '1755383886420', 'assets/img/', '', 'Kelvin Muli', NULL, 'nmmember@gmail.com', '', '', '', '', NULL, '', '', '', '', '', '$2y$10$ACOr5mQDDRtDrRsRfDJ3kOqn7VlxomzFt5Sq9AA7RKzdrl3K4lkL.', '', '', '', '', '', '', '', '', 'N/A', NULL, NULL, '', NULL, 1, 1, 1, '2025-08-24 23:13:12', '2025-08-16 23:55:24');
+INSERT INTO `user` (`id`, `user_id`, `user_type_id`, `url`, `title_id`, `full_legal_name`, `phone_number`, `email`, `gender_id`, `birth`, `country_id`, `id_no`, `residential_address`, `postal_address`, `postal_code`, `town_id`, `city_id`, `remark`, `password`, `membership_id`, `membership_no`, `member_type_id`, `membership_fee_type_id`, `contact_name`, `contact_phone_no`, `sub_reference_no`, `designation_id`, `citizenship_id`, `membership_type_id`, `sms_code`, `activation_token`, `joining_at`, `email_verified_at`, `reset`, `state`, `active`, `updated_at`, `created_at`) VALUES
+(1, '1770383887643', '4534654653', 'assets/img/', '', 'Kelvin Muli', NULL, 'nmclubadmin@gmail.com', '', '', '', '', NULL, '', '', '', '', '', '$2y$10$JALJ/5I2vO9W9mMrl7vdsOZlGFP7qYz7sI7BxQbh7dpqB9MEYEjrO', '', '', '', '', '', '', '', '', '', 'N/A', NULL, NULL, '', NULL, 1, 1, 1, '2025-09-04 01:35:33', '2025-08-16 23:55:24'),
+(2, '177038753942', '1755383886420', 'assets/img/', '', 'Muli Kelvin', NULL, 'nmmember@gmail.com', '', '', '', '', NULL, '', '', '', '', '', '$2y$10$ACOr5mQDDRtDrRsRfDJ3kOqn7VlxomzFt5Sq9AA7RKzdrl3K4lkL.', '', '', '', '', '', '', '', '', '', 'N/A', NULL, NULL, '', NULL, 1, 1, 1, '2025-09-04 00:39:36', '2025-08-16 23:55:24'),
+(3, '1756156625885', '1755383886420', 'assets/img/', '15506654043', 'Samson Reynolds-Bahringer', '394', 'your.email+fakedata19590@gmail.com', '166876543444', '2025-10-17', '6102800046', '236', '6340 Herman-Schamberger Bypass', '95812 Reva Extensions', '97958-3311', 'Quae doloribus non distinctio sint ut incidunt repellendus.', NULL, 'Incidunt dignissimos ex.', '$2y$10$BQEvrZc.ZM46MJSZJJcMPezsHmy86ZCJu7BCcRrO/BXLy1hP0AGa.', NULL, '91', '17543450598', '', 'Brandi Lowe', '559', '227', NULL, NULL, '1755813965588', NULL, NULL, '2025-10-12', NULL, 0, 1, 1, '2025-08-25 20:37:40', '2025-08-25 20:37:40'),
+(4, '175615243436', '1755383886420', 'assets/img/007e443eb1736b3967c7dfc2de02e951.png', '', 'Niko Moore', '542', 'your.email+fakedata32074@gmail.com', NULL, '', '6102800037', '', '74962 Jimmy Union', '562 Elyse Estate', '72793', '', NULL, 'Beatae reiciendis rem dolorem nesciunt.', '$2y$10$nCXSzJFFg5sf.zLw53KEguPERytwbv7eqMu46KUnPVk142F8Dy.q.', NULL, '', '', '', 'Kylee Gottlieb', '303', '', NULL, NULL, '1755816508873', NULL, NULL, '', NULL, 0, 1, 1, '2025-08-25 20:46:43', '2025-08-25 20:46:43'),
+(5, '1757028921702', '1755383886420', 'assets/img/', '15506678265', 'Lincoln Klocko', '600', 'your.email+fakedata61665@gmail.com', '166765434677', '2025-10-12', '6102800186', '530', '24834 Tessie Estate', '272 Arely Via', '39021', 'Iusto ut vitae.', NULL, 'Cupiditate occaecati quae veniam ut placeat eaque.', '$2y$10$8b/3ufC.fDCSV05emfI5P.wAYqIxmdiOTr1lStd73tXb5q08OayZ.', NULL, '661', '', '', 'Liza Kohler', '194', '118', NULL, NULL, '1755813965588', NULL, NULL, '2025-01-22', NULL, 0, 1, 1, '2025-09-04 21:19:37', '2025-09-04 21:19:37'),
+(6, '1757021666873', '1755383886420', 'assets/img/', '15506649428', 'Kiley Frami', '132', 'mulikelvin@gmail.com', '166765434677', '2026-08-10', '6102800186', '182', '141 Hudson Terrace', '8609 Muller Crossing', '41443', 'Adipisci officia ipsa velit incidunt quasi.', NULL, 'Occaecati maxime similique quos minus qui rerum ducimus.', '$2y$10$DTqmTbtQfH3WpIaSMiCW/uVKeFqBgTxK3Y2Pg.0hmFjDXETTX6Tqe', NULL, '463', '', '', 'Elenor Kris', '131', '113', NULL, NULL, '1755813965588', NULL, NULL, '2025-09-13', NULL, 0, 1, 1, '2025-09-04 21:35:44', '2025-09-04 21:20:27'),
+(7, '1757598675013', '1755383886420', 'assets/img/', '15506684561', 'Leanne Muller', '164', 'ivickinya@gmail.com', '166841764451', '2024-12-09', '6102800186', '13', '1170 Hane Plaza', '2633 Lance Fords', '65330', 'A odio vel ab molestias earum.', NULL, 'Consectetur aliquid hic.', '$2y$10$s0mFG35J8XfVccExeNmWl.9P1lXCv8DJEUrLvCedYHiKxjXfBrWfa', NULL, '309', '', '1756946445499', 'Mollie Stokes-Lang', '169', '404', NULL, NULL, '1755813965588', NULL, NULL, '2025-07-22', NULL, 0, 1, 1, '2025-09-11 22:46:25', '2025-09-11 12:24:26'),
+(8, '1757626653283', '1755383886420', 'assets/img/', '15506654043', 'Jakob Weber', '501', 'your.email+fakedata89614@gmail.com', '166765434677', '2026-03-11', '6102800062', '515', '92154 Kaelyn Circles', '931 Mertz Street', '47466', 'At recusandae nemo ipsa cupiditate quaerat ex laboriosam.', NULL, 'Ipsa optio debitis ipsam rerum.', '$2y$10$1.UQQMAHJIyWbFjbNFgsm.9.MZxT6aBkQ6IW4gMpLPnbaznQOWfhm', NULL, '229', '', '1756946445499', 'Tyree Schimmel', '197', '441', NULL, NULL, '1755813965588', NULL, NULL, '2025-08-06', NULL, 0, 1, 0, '2025-09-11 20:54:15', '2025-09-11 20:54:15'),
+(9, '1757634712295', '1755383886420', 'assets/img/', '15506684561', 'Shaniya Hilpert', '1', 'your.email+fakedata50111@gmail.com', '166765434677', '2025-03-16', '6102800116', '650', '10190 Davis Parks', '99318 Corrine Fork', '63465-0409', 'Repellendus facere in voluptatibus ut incidunt.', NULL, 'Similique iusto recusandae ratione perferendis.', '$2y$10$aApqOeCAlfg8nnpAjv8AOOZPgM4K4htnkTOMMHa2ikBxhN/hWvTDG', NULL, '642', '', '1756946951606', 'Berneice Legros', '54', '119', NULL, NULL, '1755813965588', NULL, NULL, '2025-07-01', NULL, 0, 1, 0, '2025-09-11 23:29:15', '2025-09-11 23:29:15'),
+(10, '1757637902853', '1755383886420', 'assets/img/', '15506654043', 'Lela Walker', '591', 'your.email+fakedata78424@gmail.com', '166765434677', '2025-08-29', '6102800069', '99', '5442 Kenyon Circle', '255 Dickinson Spring', '17798-2220', 'Voluptatum quasi vitae quod.', NULL, 'Vero illum perspiciatis at officia distinctio totam.', '$2y$10$02amOlCNJC1iVYEnGZdIm.ecGu2NXeh2iBpWAg2cw20CY1eE1f/jC', NULL, '606', '', '1756946445499', 'Shemar Smith', '33', '603', NULL, NULL, '1755813965588', NULL, NULL, '2026-02-24', NULL, 0, 1, 0, '2025-09-11 23:30:12', '2025-09-11 23:30:12');
 
 -- --------------------------------------------------------
 
@@ -660,14 +739,14 @@ CREATE TABLE `user_right` (
 --
 
 INSERT INTO `user_right` (`id`, `user_right_id`, `user_type_id`, `module_id`, `view`, `figure`, `privacy`, `approve`, `input`, `edit`, `remove`, `state`, `updated_at`, `created_at`) VALUES
-(1, '1755448605161', '4534654653', '61134678909', 1, 0, 0, 0, 0, 0, 0, 1, '2025-08-17 15:18:43', '2025-08-17 15:18:43'),
-(2, '175544705170', '4534654653', '62230678800', 1, 0, 0, 0, 1, 1, 1, 1, '2025-08-25 10:45:23', '2025-08-17 15:19:19'),
-(3, '1755443043491', '4534654653', '62306723120', 1, 0, 0, 0, 0, 0, 0, 1, '2025-08-17 15:19:23', '2025-08-17 15:19:23'),
+(1, '1755448605161', '4534654653', '61134678909', 1, 0, 0, 1, 1, 0, 0, 1, '2025-09-03 21:56:02', '2025-08-17 15:18:43'),
+(2, '175544705170', '4534654653', '62230678800', 1, 0, 0, 1, 1, 1, 1, 1, '2025-09-04 21:29:12', '2025-08-17 15:19:19'),
+(3, '1755443043491', '4534654653', '62306723120', 1, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 20:25:35', '2025-08-17 15:19:23'),
 (4, '1755443137490', '4534654653', '17097446458', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:45:11', '2025-08-17 15:19:33'),
 (5, '1755448977186', '4534654653', '17894946752', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:45:31', '2025-08-17 15:19:39'),
 (6, '1755445385520', '4534654653', '17804724081', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:45:37', '2025-08-17 15:19:44'),
 (7, '1755448104667', '4534654653', '1635853924', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:45:43', '2025-08-17 15:20:06'),
-(8, '1755447711474', '4534654653', '1636554968', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:45:50', '2025-08-17 15:20:18'),
+(8, '1755447711474', '4534654653', '1636554968', 0, 0, 0, 0, 0, 0, 0, 1, '2025-09-03 22:36:35', '2025-08-17 15:20:18'),
 (9, '1755441009901', '4534654653', '1630914321', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:45:55', '2025-08-17 15:20:31'),
 (10, '1755447591744', '1755383886420', '61134678909', 1, 0, 0, 0, 0, 0, 0, 1, '2025-08-17 15:21:06', '2025-08-17 15:21:06'),
 (11, '1755445499915', '1755383886420', '17097446458', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:44:24', '2025-08-17 15:21:13'),
@@ -676,8 +755,16 @@ INSERT INTO `user_right` (`id`, `user_right_id`, `user_type_id`, `module_id`, `v
 (14, '1755445266388', '1755383886420', '73833067810', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:44:10', '2025-08-17 15:21:36'),
 (15, '1755447449186', '1755383886420', '1636554968', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:44:37', '2025-08-17 15:21:47'),
 (16, '1755448869872', '1755383886420', '1630914321', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:44:46', '2025-08-17 15:22:00'),
-(17, '1756118897434', '1755383886420', '62230678800', 1, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:44:30', '2025-08-25 10:44:30'),
-(18, '1756115202602', '1755383886420', '62306723120', 1, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 10:44:32', '2025-08-25 10:44:32');
+(17, '1756118897434', '1755383886420', '62230678800', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 20:25:50', '2025-08-25 10:44:30'),
+(18, '1756115202602', '1755383886420', '62306723120', 0, 0, 0, 0, 0, 0, 0, 1, '2025-08-25 20:25:45', '2025-08-25 10:44:32'),
+(19, '1756156565497', '1755383886420', '17072386410', 1, 0, 0, 0, 0, 0, 0, 1, '2025-09-04 00:43:06', '2025-08-25 20:26:04'),
+(20, '1756158496726', '4534654653', '17072386410', 1, 0, 0, 1, 1, 0, 0, 1, '2025-09-11 21:53:01', '2025-08-25 20:34:39'),
+(22, '1756932813388', '4534654653', '1666345984110', 1, 0, 0, 0, 0, 0, 0, 1, '2025-09-03 22:36:44', '2025-09-03 22:36:44'),
+(21, '1756937246163', '4534654653', '68656258161', 0, 0, 0, 0, 0, 0, 0, 1, '2025-09-03 22:43:04', '2025-09-03 22:36:23'),
+(23, '1757371111045', '4534654653', '17223067739', 1, 0, 0, 1, 1, 0, 0, 1, '2025-09-11 23:34:03', '2025-09-08 23:44:54'),
+(24, '1757377982241', '4534654653', '17023064062', 1, 0, 0, 0, 0, 0, 0, 1, '2025-09-08 23:51:23', '2025-09-08 23:51:23'),
+(25, '1757622439520', '4534654653', '17876086593', 1, 0, 0, 0, 0, 0, 0, 1, '2025-09-11 22:30:29', '2025-09-11 22:30:29'),
+(26, '1757633996468', '1755383886420', '17876086593', 1, 0, 0, 0, 0, 0, 0, 1, '2025-09-11 22:49:25', '2025-09-11 22:49:25');
 
 --
 -- Indexes for dumped tables
@@ -728,6 +815,19 @@ ALTER TABLE `ci_sessions`
 -- Indexes for table `document`
 --
 ALTER TABLE `document`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `maintenance`
+--
+ALTER TABLE `maintenance`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `maintenance_id` (`maintenance_id`) USING HASH;
+
+--
+-- Indexes for table `membership_fee_type`
+--
+ALTER TABLE `membership_fee_type`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -932,6 +1032,18 @@ ALTER TABLE `document`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `maintenance`
+--
+ALTER TABLE `maintenance`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `membership_fee_type`
+--
+ALTER TABLE `membership_fee_type`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `message`
 --
 ALTER TABLE `message`
@@ -1043,7 +1155,7 @@ ALTER TABLE `notice_board`
 -- AUTO_INCREMENT for table `payment_history`
 --
 ALTER TABLE `payment_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `product`
@@ -1055,7 +1167,7 @@ ALTER TABLE `product`
 -- AUTO_INCREMENT for table `subscription`
 --
 ALTER TABLE `subscription`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `support_us`
@@ -1067,13 +1179,13 @@ ALTER TABLE `support_us`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `user_right`
 --
 ALTER TABLE `user_right`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

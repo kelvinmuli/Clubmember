@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Aug 25, 2025 at 07:39 PM
--- Server version: 10.11.11-MariaDB-0+deb12u1
--- PHP Version: 7.4.33
+-- Host: 127.0.0.1
+-- Generation Time: Sep 12, 2025 at 01:41 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.0.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -152,6 +152,26 @@ CREATE TABLE `document` (
   `user_id` varchar(255) NOT NULL,
   `club_id` varchar(255) NOT NULL,
   `document_url` varchar(255) NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `membership_fee_type`
+--
+
+CREATE TABLE `membership_fee_type` (
+  `id` int(11) NOT NULL,
+  `membership_fee_type_id` varchar(255) NOT NULL,
+  `membership_type_id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `amount` varchar(255) NOT NULL,
+  `currency_id` varchar(255) NOT NULL,
+  `year` varchar(255) NOT NULL,
+  `active` int(11) NOT NULL DEFAULT 1,
+  `state` int(11) NOT NULL DEFAULT 1,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -499,10 +519,13 @@ CREATE TABLE `payment_history` (
   `user_id` varchar(255) NOT NULL,
   `customer_id` varchar(255) NOT NULL,
   `booking_id` varchar(255) NOT NULL DEFAULT 'N/A',
+  `module_id` varchar(255) NOT NULL,
+  `universal_id` varchar(255) NOT NULL,
   `subscription_id` varchar(255) NOT NULL DEFAULT 'N/A',
   `joining_fee_id` varchar(255) NOT NULL DEFAULT 'N/A',
   `product_id` varchar(255) NOT NULL DEFAULT 'N/A',
   `transaction_code` varchar(255) NOT NULL,
+  `currency_id` varchar(255) NOT NULL,
   `bill_amount` varchar(255) NOT NULL DEFAULT '0.00',
   `paid_amount` varchar(255) NOT NULL DEFAULT '0.00',
   `payment_method_id` varchar(255) NOT NULL,
@@ -511,7 +534,7 @@ CREATE TABLE `payment_history` (
   `active` int(11) DEFAULT 1,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -551,9 +574,12 @@ CREATE TABLE `subscription` (
   `user_id` varchar(255) NOT NULL,
   `member_id` varchar(255) NOT NULL,
   `membership_fee_type_id` varchar(255) NOT NULL,
+  `start_at` varchar(255) NOT NULL,
+  `payment_at` varchar(255) NOT NULL,
   `due_at` varchar(255) NOT NULL,
   `currency_id` varchar(255) NOT NULL,
   `amount` varchar(255) NOT NULL,
+  `remark` text DEFAULT NULL,
   `state` int(11) NOT NULL DEFAULT 1,
   `active` int(11) NOT NULL DEFAULT 1,
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -607,6 +633,7 @@ CREATE TABLE `user` (
   `membership_id` varchar(255) DEFAULT NULL,
   `membership_no` varchar(255) DEFAULT NULL,
   `member_type_id` varchar(255) NOT NULL,
+  `membership_fee_type_id` varchar(255) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
   `contact_name` varchar(255) DEFAULT NULL,
   `contact_phone_no` varchar(255) DEFAULT NULL,
   `sub_reference_no` varchar(255) DEFAULT NULL,
@@ -619,7 +646,7 @@ CREATE TABLE `user` (
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `reset` int(11) NOT NULL DEFAULT 0,
   `state` int(11) NOT NULL DEFAULT 1,
-  `active` int(11) NOT NULL DEFAULT 1,
+  `active` int(11) NOT NULL DEFAULT 0,
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -718,6 +745,12 @@ ALTER TABLE `ci_sessions`
 -- Indexes for table `document`
 --
 ALTER TABLE `document`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `membership_fee_type`
+--
+ALTER TABLE `membership_fee_type`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -919,6 +952,12 @@ ALTER TABLE `booking_rate`
 -- AUTO_INCREMENT for table `document`
 --
 ALTER TABLE `document`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `membership_fee_type`
+--
+ALTER TABLE `membership_fee_type`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
