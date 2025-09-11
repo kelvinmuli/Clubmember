@@ -1,3 +1,4 @@
+		<div class="modal modal-blur fade" id="modal-view-add-edit-remove-print" tabindex="-1" role="dialog" aria-hidden="true"></div>
 		<div class="modal modal-blur fade" id="modal-view-edit-print-user" name="modal-view-edit-print-maintenance" tabindex="-1" role="dialog" aria-hidden="true"></div>
 		<div class="modal modal-blur fade" id="modal-view-edit-print-maintenance" name="modal-view-edit-print-maintenance" tabindex="-1" role="dialog" aria-hidden="true"></div>
 		
@@ -85,34 +86,22 @@
 			});
 		}
 
-		function viewPropertyModal(property_id) {
+		function addSubscriptionModal(payment_status_id='1732351802222') {
 			$.ajax({
-				url: base_url + "view-property-modal/" + property_id,
+				url: base_url + "add-subscription-modal/" + payment_status_id,
 				success: function(response) {
-					document.getElementById('modal-view-edit-print-property').innerHTML = response;
-					$('#modal-view-edit-print-property').modal('show');
-					loadDatatable('property-plot-datatable', 'Projects Plots');
-				}
-			});
-		}
-		
-		function viewPropertyImageModal(property_id) {
-			$.ajax({
-				url: base_url + "view-property-image-modal/" + property_id,
-				success: function(response) {
-					document.getElementById('modal-view-edit-print-property').innerHTML = response;
-					$('#modal-view-edit-print-property').modal('show');
-				}
-			});
-		}
-
-		function viewPropertyPlotModal(property_id) {
-			$.ajax({
-				url: base_url + "view-property-plot-modal/" + property_id,
-				success: function(response) {
-					document.getElementById('modal-view-edit-print-property').innerHTML = response;
-					$('#modal-view-edit-print-property').modal('show');
-					loadDatatable('property-plot-datatable', 'Projects Plots');
+					document.getElementById('modal-view-add-edit-remove-print').innerHTML = response;
+					$('#modal-view-add-edit-remove-print').modal('show');
+					$("#membership_fee_type_id").change(function() {
+						$.ajax({
+							url: base_url + "get-membership-fee-type/" + $(this).val(),
+							success: function(response) {
+								alert(response);	
+								const object = JSON.parse(response);
+								document.getElementById("amount").value = object.amount;
+							}
+						});
+					});
 				}
 			});
 		}

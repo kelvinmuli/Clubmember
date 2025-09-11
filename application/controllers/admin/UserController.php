@@ -61,11 +61,13 @@ class UserController extends CI_Controller {
 		$this->common->checkSession();
 		$session_data = $this->common->loadSession();
 		$headerData = $this->common->loadHeaderData('member');
-		
+
+		$data['active'] = $active;
 		$data['userTypeId'] = GlobalModel::MEMBER_TYPE;
+		$data['membershipTypeId'] = $membership_type_id;
 		$data['customerDBSettingId'] = $session_data['customer_db_setting_id'];
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
-		$data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('membership_type_id', $membership_type_id)->where('active', $active)->get()->result();
+		$data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('membership_type_id', $membership_type_id)->where('active', $active)->order_by('created_at', 'DESC')->get()->result();
 		$data['userTypeData'] = $this->db->select('*')->from('m_user_type')->where('active', 1)->get()->result();
 		$data['membershipTypeData'] = $this->db->select('*')->from('m_membership_type')->where('active', 1)->get()->result();
 		if (in_array($session_data['user_type_id'], array(GlobalModel::ADMIN_TYPE)))
@@ -121,7 +123,7 @@ class UserController extends CI_Controller {
 		print_r(json_encode(array("draw"=>1, "recordsTotal"=>count($userDataArray), "recordsFiltered"=>count($userDataArray), "data"=>$userDataArray)));
 	}
 
-	public function addUserModal($user_type_id, $membership_type_id, $customer_db_setting_id)
+	public function addUserModal($user_type_id, $membership_type_id, $customer_db_setting_id, $header='all-user', $active=1)
 	{
 		$this->common->checkSession(array('dialog'=>1));
 
@@ -136,7 +138,6 @@ class UserController extends CI_Controller {
 		if ($customer_db_setting_id != GlobalModel::DEFAULT_CORE_DB_SETTING) {
 			$memberFeeTypeData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('active', 1)->get()->result();
 		}
-		
 
 		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
@@ -146,11 +147,12 @@ class UserController extends CI_Controller {
 						</div>
 
 						<form action="'.base_url('add-user').'" method="POST" enctype="multipart/form-data">	
-							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>
 							<input id="user_id" name="user_id" type="text" value="'.generate_uuid().'" hidden>		
 							<input id="user_type_id" name="user_type_id" type="text" value="'.$user_type_id.'" hidden>	
 							<input id="membership_type_id" name="membership_type_id" type="text" value="'.$membership_type_id.'" hidden>
 							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>	
+							<input id="header" name="header" type="text" value="'.$header.'" hidden>	
+							<input id="active" name="active" type="text" value="'.$active.'" hidden>
 							<div class="modal-body">
 								<div class="row">
 									<div class="col-lg-6">	
@@ -255,11 +257,11 @@ class UserController extends CI_Controller {
 										</div>
 										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
 											<div class="mb-3">
-												<label class="form-label">Member Fee Type</label>
-												<select id="membership_fee_type" name="membership_fee_type" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
-													<option selected disabled>Select Member Fee Type</option>';
+												<label class="form-label">Membership Type '.$membershipTypeRow->name.'</label>
+												<select id="membership_fee_type_id" name="membership_fee_type_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+													<option selected disabled>Select Membership Type '.$membershipTypeRow->name.'</option>';
 													if (isset($memberFeeTypeData)): foreach($memberFeeTypeData as $data):
-														$modal .= '<option value="'.$data->membership_fee_type.'">'.$data->name.'-'.$data->year.'-'.$data->amount.'</option>';
+														$modal .= '<option value="'.$data->membership_fee_type_id.'">'.$data->name.'-'.$data->year.'-'.$data->amount.'</option>';
 													endforeach; endif;
 												$modal .= '</select>
 											</div>
@@ -341,8 +343,11 @@ class UserController extends CI_Controller {
 		$postData = $this->input->post();
 		$customer_db_setting_id = $postData['customer_db_setting_id'];
 		$user_type_id = $postData['user_type_id'];
+		$header = $postData['header'];
 		$full_legal_name = $postData['full_legal_name'];
+		$membership_type_id = $postData['membership_type_id'];
 		$email = $postData['email'];
+		$active = $postData['active'];
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 
 		$path = "assets/img/";
@@ -356,18 +361,18 @@ class UserController extends CI_Controller {
 			unset($postData['url']);
 		}
 
-		if (empty($postData['password'])) 
-		{
+		if (empty($postData['password'])) {
 			$postData['password'] = password_hash(explode('@', $postData['email'])[0], PASSWORD_DEFAULT);
 		} else {
 			$postData['password'] = password_hash($postData['password'], PASSWORD_DEFAULT);
 		}
-		unset($postData['customer_db_setting_id']);
+		unset($postData['customer_db_setting_id'], $postData['header'], $postData['active']);
 		$this->db->insert($customerDBSettingRow->database_name.'.user', $postData);
 		$description = $full_legal_name.' added successfully. ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$email.' : User for '.$description));
-		redirect('all-user/'.$user_type_id.'/'.$customer_db_setting_id, 'refresh');
+		$redirect = $header == 'all-user' ? 'user/'.$user_type_id.'/'.$customer_db_setting_id : ($header == 'member' ? 'member/'.$membership_type_id.'/'.$active : 'profile/'.$postData['user_id'].'/'.$customer_db_setting_id.'/'.$postData['user_option_id']);
+		redirect($redirect, 'refresh');
 	}
 
 	public function addUserMuthaiga()

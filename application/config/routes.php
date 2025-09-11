@@ -75,6 +75,9 @@ $route['get-user-list/(:any)/(:any)'] = 'admin/UserController/getUserList/$1/$2'
 $route['add-user-modal/(:any)'] = 'admin/UserController/addUserModal/$1';
 $route['add-user-modal/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2';
 $route['add-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2/$3';
+$route['add-user-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2/$3/$4';
+$route['add-user-modal/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2/$3/$4/$5';
+$route['add-user-modal/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/UserController/addUserModal/$1/$2/$3/$4/$5/$6';
 $route['add-user'] = 'admin/UserController/addUser';
 $route['approve-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/approveUserModal/$1/$2/$3';
 $route['approve-user-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/UserController/approveUserModal/$1/$2/$3/$4';
@@ -123,11 +126,16 @@ $route['remove-customer-modal'] = 'admin/CustomerController/removeCustomerModal'
 * admin/SubscriptionController
 */
 $route['subscription'] = 'admin/SubscriptionController';
+$route['subscription/(:any)'] = 'admin/SubscriptionController/subscriptionView/$1';
 $route['add-subscription-modal'] = 'admin/SubscriptionController/addSubscriptionModal';
+$route['add-subscription-modal/(:any)'] = 'admin/SubscriptionController/addSubscriptionModal/$1';
 $route['add-subscription'] = 'admin/SubscriptionController/addSubscription';
 $route['add-membership-fee-type'] = 'admin/SubscriptionController/addMembershipFeeType';
 $route['add-membership-fee-type-modal'] = 'admin/SubscriptionController/addMembershipFeeTypeModal';
 $route['get-membership-fee-type/(:any)'] = 'admin/SubscriptionController/getMembershipFeeType/$1';
+$route['approve-subscription-modal/(:any)/(:any)'] = 'admin/SubscriptionController/approveSubscriptionModal/$1/$2';
+$route['approve-subscription'] = 'admin/SubscriptionController/approveSubscription';
+$route['send-payment-reminder/(:any)/(:any)'] = 'admin/SubscriptionController/sendPaymentReminder/$1/$2';
 
 
 

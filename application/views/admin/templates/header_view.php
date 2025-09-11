@@ -90,7 +90,7 @@
 			 <?php $customerRow = get_table('customer', 'customer_id', get_table('customer_db_setting', 'customer_db_setting_id', $customer_db_setting_id, 'customer_id'));?>
 			<div class="navbar-brand">
 				<a href="<?=base_url('home')?>">
-					<img src="<?=base_url($customerRow->logo)?>" alt="<?=$customerRow->full_legal_name?>" class="navbar-brand-image" style="font-size: 10px;">
+					<img src="<?=base_url($customerRow->logo)?>" alt="<?=$customerRow->full_legal_name?>" class="navbar-brand-image" style="font-size: 10px; height: 6rem;">
 				</a>
 			</div>
 
@@ -179,8 +179,11 @@
 								<?php if ($module->withsub == 1) { ?>
 									<div class="dropdown-menu <?=($module->path == $moduleMenu->path ? 'show' : '')?>" <?=($module->path == $moduleMenu->path ? 'data-bs-popper="none"' : '')?>>
 										<?php $subCount = 0; if (isset($subModuleData)): foreach($subModuleData as $subModule): if ($module->module_id == $subModule->main_id && $subModule->state == 1 && $subModule->sub == 1): if (empty(get_user_right($user_type_id, $subModule->module_id, 'view', 1))) { continue; } ?>
-											<?php if ($module->module_id == '73833067810') { ?>
+											<?php if (in_array($subModule->module_id, ['60106723111', '17876086593'])) { ?>
 												<?php $ps = 0; if (isset($paymentStatusData)): foreach($paymentStatusData as $paymentStatus): ?>
+													<?php if ($subModule->module_id == '17876086593' && $paymentStatus->payment_status_id == '1732351802222' && !empty(get_user_right($user_type_id, $subModule->main_id, 'input', 1))): ?>	
+														<a class="dropdown-item" onclick="addSubscriptionModal('<?=$paymentStatus->payment_status_id?>')">Add Subscription</a>
+													<?php endif; ?>
 													<a class="dropdown-item <?=($paymentStatus->payment_status_id == $paymentStatusId ? 'active' : '')?>" href="<?=base_url($subModule->path).'/'.$paymentStatus->payment_status_id?>"><?=++$ps.'. '.$paymentStatus->name?></a>	
 												<?php endforeach; endif; ?>
 											<?php } elseif ($subModule->module_id == '17023064062') { ?>
@@ -188,29 +191,7 @@
 													<a class="dropdown-item" href="<?=base_url($module->path).'/'.$membershipType->membership_type_id.'/0'?>"><?='Pending '.$membershipType->name?></a>	
 												<?php endforeach; endif; if (isset($membershipTypeData)): foreach($membershipTypeData as $membershipType): ?>
 													<a class="dropdown-item" href="<?=base_url($module->path).'/'.$membershipType->membership_type_id.'/1'?>"><?=$membershipType->name?></a>	
-												<?php endforeach; endif; ?>
-											<?php } elseif ($subModule->module_id == '1744206515594') { ?>
-												<?php $pt = 0;  if (isset($propertyTypeData)): foreach($propertyTypeData as $propertyType): ?>
-													<a class="dropdown-item <?=($propertyType->property_type_id == $propertyTypeId ? 'active' : '')?>" href="<?=base_url($module->path).'/'.$propertyType->property_type_id?>"><?=++$pt.'. '.$propertyType->name?></a>	
-												<?php endforeach; endif; ?>
-											<?php } elseif ($subModule->module_id == '1750063183458') { ?>
-												<div class="dropend">
-													<a class="dropdown-item dropdown-toggle <?=empty($marketingCampaignId) ? '' : 'show'?>" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="<?=empty($marketingCampaignId) ? 'false' : 'true'?>"><?=++$subCount.'. '.$subModule->name?></a>
-													<div class="dropdown-menu <?=empty($marketingCampaignId) ? '' : 'show'?>" <?=empty($marketingCampaignId) ? '' : 'data-bs-popper="static"'?>>
-														<?php $mc = 0; if (isset($marketingCampaignData)): foreach($marketingCampaignData as $marketingCampaign): ?>
-															<a class="dropdown-item <?=($marketingCampaign->marketing_campaign_id == $marketingCampaignId ? 'active' : '')?>" href="<?=base_url($subModule->path).'/'.$marketingCampaign->marketing_campaign_id?>"><?=++$mc.'. '.$marketingCampaign->name?></a>	
-														<?php endforeach; endif; ?>	
-													</div>
-												</div>
-											<?php } elseif ($subModule->module_id == '1750071901669') { ?>
-												<div class="dropend">
-													<a class="dropdown-item dropdown-toggle <?=empty($campaignStateId) ? '' : 'show'?>" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="<?=empty($campaignStateId) ? 'false' : 'true'?>"><?=++$subCount.'. '.$subModule->name?></a>
-													<div class="dropdown-menu <?=empty($campaignStateId) ? '' : 'show'?>" <?=empty($campaignStateId) ? '' : 'data-bs-popper="static"'?>>
-														<?php $cs = 0; if (isset($campaignStateData)): foreach($campaignStateData as $campaignState): ?>
-															<a class="dropdown-item <?=($campaignState->campaign_state_id == $campaignStateId ? 'active' : '')?>" href="<?=base_url($subModule->path).'/'.$campaignState->campaign_state_id?>"><?=++$cs.'. '.$campaignState->name?></a>	
-														<?php endforeach; endif; ?>	
-													</div>
-												</div>									
+												<?php endforeach; endif; ?>									
 											<?php } elseif ($subModule->module_id == '62306723120') { ?>
 												<!-- <div class="hr-text"><?=$subModule->name?></div> -->
 												<?php $ut = 0; if (isset($userTypeData)): foreach($userTypeData as $userType): ?>

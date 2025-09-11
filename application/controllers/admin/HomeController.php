@@ -28,17 +28,16 @@ class HomeController extends CI_Controller {
 		$session_data = $this->common->loadSession();
 		$headerData = $this->common->loadHeaderData('dashboard');
 		
-		$customerData = [];
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
+		// print_r($customerDBSettingRow); exit;
 		if ($session_data['customer_db_setting_id'] == GlobalModel::DEFAULT_CORE_DB_SETTING)
 		{
 			$customerData = $this->db->select('*')->from('customer')->where('active', 1)->get()->result();
 		}
 		else
 		{
-			$userArrayData = [];
-			$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 			$customerData = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->where('active', 1)->get()->result();
-			// $data['userData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where_in('membership_type_id',array('1755813965588','N/A'))->get()->result();
 			$data['membershipTypeData'] = $this->db->select('*')->from('m_membership_type')->where('active',1)->get()->result();
 			$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('active', 0)->limit(5)->order_by('created_at', 'DESC')->get()->result();
 			foreach ($userData as $value) {
@@ -48,16 +47,17 @@ class HomeController extends CI_Controller {
 
 		if ($session_data['user_type_id'] == GlobalModel::CLUB_ADMIN_TYPE)
 		{
-			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('active', 1)->get()->result();
+			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('s.active', 1)->get()->result();
 		}
 		elseif ($session_data['user_type_id'] == GlobalModel::MEMBER_TYPE)
 		{
-			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('user_id', $session_data['user_id'])->where('active', 1)->get()->result();
+			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('s.user_id', $session_data['user_id'])->where('s.active', 1)->get()->result();
 		}
 		$data['subscriptionData'] = $subscriptionData ?? [];
 		$data['customer_db_setting_id'] = $session_data['customer_db_setting_id'];
-		$data['customerData'] = $customerData;
-		$data['userArrayData'] = $userArrayData;
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
+		$data['customerData'] = $customerData ?? [];
+		$data['userArrayData'] = $userArrayData ?? [];
 		$data['total_customers'] = count($customerData);
 
 		$this->load->view('admin/templates/header_view', $headerData);

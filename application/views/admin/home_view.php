@@ -145,7 +145,59 @@
 				</div>
 			</div>
 
-			<?php if (!in_array($user_type_id, array(GlobalModel::MEMBER_TYPE))): ?>
+			<?php if (in_array($user_type_id, array(GlobalModel::MEMBER_TYPE))): ?>
+				<div class="col-12">
+					<div class="card">
+						<div class="card-table">
+							<div class="card-header">
+								<div class="row w-full">
+									<div class="col">
+										<?php if (in_array($user_type_id, array(GlobalModel::ADMIN_TYPE))): ?>
+											<h3 class="card-title mb-0">Newly Added Customers</h3>
+											<p class="text-secondary m-0">Listing all Newly Added Customers.</p>
+										<?php else: ?>
+											<h3 class="card-title mb-0">My Subscriptions</h3>
+											<p class="text-secondary m-0">Listing all My Subscriptions.</p>
+										<?php endif; ?>
+									</div>
+								</div>
+							</div>
+							<div class="card-body border-bottom py-3">
+								<table id="subscription-datatable" class="table card-table table-vcenter text-nowrap datatable" style="width: 100%;">
+									<thead>
+										<tr>
+											<th class="w-1">#</th>											
+											<th>Full Legal Name</th>
+											<th>Membership Fee Type</th>
+											<th>Due Date</th>
+											<th>Payment Date</th>
+											<th>Currency</th>
+											<th>Amount</th>
+											<th>Status</th>
+											<th>Created At</th>
+										</tr>
+									</thead>
+									<tbody class="table-tbody">
+										<?php $s = 0; if (isset($subscriptionData)): foreach($subscriptionData as $data): $paymentHistoryRow = get_table($customerDBSettingRow->database_name.'.payment_history', 'universal_id', $data->subscription_id); ?>
+											<tr>
+												<td class="w-1"><?=++$s?>.</td>
+												<td><?= get_table($customerDBSettingRow->database_name.'.user', 'user_id', $data->user_id, 'full_legal_name')?></td>
+												<td><?= get_table($customerDBSettingRow->database_name.'.membership_fee_type', 'membership_fee_type_id', $data->membership_fee_type_id, 'name')?></td>
+												<td><?= date('d M Y', strtotime($data->due_at)) ?></td>
+												<td><?= date('d M Y', strtotime($data->payment_at)) ?></td>
+												<td><?= get_table('m_currency', 'currency_id', $data->currency_id, 'sign')?></td>
+												<td><?= $data->amount ?></td>
+												<td><?= get_table('m_payment_status', 'payment_status_id', $data->payment_status_id, 'name')?></td>
+												<td><?= date('d M Y', strtotime($data->created_at)) ?></td>
+											</tr>
+										<?php endforeach; endif; ?>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			<?php else: ?>	
 				<div class="col-12" hidden>
 					<div class="card">
 						<div class="card-table">
@@ -271,6 +323,7 @@
 					</div>
 				<?php endforeach; endif; ?> 
 			<?php endif; ?>
+			
 		</div>
 	</div>
 

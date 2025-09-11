@@ -15,7 +15,7 @@
 				<!-- Page title actions -->
 				<div class="col-auto ms-auto d-print-none">
 					<div class="btn-list">
-						<?php if ($inputUserRight): ?>
+						<?php if ($inputUserRight && $active == 0): ?>
 							<div class="col-lg-5">
 								<span class="dropdown">
 									<button class="btn btn-success dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown">Add New <?=$userTypeName?></button>
@@ -59,7 +59,7 @@
 											<th>Membership No.</th>
 											<th>Residental Address</th>
 											<th>Created At</th>	
-											<?php if ($editUserRight || $removeUserRight): ?>								
+											<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>								
 												<th>Actions</th>
 											<?php endif; ?>
 										</tr>
@@ -73,13 +73,15 @@
 												<td><?=$user->email?></td>
 												<td><?=$user->membership_no?></td>
 												<td><?=$user->residential_address?></td>
-												<td><?=$user->created_at?></td>
-												<?php if ($editUserRight || $removeUserRight): ?>
+												<td><?= date('d M Y H:i', strtotime($user->created_at)) ?></td>
+												<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
 													<td>
 														<span class="dropdown">
 															<button class="btn dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
 															<div class="dropdown-menu dropdown-menu-end">
-																<?php if ($editUserRight): ?>
+																<?php if ($approveUserRight): ?>
+																	<a class="dropdown-item" onclick="approveUserModal('<?=$user->user_id?>', '<?=$user->membership_type_id?>', '<?=$customer_db_setting_id?>', 'member')">Approve</a>
+																<?php endif; if ($editUserRight): ?>
 																	<a class="dropdown-item" href="#" onclick="editUserModal('<?=$user->user_id?>')">Edit</a>
 																<?php endif; if ($removeUserRight): ?>
 																	<a class="dropdown-item" href="#" onclick="deleteUserModal('<?=$user->user_id?>')">Delete</a>
@@ -109,7 +111,7 @@
 
 		function addUserModal(user_type_id, membership_type_id) {
 			$.ajax({
-				url: base_url + "add-user-modal/" + user_type_id + "/" + membership_type_id + "/<?=$customer_db_setting_id?>",
+				url: base_url + "add-user-modal/" + user_type_id + "/" + membership_type_id + "/<?=$customerDBSettingId?>/member/<?=$active?>",
 				success: function(response) {
 					document.getElementById('modal-view-edit-print-user').innerHTML = response;
 					$('#modal-view-edit-print-user').modal('show');
