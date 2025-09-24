@@ -279,6 +279,8 @@
 												<th>Email</th>
 												<th>Membership No.</th>
 												<th>Residental Address</th>	
+												<th>LR/No.</th>
+												<th>Origin</th>
 												<th>Status</th>
 												<th>Created At</th>
 												<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
@@ -295,6 +297,8 @@
 													<td><?=$user->email?></td>
 													<td><?=$user->membership_no?></td>
 													<td><?=$user->residential_address?></td>
+													<td><?=$user->sub_reference_no?></td>
+													<td><?=get_table('m_user_origin', 'user_origin_id', $user->user_origin_id, 'name')?></td>
 													<td><?=get_table('m_active', 'num', $user->active, 'name_two')?></td>
 													<td><?=date_format(date_create($user->created_at),"y M d H:i:s")?></td>
 													<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
@@ -302,8 +306,8 @@
 															<span class="dropdown">
 																<button class="btn dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="true">Actions</button>
 																<div class="dropdown-menu dropdown-menu-end" data-popper-placement="bottom-end" style="position: absolute; inset: 0px 0px auto auto; margin: 0px; transform: translate(0px, 38px);">
-																	<?php if ($approveUserRight): ?>
-																		<a class="dropdown-item" onclick="approveUserModal('<?=$user->user_id?>', '<?=$membership->membership_type_id?>', '<?=$customer_db_setting_id?>', 'dashboard')">Approve</a>
+																	<?php if ($approveUserRight && $user->active == 0): ?>
+																		<a class="dropdown-item" onclick="subscriptionApprovalModal('<?=$user->user_id?>', '<?=$membership->membership_type_id?>', '<?=$customer_db_setting_id?>', 'dashboard')">Approve</a>
 																	<?php endif; if ($editUserRight): ?>
 																		<a class="dropdown-item" onclick="editUserModal('<?=$user->user_id?>')">Update</a>
 																	<?php endif; if ($removeUserRight): ?>

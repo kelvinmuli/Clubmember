@@ -1,5 +1,5 @@
 		<div class="modal modal-blur fade" id="modal-view-add-edit-remove-print" tabindex="-1" role="dialog" aria-hidden="true"></div>
-		<div class="modal modal-blur fade" id="modal-view-edit-print-user" name="modal-view-edit-print-maintenance" tabindex="-1" role="dialog" aria-hidden="true"></div>
+		<div class="modal modal-blur fade" id="modal-view-edit-print-user" name="modal-view-edit-print-user" tabindex="-1" role="dialog" aria-hidden="true"></div>
 		<div class="modal modal-blur fade" id="modal-view-edit-print-maintenance" name="modal-view-edit-print-maintenance" tabindex="-1" role="dialog" aria-hidden="true"></div>
 		
 			<!-- END PAGE BODY -->
@@ -56,6 +56,16 @@
 			});
 		}
 		
+		function subscriptionApprovalModal(user_id, membership_type_id, customer_db_setting_id, header='all-user') {
+			$.ajax({
+				url: base_url + "subscription-approval-modal/" + user_id + "/" + membership_type_id + "/" + customer_db_setting_id + "/" + header,
+				success: function(response) {
+					document.getElementById('modal-view-edit-print-user').innerHTML = response;
+					$('#modal-view-edit-print-user').modal('show');
+				}
+			});
+		}
+
 		function editUserModal(user_id) {
 			$.ajax({
 				url: base_url + "edit-user-modal/" + user_id,
@@ -95,8 +105,7 @@
 					$("#membership_fee_type_id").change(function() {
 						$.ajax({
 							url: base_url + "get-membership-fee-type/" + $(this).val(),
-							success: function(response) {
-								alert(response);	
+							success: function(response) {	
 								const object = JSON.parse(response);
 								document.getElementById("amount").value = object.amount;
 							}

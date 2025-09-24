@@ -117,9 +117,9 @@
                                                   Please set your account password to get access to the <?=$club_name?> -  ClubMember App where you can make bookings and pay for subscriptions and much more.
                                                 </p>
 
-                                                 <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">Please confirm that this is your email address by clicking on the link below <a style="color: #00bc87;text-decoration: underline;"" target="_blank" href="<?=$url?>"></a> within 48&nbsp;hours.</p>
-
-                                                  <p><?=$url?></p>
+                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">Please confirm that this is your email address by clicking on the link below <a style="color: #00bc87;text-decoration: underline;"" target="_blank" href="<?=$url?>"></a> within 48&nbsp;hours.</p>
+																								<a style="color: #00bc87; text-decoration: underline;" target="_blank" href="<?=$url?>"></a>
+																								<p>Then after resetting use this link to login: <a style="color: #00bc87; text-decoration: underline;" target="_blank" href="<?=base_url('nmra')?>"></a></p>
 
                                                 <p>Thank you!</p>
 

@@ -45,12 +45,12 @@
               <div class="text-center mb-4">
                 <!-- BEGIN NAVBAR LOGO -->
                 <a href="/" class="logo">
-                  <img src="<?=base_url()?>assets/website/img/Cb-logo-1.jpg" alt="New Muthaiga Logo" width="70%">
+                  <img src="<?=base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="70%">
                 </a>
               </div>
               <div class="card card-md">
                 <div class="card-body">
-                  <h2 class="h2 text-center mb-4">Login to ClubMember</h2>
+                  <h2 class="h2 text-center mb-4">Login to <?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?></h2>
 
                    <?php if ($this->session->flashdata()) { ?>
                         <?php $alert = empty($this->session->flashdata('err')) ? 'alert-success' : 'alert-danger' ?>

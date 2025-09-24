@@ -91,7 +91,7 @@ class UserController extends CI_Controller {
 
 		$userTypeRow = $this->db->select('*')->from('m_user_type')->where('user_type_id', $user_type_id)->get()->row();
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
-		$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', $user_type_id)->get()->result();
+		$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', $user_type_id)->order_by('created_at', 'DESC')->get()->result();
 		
 		$u = 0;
 		$userDataArray = [];
@@ -117,7 +117,10 @@ class UserController extends CI_Controller {
 								</span>	
 							</td>';
 			endif;
-			$userDataArray[] = array(++$u.'.', $user->full_legal_name, $user->phone_number, $user->email, ($user->membership_no ?? '-'), $user->residential_address, $user->created_at, $actions);
+			$origin = get_table('m_user_origin', 'user_origin_id', $user->user_origin_id, 'name');
+			$status = get_table('m_active', 'num', $user->active, 'name_two');
+			$createdAt = date_format(date_create($user->created_at),"y M d H:i:s");
+			$userDataArray[] = array(++$u.'.', $user->full_legal_name, $user->phone_number, $user->email, ($user->membership_no ?? '-'), $user->residential_address, $user->sub_reference_no, $origin, $status, $createdAt, $actions);
 		}
 
 		print_r(json_encode(array("draw"=>1, "recordsTotal"=>count($userDataArray), "recordsFiltered"=>count($userDataArray), "data"=>$userDataArray)));
@@ -371,7 +374,7 @@ class UserController extends CI_Controller {
 		$description = $full_legal_name.' added successfully. ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$email.' : User for '.$description));
-		$redirect = $header == 'all-user' ? 'user/'.$user_type_id.'/'.$customer_db_setting_id : ($header == 'member' ? 'member/'.$membership_type_id.'/'.$active : 'profile/'.$postData['user_id'].'/'.$customer_db_setting_id.'/'.$postData['user_option_id']);
+		$redirect = $header == 'all-user' ? $header.'/'.$user_type_id.'/'.$customer_db_setting_id : ($header == 'member' ? 'member/'.$membership_type_id.'/'.$active : 'profile/'.$postData['user_id'].'/'.$customer_db_setting_id.'/'.$postData['user_option_id']);
 		redirect($redirect, 'refresh');
 	}
 
@@ -414,7 +417,7 @@ class UserController extends CI_Controller {
 
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', '1705386384290')->get()->row();
 		$titleRow = $this->db->select('*')->from('m_title')->where('name', $postData['title'])->get()->row();
-		$res = $this->db->insert($customerDBSettingRow->database_name.'.user', array('user_id'=>generate_uuid(),'user_type_id'=>'1755383886420','title_id'=>$titleRow->title_id ?? $postData['title'], 'full_legal_name'=>$postData['fulllegalname'], 'email'=>$postData['email'], 'phone_number'=>$postData['mobile_no'], 'membership_type_id'=>$postData['member_type'], 'membership_no'=>$postData['membership_no'], 'id_no'=>$postData['id_passport_no'], 'sub_reference_no'=>$postData['regular_lr_no'], 'residential_address'=>$postData['physical_address'], 'postal_code'=>$postData['postal_code'], 'postal_address'=>$postData['postal_address'], 'remark'=>$postData['notes'] ));
+		$res = $this->db->insert($customerDBSettingRow->database_name.'.user', array('user_id'=>generate_uuid(),'user_type_id'=>'1755383886420','title_id'=>$titleRow->title_id ?? $postData['title'], 'full_legal_name'=>$postData['fulllegalname'], 'email'=>$postData['email'], 'phone_number'=>$postData['mobile_no'], 'membership_type_id'=>$postData['member_type'], 'membership_no'=>$postData['membership_no'], 'id_no'=>$postData['id_passport_no'], 'sub_reference_no'=>$postData['regular_lr_no'], 'residential_address'=>$postData['physical_address'], 'postal_code'=>$postData['postal_code'], 'postal_address'=>$postData['postal_address'], 'remark'=>$postData['notes'], 'user_origin_id'=>'176874226539'));
 		if ($res)
 		{
 			return $this->output

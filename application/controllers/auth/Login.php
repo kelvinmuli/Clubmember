@@ -20,8 +20,16 @@ class Login extends CI_Controller {
 	 */
 	public function index()
 	{
+		// $customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('sub_domain', $database_name)->get()->row();
+		// $data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
 		$this->load->view('auth/login_view');
-        // $this->load->view('front/templates/footer_view');
+	}
+
+	public function nmra()
+	{
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('sub_domain', 'muthaiga')->get()->row();
+		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+		$this->load->view('auth/login_view', $data);
 	}
 
 	 public function VerifyLogin()

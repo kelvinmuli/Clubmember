@@ -1011,7 +1011,7 @@ class MaintenanceController extends CI_Controller {
 		$data['maintenanceData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance')->get()->result();
 
 		$this->load->view('admin/templates/header_view', $headerData);
-		$this->load->view('maintenance_naming_view', $data);
+		$this->load->view('admin/maintenance_naming_view', $data);
 		$this->load->view('admin/templates/footer_view');
 	}
 
@@ -1191,7 +1191,7 @@ class MaintenanceController extends CI_Controller {
 		$data['maintenanceData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.maintenance')->get()->result();
 
 		$this->load->view('admin/templates/header_view', $headerData);
-		$this->load->view('maintenance_column_naming_view', $data);
+		$this->load->view('admin/maintenance_column_naming_view', $data);
 		$this->load->view('admin/templates/footer_view');
 	}
 

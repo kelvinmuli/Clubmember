@@ -18,7 +18,7 @@
 				<!-- Page title actions -->
 				<div class="col-auto ms-auto d-print-none">
 					<div class="btn-list">
-						<?php if ($inputUserRight): ?>
+						<?php if ($inputUserRight && ($userTypeId == '1755383886420' && $customerDBSettingId == '1755387775468')): ?>
 							<div class="col-lg-5">
 								<span class="dropdown">
 									<button class="btn btn-success dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown">Add New <?=$userTypeName?></button>
@@ -47,11 +47,11 @@
 							<h3 class="card-title"><?=isset($userTypeId) ? 'All '.$userTypeName.'s' : $moduleMenu->name?></h3>
 							<div class="col-auto ms-auto d-print-none">
 								<div class="btn-list">		
-										<select id="customer_db_setting_id" name="customer_db_setting_id" class="form-select btn-pill">
-											<?php if (isset($customerDBSettingData)): foreach($customerDBSettingData as $customerDBSetting): ?>
-												<option value="<?=$customerDBSetting->customer_db_setting_id?>" <?=($customerDBSetting->customer_db_setting_id == $customerDBSettingId) ? 'selected' : ''?>><?=get_table('customer', 'customer_id', $customerDBSetting->customer_id, 'full_legal_name')?></option>
-											<?php  endforeach; endif; ?>
-										</select>
+									<select id="customer_db_setting_id" name="customer_db_setting_id" class="form-select btn-pill">
+										<?php if (isset($customerDBSettingData)): foreach($customerDBSettingData as $customerDBSetting): ?>
+											<option value="<?=$customerDBSetting->customer_db_setting_id?>" <?=($customerDBSetting->customer_db_setting_id == $customerDBSettingId) ? 'selected' : ''?>><?=get_table('customer', 'customer_id', $customerDBSetting->customer_id, 'full_legal_name')?></option>
+										<?php  endforeach; endif; ?>
+									</select>
 								</div>
 							</div>
 						</div>
@@ -67,6 +67,9 @@
 											<th>Email</th>
 											<th>Membership No.</th>
 											<th>Residental Address</th>
+											<th>LR/No.</th>
+											<th>Origin</th>
+											<th>Status</th>
 											<th>Created At</th>									
 											<th>Actions</th>
 										</tr>
