@@ -18,17 +18,19 @@ class Login extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see https://codeigniter.com/user_guide/general/urls.html
 	 */
-	public function index()
+	public function index($host='1755387775468')
 	{
-		// $customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('sub_domain', $database_name)->get()->row();
-		// $data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
-		$this->load->view('auth/login_view');
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $host)->or_where('host', $host)->get()->row();
+		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id ?? '')->get()->row();
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
+		$this->load->view('auth/login_view', $data);
 	}
 
 	public function nmra()
 	{
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('sub_domain', 'muthaiga')->get()->row();
 		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
 		$this->load->view('auth/login_view', $data);
 	}
 

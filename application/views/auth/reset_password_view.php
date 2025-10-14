@@ -12,7 +12,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>ClubMember.app - Stella Member Experiences - Login</title>
+    <title>ClubMember.app - Stella Member Experiences - Reset Password</title>
     <!-- BEGIN GLOBAL MANDATORY STYLES -->
     <link href="<?=base_url()?>assets/admin/dist/css/tabler.css?1747674012" rel="stylesheet" />
     <!-- END GLOBAL MANDATORY STYLES -->
@@ -52,17 +52,17 @@
                 <div class="card-body">
                   <h2 class="h2 text-center mb-4">Reset Password</h2>
 
-                   <?php if ($this->session->flashdata()) { ?>
-                        <?php $alert = empty($this->session->flashdata('err')) ? 'alert-success' : 'alert-danger' ?>
-                        <div class="alert alert-danger" role="alert">
-                            <?= $this->session->flashdata('message'); ?>
-                            <?= $this->session->flashdata('err'); ?>
-                        </div>
-                   <?php } ?>
+                   	<?php if ($this->session->flashdata()) { ?>
+											<?php $alert = empty($this->session->flashdata('err')) ? 'alert-success' : 'alert-danger' ?>
+											<div class="alert alert-danger" role="alert">
+													<?= $this->session->flashdata('message'); ?>
+													<?= $this->session->flashdata('err'); ?>
+											</div>
+                   	<?php } ?>
 
                   <form action="<?=base_url('reset-now')?>" method="POST">
-					<input type="text" id="user_id" name="user_id" class="form-control" value="<?=$userRow->user_id?>" hidden/>
-					<input type="text" id="customer_db_setting_id" name="customer_db_setting_id" class="form-control" value="<?=$customer_db_setting_id?>" hidden/>
+										<input type="text" id="user_id" name="user_id" class="form-control" value="<?=$userRow->user_id?>" hidden/>
+										<input type="text" id="customer_db_setting_id" name="customer_db_setting_id" class="form-control" value="<?=$customer_db_setting_id?>" hidden/>
                     <div class="mb-3">
                       <label class="form-label">Email address</label>
                       <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com" autocomplete="off" value="<?=$userRow->email?>" disabled/>

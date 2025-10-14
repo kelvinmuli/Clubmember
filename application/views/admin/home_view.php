@@ -277,6 +277,7 @@
 												<th>Full Legal Name</th>
 												<th>Phone Number</th>
 												<th>Email</th>
+												<th>Membership Fee Type</th>
 												<th>Membership No.</th>
 												<th>Residental Address</th>	
 												<th>LR/No.</th>
@@ -295,6 +296,7 @@
 													<td><?=$user->full_legal_name?></td>
 													<td><?=$user->phone_number?></td>
 													<td><?=$user->email?></td>
+													<td><?=get_table($customerDBSettingRow->database_name.'.membership_fee_type', 'membership_fee_type_id', $user->membership_fee_type_id, 'name')?></td>
 													<td><?=$user->membership_no?></td>
 													<td><?=$user->residential_address?></td>
 													<td><?=$user->sub_reference_no?></td>
@@ -312,7 +314,9 @@
 																		<a class="dropdown-item" onclick="editUserModal('<?=$user->user_id?>')">Update</a>
 																	<?php endif; if ($removeUserRight): ?>
 																		<a class="dropdown-item" onclick="removeUserModal('<?=$user->user_id?>')">Delete</a>
-																	<?php endif; ?> 
+																	<?php endif; if ($user->user_type_id == "1755383886420"): ?>
+																		<a class="dropdown-item">Pay</a>
+																	<?php endif; ?>
 																</div>
 															</span>
 														</td>

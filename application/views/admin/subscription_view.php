@@ -1,4 +1,4 @@
-<?php $userTypeName = empty($userTypeId) ? 'N/A' : get_table('m_user_type', 'user_type_id', $userTypeId, 'name'); ?>
+<?php $paymentStatusName = empty($paymentStatusId) ? 'N/A' : get_table('m_payment_status', 'payment_status_id', $paymentStatusId, 'name'); ?>
 <div class="page-wrapper">
     <div class="container-fluid">			
 		<!-- Page title -->
@@ -9,6 +9,7 @@
 						<li class="breadcrumb-item"><a href="<?=base_url()?>">Website</a></li>
 						<li class="breadcrumb-item"><a href="<?=base_url('home')?>">Home</a></li>
 						<li class="breadcrumb-item"><a href="#"><?=$moduleMenu->name?></a></li>
+						<li class="breadcrumb-item"><a href="#"><?=$paymentStatusName?></a></li>
 					</ol>
               	</div>
 
@@ -42,7 +43,7 @@
 				<div class="col-12">
 					<div class="card">
 						<div class="card-header">
-							<h3 class="card-title"><?=$moduleMenu->name?></h3>
+							<h3 class="card-title"><?=$paymentStatusName.' '.$moduleMenu->name?></h3>
 							<div class="col-auto ms-auto d-print-none">
 								<div class="btn-list">		
 										

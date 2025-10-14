@@ -65,6 +65,7 @@
 											<th>Full Legal Name</th>
 											<th>Phone Number</th>
 											<th>Email</th>
+											<th>Membership Fee Type</th>
 											<th>Membership No.</th>
 											<th>Residental Address</th>
 											<th>LR/No.</th>

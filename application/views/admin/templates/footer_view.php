@@ -9,18 +9,19 @@
 					<div class="row text-center align-items-center flex-row-reverse">
 						<div class="col-lg-auto ms-lg-auto">
 							<ul class="list-inline list-inline-dots mb-0">
-							<li class="list-inline-item"><a href="https://docs.tabler.io" target="_blank" class="link-secondary" rel="noopener"><?=$systemRow->name?> is powered by <?=$systemRow->company?></a></li>
+							<!-- <li class="list-inline-item"><a href="https://docs.tabler.io" target="_blank" class="link-secondary" rel="noopener"><?=$systemRow->name?> is powered by <?=$systemRow->company?></a>
+							</li> -->
 							</ul>
 						</div>
 						<div class="col-12 col-lg-auto mt-3 mt-lg-0">
 							<ul class="list-inline list-inline-dots mb-0">
-								<li class="list-inline-item">
+								<!-- <li class="list-inline-item">
 									Copyright &copy; 2025
 									<a href="." class="link-secondary"><?=$systemRow->name?></a>. All rights reserved.
-								</li>
-								<li class="list-inline-item">
+								</li> -->
+								<!-- <li class="list-inline-item">
 									<a href="./changelog.html" class="link-secondary" rel="noopener"> <?=$systemRow->version?> </a>
-								</li>
+								</li> -->
 							</ul>
 						</div>
 					</div>

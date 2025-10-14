@@ -222,8 +222,12 @@ class SubscriptionController extends CI_Controller {
 				$this->db->update($customerDBSettingRow->database_name.'.user', array('active'=>1), array('user_id'=>$postData['user_id']));
 				$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
 				$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
-				$html = $this->load->view('admin/club_member_temp', array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
-				$this->common->sendMail($userRow->email, 'Approval Notification', $html);
+				$htmlApprovalNotification = $this->load->view('admin/club_member_temp', array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
+				$this->common->sendMail($userRow->email, 'Approval Notification', $htmlApprovalNotification);
+
+				$membershipTypeName = get_table('m_membership_type', 'membership_type_id', $userRow->membership_type_id, 'name');
+				$htmlSubscriptionPayment = $this->load->view('admin/subscription_payment_temp', array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$postData['amount'], 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
+				$this->common->sendMail($userRow->email, 'Subscription Payment', $htmlSubscriptionPayment);
 			}
 			else
 			{

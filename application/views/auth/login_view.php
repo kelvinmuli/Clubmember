@@ -45,12 +45,14 @@
               <div class="text-center mb-4">
                 <!-- BEGIN NAVBAR LOGO -->
                 <a href="/" class="logo">
-                  <img src="<?=base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="70%">
+                  <img src="<?=base_url('assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="70%">
                 </a>
               </div>
+
+
               <div class="card card-md">
                 <div class="card-body">
-                  <h2 class="h2 text-center mb-4">Login to <?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?></h2>
+                  <h2 class="h2 text-center mb-4">Login</h2>
 
                    <?php if ($this->session->flashdata()) { ?>
                         <?php $alert = empty($this->session->flashdata('err')) ? 'alert-success' : 'alert-danger' ?>
@@ -66,10 +68,7 @@
                       <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com" autocomplete="off" />
                     </div>
                     <div class="mb-2">
-                      <label class="form-label">
-                        Password
-                        
-                      </label>
+                      <label class="form-label">Password</label>
                       <div class="input-group input-group-flat">
                         <input type="password" id="pwd" name="password" class="form-control" placeholder="Your password" autocomplete="off" />
                         <span class="input-group-text">
@@ -92,6 +91,11 @@
                           ></a>
                         </span>
                       </div>
+                      <div class="mb-3">
+												<a href="<?=base_url('forgot-password/'.(isset($customerDBSettingRow->customer_db_setting_id) ? $customerDBSettingRow->customer_db_setting_id : ''))?>" class="form-label" style="float: right; font-size: 12px;">
+													Forgot password?
+												</a>	
+											</div>
                     </div>
                     
                     <div class="form-footer">
@@ -106,6 +110,11 @@
             </div>
           </div>
           <div class="col-lg d-none d-lg-block">
+            <a href="/" class="logo">
+							<?php if (isset($customerRow) && $customerRow->customer_id != '17765689954') { ?>
+								<img src="<?=base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="30%">
+							<?php } ?>
+						</a>
             <svg class="img d-block mx-auto" xmlns="http://www.w3.org/2000/svg" height="400" fill="none" viewBox="0 0 800 600">
               <style>
                 :where(.theme-dark, [data-bs-theme="dark"]) .tblr-illustrations-boy-with-key-a {

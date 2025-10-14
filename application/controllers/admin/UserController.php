@@ -75,6 +75,7 @@ class UserController extends CI_Controller {
 		else
 			$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->where('active', 1)->get()->result();
 		$data['customerDBSettingData'] = $customerDBSettingData;
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('admin/member_view', $data);
@@ -117,10 +118,11 @@ class UserController extends CI_Controller {
 								</span>	
 							</td>';
 			endif;
+			$membershipFeeType = get_table($customerDBSettingRow->database_name.'.membership_fee_type', 'membership_fee_type_id', $user->membership_fee_type_id, 'name');
 			$origin = get_table('m_user_origin', 'user_origin_id', $user->user_origin_id, 'name');
 			$status = get_table('m_active', 'num', $user->active, 'name_two');
 			$createdAt = date_format(date_create($user->created_at),"y M d H:i:s");
-			$userDataArray[] = array(++$u.'.', $user->full_legal_name, $user->phone_number, $user->email, ($user->membership_no ?? '-'), $user->residential_address, $user->sub_reference_no, $origin, $status, $createdAt, $actions);
+			$userDataArray[] = array(++$u.'.', $user->full_legal_name, $user->phone_number, $user->email, $membershipFeeType, ($user->membership_no ?? '-'), $user->residential_address, $user->sub_reference_no, $origin, $status, $createdAt, $actions);
 		}
 
 		print_r(json_encode(array("draw"=>1, "recordsTotal"=>count($userDataArray), "recordsFiltered"=>count($userDataArray), "data"=>$userDataArray)));

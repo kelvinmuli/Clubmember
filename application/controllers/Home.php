@@ -20,7 +20,22 @@ class Home extends CI_Controller {
 	 */
 	public function index()
 	{
-		$this->load->view('home_view');
-		// $this->load->view('front/templates/footer_view');
+		$checkHost = false;
+		$host = $_SERVER['HTTP_HOST'];
+		$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->get()->result();
+		foreach ($customerDBSettingData as $customerDBSetting) 
+		{
+			if (strpos($host, $customerDBSetting->host.'.') === 0) 
+			{
+				$checkHost = true;
+				redirect('logon/'.$customerDBSetting->customer_db_setting_id, 'refresh');
+			}
+		}
+
+        if (!$checkHost) 
+		{
+            $this->load->view('home_view');
+			// $this->load->view('front/templates/footer_view');
+        }
 	}
 }

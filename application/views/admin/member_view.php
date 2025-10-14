@@ -56,6 +56,7 @@
 											<th>Full Legal Name</th>
 											<th>Phone Number</th>
 											<th>Email</th>
+											<th>Membership Fee Type</th>
 											<th>Membership No.</th>
 											<th>Residental Address</th>
 											<th>LR/No.</th>
@@ -74,6 +75,7 @@
 												<td><?=$user->full_legal_name?></td>
 												<td><?=$user->phone_number?></td>
 												<td><?=$user->email?></td>
+												<td><?=get_table($customerDBSettingRow->database_name.'.membership_fee_type', 'membership_fee_type_id', $user->membership_fee_type_id, 'name')?></td>
 												<td><?=$user->membership_no?></td>
 												<td><?=$user->residential_address?></td>
 												<td><?=$user->sub_reference_no?></td>
