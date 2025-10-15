@@ -28,7 +28,7 @@ class Home extends CI_Controller {
 			if (strpos($host, $customerDBSetting->host.'.') === 0) 
 			{
 				$checkHost = true;
-				redirect('logon/'.$customerDBSetting->customer_db_setting_id, 'refresh');
+				redirect('login/'.$customerDBSetting->customer_db_setting_id, 'refresh');
 			}
 		}
 

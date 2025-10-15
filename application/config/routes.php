@@ -59,6 +59,7 @@ $route['nmra'] = 'auth/Login/nmra';
 $route['control'] = 'auth/Login';
 $route['control/(:any)'] = 'auth/Login/index/$1';
 $route['login'] = 'auth/Login'; 
+$route['login/(:any)'] = 'auth/Login/index/$1'; 
 $route['reset/(:any)/(:any)'] = 'auth/Login/resetPassword/$1/$2';
 $route['reset-now'] = 'auth/Login/resetNowPassword';
 $route['adminlogout'] = 'auth/Login/Logout';

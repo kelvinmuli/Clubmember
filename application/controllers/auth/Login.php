@@ -18,9 +18,26 @@ class Login extends CI_Controller {
 	 * map to /index.php/welcome/<method_name>
 	 * @see https://codeigniter.com/user_guide/general/urls.html
 	 */
-	public function index($host='1755387775468')
+	public function index($host='')
 	{
-		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $host)->or_where('host', $host)->get()->row();
+		$checkHost = false;
+		$customerDBSettingRow = [];
+		$host = $_SERVER['HTTP_HOST'];
+		$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->get()->result();
+		foreach ($customerDBSettingData as $customerDBSetting) 
+		{
+			if (strpos($host, $customerDBSetting->host.'.') === 0) 
+			{
+				$checkHost = true;
+				$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customerDBSetting->customer_db_setting_id)->get()->row();
+			}
+		}
+		
+		if (!$checkHost)
+		{
+			$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $host)->or_where('host', $host)->get()->row();
+		}
+		
 		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id ?? '')->get()->row();
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
 		$this->load->view('auth/login_view', $data);
