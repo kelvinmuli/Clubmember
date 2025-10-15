@@ -116,6 +116,26 @@
 			});
 		}
 
+		function paymentInfoModal(user_id, universal_id='') {
+			$.ajax({
+				url: base_url + "payment-info-modal/" + user_id + "/" + universal_id,
+				success: function(response) {
+					document.getElementById('modal-view-add-edit-remove-print').innerHTML = response;
+					$('#modal-view-add-edit-remove-print').modal('show');
+				}
+			});
+		}
+
+		function payModal(user_id, payment_history_id='') {
+			$.ajax({
+				url: base_url + "pay-modal/" + user_id + "/" + payment_history_id,
+				success: function(response) {
+					document.getElementById('modal-view-add-edit-remove-print').innerHTML = response;
+					$('#modal-view-add-edit-remove-print').modal('show');
+				}
+			});
+		}
+
 		function addMaintenanceModal(module_type_id, maintenance) {
 			$.ajax({
 				url: base_url + "add-maintenance-modal/<?=$moduleMenu->module_id?>/" + module_type_id + "/" + maintenance,

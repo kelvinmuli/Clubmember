@@ -65,11 +65,12 @@ class SubscriptionController extends CI_Controller {
 		$this->addSubscriptionApproveModal('', $user_id, $membership_type_id, $customer_db_setting_id, $header);
 	}
 
-	public function addSubscriptionApproveModal($payment_status_id='', $user_id='', $membership_type_id='', $customer_db_setting_id='', $header='all-user')
+	public function addSubscriptionApproveModal($payment_status_id='', $user_id='', $membership_type_id='', $customer_db_setting_ids='', $header='all-user')
 	{
 		$this->common->checkSession(array('dialog'=>1));
 		$session_data = $this->common->loadSession();
-		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', empty($customer_db_setting_id) ? $session_data['customer_db_setting_id'] : $customer_db_setting_id)->get()->row();
+		$customer_db_setting_id = empty($customer_db_setting_ids) ? $session_data['customer_db_setting_id'] : $customer_db_setting_ids;
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$membershipFeeTypeRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('membership_type_id', $membership_type_id)->get()->row();
 		$membershipFeeTypeData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('active', 1)->get()->result();
 		$currencyData = $this->db->select('*')->from('m_currency')->where('active', 1)->get()->result();

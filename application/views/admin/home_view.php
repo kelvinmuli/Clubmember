@@ -315,7 +315,7 @@
 																	<?php endif; if ($removeUserRight): ?>
 																		<a class="dropdown-item" onclick="removeUserModal('<?=$user->user_id?>')">Delete</a>
 																	<?php endif; if ($user->user_type_id == "1755383886420"): ?>
-																		<a class="dropdown-item">Pay</a>
+																		<a class="dropdown-item" onclick="paymentInfoModal('<?=$user->user_id?>', '17072386410')">Pay</a>
 																	<?php endif; ?>
 																</div>
 															</span>

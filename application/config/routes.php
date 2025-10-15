@@ -147,6 +147,11 @@ $route['get-membership-fee-type/(:any)'] = 'admin/SubscriptionController/getMemb
 $route['approve-subscription-modal/(:any)/(:any)'] = 'admin/SubscriptionController/approveSubscriptionModal/$1/$2';
 $route['approve-subscription'] = 'admin/SubscriptionController/approveSubscription';
 $route['send-payment-reminder/(:any)/(:any)'] = 'admin/SubscriptionController/sendPaymentReminder/$1/$2';
+$route['payment-info-modal/(:any)'] = 'admin/PayController/paymentInfoModal/$1';
+$route['payment-info-modal/(:any)/(:any)'] = 'admin/PayController/paymentInfoModal/$1/$2';
+$route['pay-modal/(:any)'] = 'admin/PayController/payModal/$1';
+$route['pay-modal/(:any)/(:any)'] = 'admin/PayController/payModal/$1/$2';
+$route['pay'] = 'admin/SubscriptionController/pay';
 
 
 
