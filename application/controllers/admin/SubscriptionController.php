@@ -65,7 +65,7 @@ class SubscriptionController extends CI_Controller {
 		$this->addSubscriptionApproveModal('', $user_id, $membership_type_id, $customer_db_setting_id, $header);
 	}
 
-	public function addSubscriptionApproveModal($payment_status_id='', $user_id='', $membership_type_id='', $customer_db_setting_ids='', $header='all-user')
+	public function addSubscriptionApproveModal($payment_status_id='', $user_id='', $membership_type_id='', $customer_db_setting_ids='', $header='subscription/1732351802222')
 	{
 		$this->common->checkSession(array('dialog'=>1));
 		$session_data = $this->common->loadSession();
@@ -172,9 +172,9 @@ class SubscriptionController extends CI_Controller {
 									if (empty($payment_status_id)):
 										$modal .= '<div class="col-lg-6">
 											<div class="mb-3">
-												<label class="form-label">Approval</label>
+												<label class="form-label">Approval Status</label>
 												<select id="active" name="active" class="form-select btn-pill">
-													<option selected disabled>Select Approval</option>';
+													<option selected disabled>Select Approval Status</option>';
 													if (isset($activeData)): foreach($activeData as $data):
 														$modal .= '<option value="'.$data->num.'">'.$data->name_two.'</option>';
 													endforeach; endif;
@@ -185,7 +185,7 @@ class SubscriptionController extends CI_Controller {
 								$modal .= '</div>
 							</div>
 							<div class="modal-footer">
-								<a href="#" class="btn btn-link link-secondary " data-bs-dismiss="modal">Cancel</a>
+								<a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
 								<button href="#" type="submit" class="btn btn-primary ms-auto btn-pill">
 									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>';
 									if (!empty($payment_status_id)):

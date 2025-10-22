@@ -175,6 +175,9 @@
 											<th>Amount</th>
 											<th>Status</th>
 											<th>Created At</th>
+											<?php if ($viewUserRight || $approveUserRight): ?>
+												<th>Actions</th>
+											<?php endif; ?>
 										</tr>
 									</thead>
 									<tbody class="table-tbody">
@@ -189,6 +192,23 @@
 												<td><?= $data->amount ?></td>
 												<td><?= get_table('m_payment_status', 'payment_status_id', $data->payment_status_id, 'name')?></td>
 												<td><?= date('d M Y', strtotime($data->created_at)) ?></td>
+												<?php if ($viewUserRight || $approveUserRight): ?>
+													<td>
+														<span class="dropdown">
+															<button class="btn dropdown-toggle" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
+															<div class="dropdown-menu dropdown-menu-end">
+																<!-- <a class="dropdown-item" onclick="viewSubscriptionModal('<?=$data->subscription_id?>')">View Subscription</a> -->
+																<?php if ($data->active == 0): ?>
+																	<a href="#" class="dropdown-item" onclick="approveSubscriptionModal('<?=$data->subscription_id?>', '<?=$data->payment_history_id?>')">
+																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg> Approve/View
+																	</a>
+																<?php endif; if ($data->payment_status_id != '1732371146921'): ?>
+																	<a class="dropdown-item" onclick="paymentInfoModal('<?=$data->user_id?>', '<?=$data->subscription_id?>')">Pay</a>
+																<?php endif; ?>
+															</div>
+														</span>
+													</td>
+												<?php endif; ?>
 											</tr>
 										<?php endforeach; endif; ?>
 									</tbody>
@@ -270,7 +290,7 @@
 
 							<div class="card-body border-bottom py-3">
 								<div class="table-responsive">
-									<table id="user-datatable" class="table table-vcenter text-nowrap">
+									<table id="user-<?=$membership->membership_type_id?>-datatable" class="table table-vcenter text-nowrap">
 										<thead>
 											<tr>
 												<th class="w-1">#</th>											
@@ -284,13 +304,13 @@
 												<th>Origin</th>
 												<th>Status</th>
 												<th>Created At</th>
-												<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
+												<?php if ($viewUserRight || $approveUserRight || $editUserRight || $removeUserRight): ?>
 													<th>Actions</th>	
 												<?php endif; ?>
 											</tr>
 										</thead>
 										<tbody class="table-tbody">
-											<?php $u = 0; if (isset($userArrayData[$membership->membership_type_id])): foreach ($userArrayData[$membership->membership_type_id] as $user): ?>
+											<?php $u = 0; if (isset($userArrayData[$membership->membership_type_id])): foreach ($userArrayData[$membership->membership_type_id] as $user): $paymentHistoryRow = get_table($customerDBSettingRow->database_name.'.payment_history', 'user_id', $user->user_id); ?>
 												<tr>
 													<td><?=++$u?>.</td>
 													<td><?=$user->full_legal_name?></td>
@@ -303,7 +323,7 @@
 													<td><?=get_table('m_user_origin', 'user_origin_id', $user->user_origin_id, 'name')?></td>
 													<td><?=get_table('m_active', 'num', $user->active, 'name_two')?></td>
 													<td><?=date_format(date_create($user->created_at),"y M d H:i:s")?></td>
-													<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
+													<?php if ($viewUserRight || $approveUserRight || $editUserRight || $removeUserRight): ?>
 														<td class="text-end">
 															<span class="dropdown">
 																<button class="btn dropdown-toggle align-text-top btn-pill" data-bs-boundary="viewport" data-bs-toggle="dropdown" aria-expanded="true">Actions</button>
@@ -314,8 +334,8 @@
 																		<a class="dropdown-item" onclick="editUserModal('<?=$user->user_id?>')">Update</a>
 																	<?php endif; if ($removeUserRight): ?>
 																		<a class="dropdown-item" onclick="removeUserModal('<?=$user->user_id?>')">Delete</a>
-																	<?php endif; if ($user->user_type_id == "1755383886420"): ?>
-																		<a class="dropdown-item" onclick="paymentInfoModal('<?=$user->user_id?>', '17072386410')">Pay</a>
+																	<?php endif; if ($paymentHistoryRow->payment_status_id != '1732371146921'): ?>
+																		<a class="dropdown-item" onclick="paymentInfoModal('<?=$user->user_id?>', '<?=$paymentHistoryRow->universal_id?>')">Pay</a>
 																	<?php endif; ?>
 																</div>
 															</span>
@@ -338,6 +358,9 @@
 	<script>
 		$(document).ready(function() {
 			overviewCard();
+			<?php if (isset($membershipTypeData)): foreach ($membershipTypeData as $membership): ?>
+				loadDataTable('user-<?=$membership->membership_type_id?>-datatable');
+			<?php endforeach; endif; ?>
 		});
 
 		function overviewCard() {

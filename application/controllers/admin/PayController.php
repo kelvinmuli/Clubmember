@@ -55,7 +55,7 @@ class PayController extends CI_Controller {
 									<h4 class="widget-title">Subscription Details</h4>
 									<p><strong>Club Name:</strong> '.$customerRow->full_legal_name.'</p>
 									<p><strong>Member Name:</strong> '.$userRow->full_legal_name.'</p>
-									<p><strong>Membership Type:</strong> '.$membershipFeeTypeRow->name.'</p>
+									<p><strong>Membership Type:</strong> '.($membershipFeeTypeRow->name ?? '').'</p>
 								</div>
 							</div>
 							<div class="modal-body">
@@ -108,7 +108,8 @@ class PayController extends CI_Controller {
 		// $customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
 		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
 		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
-		$ipayRow = $this->ipayPost($userRow->phone_number,$userRow->email,$paymentHistoryRow->bill_amount, $payment_history_id);
+		$customerDBSettingIdPaymentHistoryId = substr($customer_db_setting_id, -7).'C'.substr($payment_history_id, -7);
+		$ipayRow = $this->ipayPost($userRow->phone_number,$userRow->email,$paymentHistoryRow->bill_amount, $customerDBSettingIdPaymentHistoryId);
 		// $ipayRow = $this->ipayPost('072738079','ivickinya@gmail.com','10', generate_uuid());
 		$modal ='<div class="modal-dialog modal-lg" role="document">
 					<div class="modal-content">
@@ -120,10 +121,22 @@ class PayController extends CI_Controller {
 						<form id="pay-form" method="post" action="'.base_url('pay').'">
 							<div class="modal-body">
 								<iframe width="100%" height="550" src="https://payments.ipayafrica.com/v3/ke?live='.$ipayRow['live'].'&oid='.$ipayRow['oid'].'&inv='.$ipayRow['inv'].'&ttl='.$ipayRow['ttl'].'&tel='.$ipayRow['tel'].'&eml='.$ipayRow['eml'].'&vid='.$ipayRow['vid'].'&curr='.$ipayRow['curr'].'&p1='.$ipayRow['p1'].'&p2='.$ipayRow['p2'].'&p3='.$ipayRow['p3'].'&p4='.$ipayRow['p4'].'&cbk='.$ipayRow['cbk'].'&cst='.$ipayRow['cst'].'&crl='.$ipayRow['crl'].'&hsh='.$ipayRow['hsh'].'"  allowfullscreen></iframe>
+								<section class="panel-form-wrapper" hidden>
+									<div class="panel-sing-in">
+										<div class="row">
+											<div class="clear">
+												<h4 class="Titillium-Regular  capital  left " style="color: green;"> <i class="fa fa-check-circle" aria-hidden="true" style="font-size: 18px; color:green"></i> Your payment has been submitted successfully!</h4>
+												<br>
+												<label> You will receive a payment receipt on email for confirmation with details of your payment and a link to track the progress. For any question you may have for us. Please use the support link at the bottom of the page. </label>
+												<h4 class="Titillium-Regular  capital  left " style="color: #43ac6a;">Thank You.</h4><br>     
+											</div> 
+										</div>
+									</div>
+								</section>
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-								<!-- <button type="submit" class="btn btn-primary">Make payment now</button> -->
+								<a href="'.base_url('subscription/1732371146921').'" class="btn btn-primary">Back to subscription</a>
 							</div>
 						</form>
 					</div>
@@ -131,7 +144,7 @@ class PayController extends CI_Controller {
 		print_r($modal);
 	}
 
-	public function ipayPost($phone_no, $email, $amount, $payment_history_id = "") 
+	public function ipayPost($phone_no, $email, $amount, $customerDBSettingIdPaymentHistoryId = "") 
 	{
         $session_data = $this->common->loadSession();
        	$fields = array("live"=> "1",
@@ -146,7 +159,7 @@ class PayController extends CI_Controller {
                     "p1"=> "airtel",
                     "p2"=> "020102292999",
                     "p3"=>  $session_data['user_id'],
-                    "p4"=> $payment_history_id,
+                    "p4"=> $customerDBSettingIdPaymentHistoryId,
                     "cbk"=> base_url('callback'),
                     "cst"=> "1",
                     "crl"=> "0",
@@ -166,88 +179,25 @@ class PayController extends CI_Controller {
 
 	public function insertIpay()
     {
+		// $request  = '{"status":"aei7p7yrx4ae34","txncd":"TJLBX7YV29","msisdn_id":"KELVIN KELVIN","msisdn_idnum":"254726542690","p1":"airtel","p2":"020102292999","p3":"177038753942","p4":"6384290C1421760","uyt":"772938402","agt":"488511650","qwh":"2035065686","ifd":"1052563480","afd":"2107564989","poi":"248393003","id":"1760996212","ivm":"1760996212","mc":"1","channel":"MPESA","vat":"0.0032","commission":"0.020"}';
+		// $stringRequest = json_encode($request);
+		// $obj = json_decode($request);
 		$stringRequest = json_encode($_REQUEST);
 		$obj = json_decode($stringRequest);
-        if ($obj->channel == 'Credit_Card') {
-			$paymentMethodId = '';
-            $postArr = array(
-                'txncd' => $obj->txncd, 
-                'qwh' => $obj->qwh, 
-                'afd' => $obj->afd, 
-                'poi' => $obj->poi, 
-                'uyt' => $obj->uyt, 
-                'ifd' => $obj->ifd, 
-                'agt' => $obj->agt, 
-                'id' => $obj->id, 
-                'status' => $obj->status, 
-                'ivm' => $obj->ivm, 
-                'mc' => $obj->mc, 
-                'p1' => $obj->p1, 
-                'p2' => $obj->p2, 
-                'p3' => $obj->p3,
-                'p4' => $obj->p4,
-                'msisdn_id' => $obj->msisdn_id,
-                'msisdn_idnum' => $obj->msisdn_idnum,
-                'channel' => $obj->channel,
-                'tokenid' => $obj->tokenid,
-                'tokenemail' => $obj->tokenemail,
-                'card_mask' => $obj->card_mask
-                );
-        }
-		else
-		{
-			$paymentMethodId = '1700743964240';
-        	$postArr = array(
-                'txncd' => $obj->txncd, 
-                'qwh' => $obj->qwh, 
-                'afd' => $obj->afd, 
-                'poi' => $obj->poi, 
-                'uyt' => $obj->uyt, 
-                'ifd' => $obj->ifd, 
-                'agt' => $obj->agt, 
-                'id' => $obj->id, 
-                'status' => $obj->status, 
-                'ivm' => $obj->ivm, 
-                'mc' => $obj->mc, 
-                'p1' => $obj->p1, 
-                'p2' => $obj->p2, 
-                'p3' => $obj->p3,
-                'p4' => $obj->p4,
-                'msisdn_id' => $obj->msisdn_id,
-                'msisdn_idnum' => $obj->msisdn_idnum,
-                'channel' => $obj->channel,
-                'hsh' => $obj->hsh,
-        );
-    }
-
-    $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$stringRequest));
-	$paymentHistoryRow = $this->db->select('*')->from("payment_history")->where('payment_history_id', $obj->p4)->get()->row();
-    $this->db->update("payment_history", array('payment_state_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$obj->txncd, 'paid_amount'=>$paymentHistoryRow->bill_amount), array('payment_history_id'=>$obj->p4));
-
-    // redirect('payment-successful');
-
-        // print '<section class="panel-form-wrapper">
-		// 			<div class="panel-sing-in">
-		// 				<div class="row">
-
-		// 				<div class="clear">
-		// 						<h4 class="Titillium-Regular  capital  left " style="color: green;"> <i class="fa fa-check-circle" aria-hidden="true" style="font-size: 18px; color:green"></i> Your payment has been submitted successfully!
-		// 						</h4><br>
-									
-		// 							<label>
-		// 							You will receive a payment receipt on email for confirmation with details of your payment and a link to track the progress. For any question you may have for us. Please use the support link at the bottom of the page. 
-		// 							</label>
-
-		// 					<h4 class="Titillium-Regular  capital  left " style="color: #43ac6a;">Thank You.</h4><br>     
-		// 					</div>     
-					
-		// 				</div>
-		// 			</div>
-		// 		</section>';
-
+		$paymentMethodId = '1700743964240'; // Default to M-PESA
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$stringRequest));
+		$customerDBSettingIdPaymentHistoryId = explode('C', $obj->p4);
+		$customerDbSettingId = $customerDBSettingIdPaymentHistoryId[0];
+		$paymentHistoryId = $customerDBSettingIdPaymentHistoryId[1];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('customer_db_setting_id', $customerDbSettingId)->get()->row();	
+		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->like('payment_history_id', $paymentHistoryId)->get()->row();
+		$subscription = $this->db->update($customerDBSettingRow->database_name.'.subscription', array('payment_at'=>date('Y-m-d')), array('subscription_id'=>$paymentHistoryRow->universal_id));
+		$payment_history = $this->db->update($customerDBSettingRow->database_name.'.payment_history', array('payment_status_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$obj->txncd, 'paid_amount'=>$obj->mc), array('payment_history_id'=>$paymentHistoryRow->payment_history_id));
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'paymentHistoryRow -> '.json_encode($paymentHistoryRow)));
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'subscription -> '.$subscription));
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'payment_history -> '.$payment_history));
 		// $subscriptionData = $this->db->select('*')->from('club_subscription')->where('subscription_id', $obj->p4)->get()->row();
-		//  $memberData = $this->db->select('*')->from('users')->where('user_id', $subscriptionData->member_userid)->get()->row();
+		// $memberData = $this->db->select('*')->from('users')->where('user_id', $subscriptionData->member_userid)->get()->row();
 		// $this->send_mail($memberData->email,$memberData->name,$subscriptionData->member,$subscriptionData->subscription_id,$subscriptionData->amount,$subscriptionData->membership_fee_type,$subscriptionData->payment_method,$subscriptionData->txncd);
-		
 	}
 }

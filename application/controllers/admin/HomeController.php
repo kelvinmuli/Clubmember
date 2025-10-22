@@ -59,6 +59,8 @@ class HomeController extends CI_Controller {
 		$data['customerData'] = $customerData ?? [];
 		$data['userArrayData'] = $userArrayData ?? [];
 		$data['total_customers'] = count($customerData);
+		print_r(json_encode($data['subscriptionData']));
+		exit;
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('admin/home_view', $data);

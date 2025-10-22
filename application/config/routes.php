@@ -152,10 +152,9 @@ $route['payment-info-modal/(:any)/(:any)'] = 'admin/PayController/paymentInfoMod
 $route['pay-modal/(:any)'] = 'admin/PayController/payModal/$1';
 $route['pay-modal/(:any)/(:any)'] = 'admin/PayController/payModal/$1/$2';
 $route['pay'] = 'admin/SubscriptionController/pay';
+$route['callback'] = 'admin/PayController/insertIpay';
 
 
-
-$route['callback'] = 'Mpesa/insertIpay';
 $route['logout'] = 'front/Signup/logout';
 
 /*
