@@ -761,6 +761,151 @@ if (!function_exists('do_file_upload'))
 	}
 }
 
+if (!function_exists('check_file_exists')) 
+{
+	/**
+	 * Check whether a file exists locally or (optionally) remotely.
+	 * - Supports relative paths under FCPATH (e.g., assets/img/logo.png)
+	 * - Supports absolute local paths (e.g., C:\www\site\assets\img\logo.png)
+	 * - Strips base_url() from same-site URLs to resolve to a local file
+	 * - Optionally verifies remote URLs via a fast HEAD request when $allowRemote is true
+	 *
+	 * @param string $pathOrUrl      File path or URL to check
+	 * @param bool   $allowRemote    When true, perform a HEAD request for http(s) URLs
+	 * @return bool                  True if the file is found; otherwise false
+	 */
+	function check_file_exists($pathOrUrl, $allowRemote = false)
+	{
+		if (empty($pathOrUrl) || !is_string($pathOrUrl)) return false;
+		$target = trim($pathOrUrl);
+
+	// Normalize directory separators for local checks
+	$normalized = str_replace(['\\'], ['/' ], $target);
+
+		// If it's a same-site absolute URL, strip base_url to get a relative path
+		$ci = function_exists('get_instance') ? get_instance() : null;
+		if (function_exists('base_url')) {
+			$base = rtrim(base_url(), '/');
+			if (stripos($normalized, $base) === 0) {
+				$normalized = ltrim(substr($normalized, strlen($base)), '/');
+			}
+		}
+
+	// Remove query string or fragment for filesystem checks
+	$normalizedNoQuery = preg_replace('/[?#].*$/', '', $normalized);
+
+	// If now relative (no scheme and not an absolute Windows path), resolve under FCPATH
+	$isHttp = preg_match('#^https?://#i', $normalized) === 1;
+		$isWinAbs = preg_match('#^[a-zA-Z]:/#', $normalized) === 1;
+		$isUnixAbs = substr($normalized, 0, 1) === '/';
+
+		// 1) Try local relative path under FCPATH
+		if (!$isHttp && !$isWinAbs && !$isUnixAbs) {
+			$full = rtrim(FCPATH, '/\\') . '/' . ltrim($normalizedNoQuery, '/');
+			if (is_file($full)) return true;
+		}
+
+		// 2) Try absolute local path (Unix/Windows)
+		if (!$isHttp && is_file($normalizedNoQuery)) return true;
+
+		// 3) Remote URL (optional)
+		if ($isHttp && $allowRemote) {
+			// Prefer cURL for a HEAD request
+			if (function_exists('curl_init')) {
+				$ch = curl_init($target);
+				curl_setopt($ch, CURLOPT_NOBODY, true);
+				curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+				curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+				curl_exec($ch);
+				$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+				curl_close($ch);
+				return ($code >= 200 && $code < 400);
+			} else {
+				$headers = @get_headers($target, 1);
+				if (is_array($headers) && isset($headers[0])) {
+					return (bool)preg_match('/\s(2\d\d|3\d\d)\b/', $headers[0]);
+				}
+			}
+		}
+
+		return false;
+	}
+}
+
+if (!function_exists('file_upload')) 
+{
+	function file_upload($column, $file_name='', $path='assets/img/')
+	{
+		// Default to returning the directory (legacy behavior) if nothing uploaded
+		$result = rtrim($path, "/\\/ ").'/';
+
+		// Validate file presence and PHP upload status first
+		if (!isset($_FILES[$column]) || empty($_FILES[$column]['name']) || (isset($_FILES[$column]['error']) && $_FILES[$column]['error'] !== UPLOAD_ERR_OK)) {
+			return $result;
+		}
+
+		// Normalize path and build absolute upload path
+		$relativePath = trim($path);
+		if ($relativePath === '') { 
+			$relativePath = 'assets/img/'; 
+		}
+		$relativePath = rtrim(str_replace('\\', '/', $relativePath), '/').'/';
+		$absoluteBase = defined('FCPATH') ? rtrim(FCPATH, '/\\') : rtrim(str_replace('\\', '/', getcwd()), '/');
+		$uploadDir = $absoluteBase . '/' . $relativePath;
+
+		// Ensure target directory exists (recursively)
+		if (!is_dir($uploadDir)) {
+			@mkdir($uploadDir, 0777, true);
+		}
+
+		$ci =& get_instance();
+		$originalName = $_FILES[$column]['name'];
+		$extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+
+		// Configure CI Upload
+		$config = array();
+		$config['upload_path']      = $uploadDir;              // absolute path required by CI Upload
+		$config['allowed_types']    = 'gif|jpg|jpeg|png|iso|dmg|zip|rar|doc|docx|xls|xlsx|xlsm|ppt|pptx|csv|ods|odt|odp|pdf|rtf|sxc|sxi|txt|exe|avi|mpeg|mp3|mp4|3gp';
+		$config['max_size']         = 100000;                  // ~100MB
+		$config['overwrite']        = TRUE;
+		$config['remove_spaces']    = TRUE;
+		$config['file_ext_tolower'] = TRUE;
+
+		if (!empty($file_name)) {
+			// Sanitize provided file name (strip path, keep alphanum, dash, underscore, dot)
+			$file_name = basename($file_name);
+			$file_name = preg_replace('/[^A-Za-z0-9._-]/', '_', $file_name);
+			if ($extension) {
+				$providedExt = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+				if ($providedExt !== $extension) {
+					// Remove provided extension (if any) then add the real one
+					if ($providedExt) {
+						$file_name = substr($file_name, 0, -(strlen($providedExt) + 1));
+					}
+					$file_name .= '.'.$extension;
+				}
+			}
+			$config['file_name']    = $file_name;
+			$config['encrypt_name'] = FALSE; // honor supplied name
+		} else {
+			$config['encrypt_name'] = TRUE; // random naming when no name supplied
+		}
+
+		// Always initialize the upload library in case it was loaded before with other settings
+		$ci->load->library('upload');
+		$ci->upload->initialize($config, TRUE);
+
+		if ($ci->upload->do_upload($column)) {
+			$data = $ci->upload->data();
+			// Return relative path suitable for base_url()
+			$result = $relativePath.$data['file_name'];
+		}
+
+		return $result;
+	}
+}
+
 if (!function_exists('get_user_right')) 
 {
 	function get_user_right($param1 = '', $param2 = '', $column = '', $param3 = 0)

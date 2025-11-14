@@ -74,6 +74,7 @@ $route['forgot-password-now'] = 'admin/AuthController/resetPasswordNow';
 */
 $route['all-user/(:any)'] = 'admin/UserController/userView/$1';
 $route['all-user/(:any)/(:any)'] = 'admin/UserController/userView/$1/$2';
+$route['member/(:any)'] = 'admin/UserController/memberView/$1';
 $route['member/(:any)/(:any)'] = 'admin/UserController/memberView/$1/$2';
 $route['profile'] = 'admin/UserController/profileView';
 $route['profile/(:any)'] = 'admin/UserController/profileView/$1';
@@ -138,6 +139,8 @@ $route['subscription/(:any)'] = 'admin/SubscriptionController/subscriptionView/$
 $route['add-subscription-modal'] = 'admin/SubscriptionController/addSubscriptionModal';
 $route['add-subscription-modal/(:any)'] = 'admin/SubscriptionController/addSubscriptionModal/$1';
 $route['add-subscription'] = 'admin/SubscriptionController/addSubscription';
+$route['view-subscription-modal/(:any)'] = 'admin/SubscriptionController/viewSubscriptionModal/$1';
+$route['view-subscription-modal/(:any)/(:any)'] = 'admin/SubscriptionController/viewSubscriptionModal/$1/$2';
 $route['subscription-approval-modal/(:any)/(:any)/(:any)'] = 'admin/SubscriptionController/subscriptionApprovalModal/$1/$2/$3';
 $route['subscription-approval-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/SubscriptionController/subscriptionApprovalModal/$1/$2/$3/$4';
 $route['subscription-approval-modal/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/SubscriptionController/subscriptionApprovalModal/$1/$2/$3/$4/$5';
@@ -156,6 +159,88 @@ $route['callback'] = 'admin/PayController/insertIpay';
 
 
 $route['logout'] = 'front/Signup/logout';
+
+/*
+* admin/AGMMinutesController
+*/
+$route['agm-minutes'] = 'admin/AgmMinutesController/agmMinutesView';
+$route['add-agm-minutes-modal'] = 'admin/AgmMinutesController/addAgmMinutesModal';
+$route['add-agm-minutes'] = 'admin/AgmMinutesController/addAgmMinutes';
+$route['view-agm-minutes-modal/(:any)'] = 'admin/AgmMinutesController/viewAgmMinutesModal/$1';
+$route['edit-agm-minutes-modal/(:any)'] = 'admin/AgmMinutesController/editAgmMinutesModal/$1';
+$route['edit-agm-minutes'] = 'admin/AgmMinutesController/editAgmMinutes';
+$route['remove-agm-minutes-modal/(:any)'] = 'admin/AgmMinutesController/removeAgmMinutesModal/$1';
+$route['remove-agm-minutes'] = 'admin/AgmMinutesController/removeAgmMinutes';
+
+/*
+* admin/NewsletterController
+*/
+$route['newsletter'] = 'admin/NewsletterController/newsletterView';
+$route['add-newsletter-modal'] = 'admin/NewsletterController/addNewsletterModal';
+$route['add-newsletter'] = 'admin/NewsletterController/addNewsletter';
+$route['view-newsletter-modal/(:any)'] = 'admin/NewsletterController/viewNewsletterModal/$1';
+$route['edit-newsletter-modal/(:any)'] = 'admin/NewsletterController/editNewsletterModal/$1';
+$route['edit-newsletter'] = 'admin/NewsletterController/editNewsletter';
+$route['remove-newsletter-modal/(:any)'] = 'admin/NewsletterController/removeNewsletterModal/$1';
+$route['remove-newsletter'] = 'admin/NewsletterController/removeNewsletter';
+
+/*
+* admin/ProjectController
+*/
+$route['projects'] = 'admin/ProjectController/projectView';
+$route['projects/(:any)'] = 'admin/ProjectController/projectView/$1';
+$route['project'] = 'admin/ProjectController/projectView';
+$route['project/(:any)'] = 'admin/ProjectController/projectView/$1';
+$route['add-project-modal'] = 'admin/ProjectController/addProjectModal';
+$route['add-project'] = 'admin/ProjectController/addProject';
+$route['view-project-modal/(:any)'] = 'admin/ProjectController/viewProjectModal/$1';
+$route['edit-project-modal/(:any)'] = 'admin/ProjectController/editProjectModal/$1';
+$route['edit-project'] = 'admin/ProjectController/editProject';
+$route['remove-project-modal/(:any)'] = 'admin/ProjectController/removeProjectModal/$1';
+$route['remove-project'] = 'admin/ProjectController/removeProject';
+
+/*
+* admin/PetitionSetupController
+*/
+$route['petition-setup'] = 'admin/PetitionSetupController/petitionSetupView';
+$route['add-petition-setup-modal'] = 'admin/PetitionSetupController/addPetitionSetupModal';
+$route['add-petition-setup'] = 'admin/PetitionSetupController/addPetitionSetup';
+$route['view-petition-modal/(:any)'] = 'admin/PetitionSetupController/viewPetitionModal/$1';
+$route['edit-petition-setup-modal/(:any)'] = 'admin/PetitionSetupController/editPetitionSetupModal/$1';
+$route['edit-petition-setup'] = 'admin/PetitionSetupController/editPetitionSetup';
+$route['remove-petition-setup-modal/(:any)'] = 'admin/PetitionSetupController/removePetitionSetupModal/$1';
+$route['remove-petition-setup'] = 'admin/PetitionSetupController/removePetitionSetup';
+$route['petition-signatures/(:any)'] = 'admin/PetitionSetupController/petitionSignatureView/$1';
+$route['add-petition-signature-modal/(:any)'] = 'admin/PetitionSetupController/addPetitionSignatureModal/$1';
+$route['add-petition-signature'] = 'admin/PetitionSetupController/addPetitionSignature';
+$route['edit-petition-signature-modal/(:any)'] = 'admin/PetitionSetupController/editPetitionSignatureModal/$1';
+$route['edit-petition-signature'] = 'admin/PetitionSetupController/editPetitionSignature';
+$route['remove-petition-signature-modal/(:any)'] = 'admin/PetitionSetupController/removePetitionSignatureModal/$1';
+$route['remove-petition-signature'] = 'admin/PetitionSetupController/removePetitionSignature';
+
+
+/*
+* admin/PaymentHistoryController
+*/
+$route['payment-history'] = 'admin/PaymentHistoryController/paymentHistoryView';
+$route['payment-history/(:any)'] = 'admin/PaymentHistoryController/paymentHistoryView/$1';
+$route['payment-history/(:any)/(:any)'] = 'admin/PaymentHistoryController/paymentHistoryView/$1/$2';
+$route['payment-receipt-modal/(:any)/(:any)'] = 'admin/PaymentHistoryController/paymentReceiptModal/$1/$2';
+
+/*
+*
+* admin/SecurityIncidentController
+*/
+$route['security-incident'] = 'admin/SecurityIncidentController/securityIncidentView';
+$route['security-incidents'] = 'admin/SecurityIncidentController/securityIncidentView';
+$route['security-incident/(:any)'] = 'admin/SecurityIncidentController/securityIncidentView/$1';
+$route['add-security-incident-modal'] = 'admin/SecurityIncidentController/addSecurityIncidentModal';
+$route['add-security-incident'] = 'admin/SecurityIncidentController/addSecurityIncident';
+$route['view-security-incident-modal/(:any)'] = 'admin/SecurityIncidentController/viewSecurityIncidentModal/$1';
+$route['edit-security-incident-modal/(:any)'] = 'admin/SecurityIncidentController/editSecurityIncidentModal/$1';
+$route['edit-security-incident'] = 'admin/SecurityIncidentController/editSecurityIncident';
+$route['remove-security-incident-modal/(:any)'] = 'admin/SecurityIncidentController/removeSecurityIncidentModal/$1';
+$route['remove-security-incident'] = 'admin/SecurityIncidentController/removeSecurityIncident';
 
 /*
 * admin/DatabaseController
@@ -236,3 +321,9 @@ $route['customer-db-config'] = 'admin/DatabaseController';
 $route['create-customer-database'] = 'admin/DatabaseController/createCustomerDatabase';
 $route['customer-db-setup'] = 'admin/DatabaseController/create';
 $route['create-database'] = 'admin/DatabaseController/create_database';
+
+
+/*
+* admin/GlobalController
+*/
+$route['remove-global-data'] = 'admin/GlobalController/removeGlobalData';

@@ -28,18 +28,27 @@ class HomeController extends CI_Controller {
 		$session_data = $this->common->loadSession();
 		$headerData = $this->common->loadHeaderData('dashboard');
 		
-
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		// print_r($customerDBSettingRow); exit;
 		if ($session_data['customer_db_setting_id'] == GlobalModel::DEFAULT_CORE_DB_SETTING)
 		{
 			$customerData = $this->db->select('*')->from('customer')->where('active', 1)->get()->result();
+			$memberData = $this->db->select('*')->from('user')->where('user_type_id', '1755383886420')->where('active', 1)->get()->result();
+			//This year new members
+			$memberDataThisYear = $this->db->select('*')->from('user')->where('user_type_id', '1755383886420')->where('active', 1)->where('created_at', '>=', date('Y-m-d H:i:s', strtotime('first day of this year')))->get()->result();
+			$userActiveData = $this->db->select('*')->from('user')->where('active', 1)->order_by('created_at', 'DESC')->get()->result();
+			$userInactiveData = $this->db->select('*')->from('user')->where('active', 1)->order_by('created_at', 'DESC')->get()->result();
 		}
 		else
 		{
 			$customerData = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->where('active', 1)->get()->result();
 			$data['membershipTypeData'] = $this->db->select('*')->from('m_membership_type')->where('active',1)->get()->result();
+			$userActiveData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('active', 1)->order_by('created_at', 'DESC')->get()->result();
+			$userInactiveData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('active', 0)->limit(5)->order_by('created_at', 'DESC')->get()->result();
 			$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('active', 0)->limit(5)->order_by('created_at', 'DESC')->get()->result();
+			$memberData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', '1755383886420')->where('active', 1)->get()->result();
+			//This year new members
+			$memberDataThisYear = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', '1755383886420')->where('active', 1)->where('created_at', '>=', date('Y-m-d H:i:s', strtotime('first day of this year')))->get()->result();
 			foreach ($userData as $value) {
 				$userArrayData[$value->membership_type_id == 'N/A' ? '1755813965588' : $value->membership_type_id][] = $value;
 			}
@@ -53,14 +62,22 @@ class HomeController extends CI_Controller {
 		{
 			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('s.user_id', $session_data['user_id'])->where('s.active', 1)->get()->result();
 		}
+
+		$data['agmMinutesData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.agm_minutes')->where('active', 1)->limit(3)->order_by('created_at', 'DESC')->get()->result();
+		$data['newsletterData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.newsletter')->where('active', 1)->limit(4)->order_by('created_at', 'DESC')->get()->result();
 		$data['subscriptionData'] = $subscriptionData ?? [];
 		$data['customer_db_setting_id'] = $session_data['customer_db_setting_id'];
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
 		$data['customerData'] = $customerData ?? [];
 		$data['userArrayData'] = $userArrayData ?? [];
 		$data['total_customers'] = count($customerData);
-		print_r(json_encode($data['subscriptionData']));
-		exit;
+		$data['totalMembers'] = count($memberData);
+		$data['totalMembersThisYear'] = count($memberDataThisYear);
+		$data['totalSubscription'] = count($subscriptionData ?? []);
+		$data['totalActiveUsers'] = count($userActiveData ?? []);
+		$data['totalInactiveUsers'] = count($userInactiveData ?? []);
+		// print_r(json_encode($data['subscriptionData']));
+		// exit;
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('admin/home_view', $data);
@@ -81,7 +98,8 @@ class HomeController extends CI_Controller {
 						<div class="card-body">
 							<div class="row align-items-center">
 								<div class="col-auto">
-									<span class="bg-primary text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/currency-dollar -->
+									<span class="bg-primary text-white avatar">
+										<!-- Download SVG icon from http://tabler.io/icons/icon/currency-dollar -->
 										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
 											<path d="M20.925 13.163a8.998 8.998 0 0 0 -8.925 -10.163a9 9 0 0 0 0 18"></path>
 											<path d="M9 10h.01"></path>
@@ -105,7 +123,8 @@ class HomeController extends CI_Controller {
 							<div class="card-body">
 								<div class="row align-items-center">
 									<div class="col-auto">
-										<span class="bg-x text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
+										<span class="bg-x text-white avatar">
+											<!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
 												<path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9z"></path>
 												<path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
@@ -123,8 +142,15 @@ class HomeController extends CI_Controller {
 		endforeach; endif;
 
 		if (!empty(get_user_right($user_type_id, '17072386410', 'view', 1))): foreach ($paymentStatusData as $paymentStatus):
-			$subscriptionPaymentHistoryData = [];
-			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->get()->result();
+			$subscriptionData = []; $subscriptionPaymentHistoryData = [];
+			if ($session_data['user_type_id'] == GlobalModel::CLUB_ADMIN_TYPE)
+			{
+				$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('ph.payment_status_id', $paymentStatus->payment_status_id)->where('s.active', 1)->get()->result();
+			}
+			elseif ($session_data['user_type_id'] == GlobalModel::MEMBER_TYPE)
+			{
+				$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('s.user_id', $session_data['user_id'])->where('ph.payment_status_id', $paymentStatus->payment_status_id)->where('s.active', 1)->get()->result();
+			}
 			foreach ($subscriptionData as $value) {
 				$subscriptionPaymentHistoryData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('module_id', '17072386410')->where('universal_id', $value->subscription_id)->where('payment_status_id', $paymentStatus->payment_status_id)->get()->result();
 			}
@@ -133,7 +159,8 @@ class HomeController extends CI_Controller {
 							<div class="card-body">
 								<div class="row align-items-center">
 									<div class="col-auto">
-										<span class="bg-x text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
+										<span class="bg-x text-white avatar">
+											<!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
 												<path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9z"></path>
 												<path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
@@ -148,7 +175,29 @@ class HomeController extends CI_Controller {
 							</div>
 						</div>
 					</div>';
-		endforeach; endif;
+		endforeach; 
+			$modal .='<div class="col-sm-6 col-lg-3">
+						<div class="card card-sm">
+							<div class="card-body">
+								<div class="row align-items-center">
+									<div class="col-auto">
+										<span class="bg-x text-white avatar">
+											<!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+												<path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9z"></path>
+												<path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
+											</svg>
+										</span>
+									</div>
+									<div class="col">
+										<div class="font-weight-medium">'.count($subscriptionData ?? []).' Subscriptions</div>
+										<div class="text-secondary">Total Subscriptions</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>';
+		endif;
 
 		if (!empty(get_user_right($user_type_id, '17092385318', 'view', 1))): foreach ($paymentStatusData as $paymentStatus):
 			$modal .='<div class="col-sm-6 col-lg-3">
@@ -156,7 +205,8 @@ class HomeController extends CI_Controller {
 							<div class="card-body">
 								<div class="row align-items-center">
 									<div class="col-auto">
-										<span class="bg-x text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
+										<span class="bg-x text-white avatar">
+											<!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
 												<path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9z"></path>
 												<path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
@@ -179,7 +229,8 @@ class HomeController extends CI_Controller {
 							<div class="card-body">
 								<div class="row align-items-center">
 									<div class="col-auto">
-										<span class="bg-x text-white avatar"><!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
+										<span class="bg-x text-white avatar">
+										<!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
 											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
 												<path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9z"></path>
 												<path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
@@ -195,7 +246,6 @@ class HomeController extends CI_Controller {
 						</div>
 					</div>';
 		endforeach; endif;
-
 		print_r($modal);
 	}
 }

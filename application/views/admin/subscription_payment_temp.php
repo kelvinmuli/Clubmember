@@ -111,15 +111,23 @@
                     <tr>
                       <td bgcolor="#ffffff" align="left" style="padding:0; color: #666666; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400;-webkit-font-smoothing:antialiased;">
 
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:700;line-height:170%;">New Subscription : <?=$membershipTypeName?></p>
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">
+                            A new <?=$membershipTypeName?> Subscription has been added to your account for the <?=$club_name?>.
+                          </p><br>
 
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><?=$club_name?> has added a new subscription by <?=$member_name?>. Please login to pay for the subscription.</p><br>
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Price:</b>   <?=$amount?></p>
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Total:</b> <?=$amount?></p>
+                          
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Amount Due:</b>   <?=$amount?></p>
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Due Date:</b> <?= date('jS M Y', strtotime($payment_at)); ?></p>
 
                           <br>
 
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">Thank you for your support of the club.</p>
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">To complete your payment:<br>
+                          Visit the url: <a href="https://nmra.clubmember.app/v1/login/1705386384290" target="_blank">https://nmra.clubmember.app/v1/login/1705386384290</a><br>
+                          Login to your ClubMember.app account with the password you just set up.<br>
+                          Head to the Subscriptions section.<br>
+                          Follow the prompts to pay securely.<br><br>
+                          Your support helps keep the association running smoothly — thank you!
+                          </p>
                                                                             
                   <tr>
                     <td align="center">

@@ -46,53 +46,52 @@ class PayController extends CI_Controller {
 							<h5 class="modal-title">Pay</h5>
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
-
 						
-							<div class="modal-body">
-								<input type="hidden" name="user_id" value="'.$user_id.'">
-								<input type="hidden" name="universal_id" value="'.$universal_id.'">
-								<div class="col-sm-8 col-xs-6">
-									<h4 class="widget-title">Subscription Details</h4>
-									<p><strong>Club Name:</strong> '.$customerRow->full_legal_name.'</p>
-									<p><strong>Member Name:</strong> '.$userRow->full_legal_name.'</p>
-									<p><strong>Membership Type:</strong> '.($membershipFeeTypeRow->name ?? '').'</p>
+						<div class="modal-body">
+							<input type="hidden" name="user_id" value="'.$user_id.'">
+							<input type="hidden" name="universal_id" value="'.$universal_id.'">
+							<div class="col-sm-8 col-xs-6">
+								<h4 class="widget-title">Subscription Details</h4>
+								<p><strong>Club Name:</strong> '.$customerRow->full_legal_name.'</p>
+								<p><strong>Member Name:</strong> '.$userRow->full_legal_name.'</p>
+								<p><strong>Membership Type:</strong> '.($membershipFeeTypeRow->name ?? '').'</p>
+							</div>
+						</div>
+						<div class="modal-body">
+							<div class="col-sm-4 col-xs-6">
+								<h4 class="widget-title">Payment Details:</h4>
+								<div class="clearfix">
+									<p class="pull-left">Total Due:</p>
+									<p class="pull-right">'.get_table('m_currency', 'currency_id', $paymentHistoryRow->currency_id, 'sign').'  '.$paymentHistoryRow->bill_amount.'  </p>
 								</div>
 							</div>
-							<div class="modal-body">
-								<div class="col-sm-4 col-xs-6">
-									<h4 class="widget-title">Payment Details:</h4>
-									<div class="clearfix">
-										<p class="pull-left">Total Due:</p>
-										<p class="pull-right">'.get_table('m_currency', 'currency_id', $paymentHistoryRow->currency_id, 'sign').'  '.$paymentHistoryRow->bill_amount.'  </p>
+						</div>
+						<div class="modal-body">
+							<div class="row">
+								<div class="col-lg-6">
+									<div class="mb-3">
+										<label for="category_name">Phone Number: Eg.(254700000000)</label>
+										<input type="text" class="form-control remove-sharp" name="phone_no" id="phone_no" value="'.$userRow->phone_number.'">
+									</div>
+								</div>
+								<div class="col-lg-6">
+									<div class="mb-3">
+										<label for="category_name">Email Address</label>
+										<input type="email" class="form-control" name="email" id="email" value="'.$userRow->email.'">
+									</div>
+								</div>
+								<div class="col-lg-6">
+									<div class="mb-3">
+										<label for="category_name">Amount to Pay (Ksh)</label>
+										<input class="form-control" name="amount" id="amount" value="'.$paymentHistoryRow->bill_amount.'">
 									</div>
 								</div>
 							</div>
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="category_name">Phone Number: Eg.(254700000000)</label>
-											<input type="text" class="form-control remove-sharp" name="phone_no" id="phone_no" value="'.$userRow->phone_number.'">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="category_name">Email Address</label>
-											<input type="email" class="form-control" name="email" id="email" value="'.$userRow->email.'">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="category_name">Amount to Pay (Ksh)</label>
-											<input class="form-control" name="amount" id="amount" value="'.$paymentHistoryRow->bill_amount.'">
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-								<button type="submit" class="btn btn-primary" onclick="payModal(\''.$user_id.'\', \''.$paymentHistoryRow->payment_history_id.'\')">Make payment now</button>
-							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<button type="submit" class="btn btn-primary" onclick="payModal(\''.$user_id.'\', \''.$paymentHistoryRow->payment_history_id.'\')">Make payment now</button>
+						</div>
 					</div>
 				</div>';
 		print_r($modal);

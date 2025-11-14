@@ -139,7 +139,8 @@ class Common
     }
     
 	
-	function sendMail($to,$subject,$message){
+	function sendMail($to,$subject,$message)
+	{
         $this->ci->load->library('phpmailer_lib');
         $mail = $this->ci->phpmailer_lib->load();
 

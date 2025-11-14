@@ -108,31 +108,22 @@
                                             </tr>
                           <tr>
                             <td bgcolor="#ffffff" align="left" style="padding:0; color: #666666; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400;-webkit-font-smoothing:antialiased;"> 
-                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"> You have been added to the <?=$club_name?> - ClubMember App</p>
+                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"> Great news — your account has been approved for the <?=$club_name?> on ClubMember.app!</p>
                                                  <br>
                                                 
 
                                                 <br>
-                                                <p>
-                                                  Please set your account password to get access to the <?=$club_name?> -  ClubMember App where you can make bookings and pay for subscriptions and much more.
+                                                <p><b>To get started:</b></p>
+                                                <p>1. Confirm your email address by clicking the link below (within 48 hours).<br>
+                                                2. Set your password to activate your account.<br>
+                                                3. Once done, you can <b>log in anytime</b> to pay your subscriptions, and explore member features.
                                                 </p>
 
-                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">Please confirm that this is your email address by clicking on the link below <a style="color: #00bc87;text-decoration: underline;"" target="_blank" href="<?=$url?>"></a> within 48&nbsp;hours.</p>
-																								<a style="color: #00bc87; text-decoration: underline;" target="_blank" href="<?=$url?>"></a>
-																								<p>Then after resetting use this link to login: <a style="color: #00bc87; text-decoration: underline;" target="_blank" href="<?=base_url('nmra')?>"></a></p>
+                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">If you have any questions or need help, feel free to reach out.</p>
+																								
+																								<p>Welcome aboard!</p>
 
-                                                <p>Thank you!</p>
-
-                                                <!--  <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">To login, Click on the button below and enter your credentials:</p>
-                                                 <br> -->
-                                                
-
-                                                 <!-- <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Username:</b> <?//=$email?></p>
-
-                                                 <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Password:</b><?//=$pass?> </p> -->
-
-
-
+                                                <p>— New Muthaiga Residents Association</p>
 
                                                <p style="margin:0;margin-top:20px;line-height:0;"></p>
                                                
@@ -145,7 +136,7 @@
                                                     <td align="center" style="padding: 33px 0 33px 0;">
                                                       <table border="0" cellspacing="0" cellpadding="0" width="100%">
                                                         <tr>
-                                                           <td align="center" style="border-radius: 4px;" bgcolor="#00bc87"><a href="<?=$url?>" style="text-transform:uppercase;background:#00bc87;font-size: 13px; font-weight: 700; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none !important; padding: 20px 25px; border-radius: 4px; border: 1px solid #00bc87; display: block;-webkit-font-smoothing:antialiased;" target="_blank"><span style="color: #ffffff;text-decoration: none;">Set Password Now</span></a></td>
+                                                           <td align="center" style="border-radius: 4px;" bgcolor="#00bc87"><a href="<?=$url?>" style="text-transform:uppercase;background:#00bc87;font-size: 13px; font-weight: 700; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none !important; padding: 20px 25px; border-radius: 4px; border: 1px solid #00bc87; display: block;-webkit-font-smoothing:antialiased;" target="_blank"><span style="color: #ffffff;text-decoration: none;">Set Your Password Now </span></a></td>
                                                         </tr>
                                                       </table>
                                                     </td>

@@ -224,12 +224,12 @@ class SubscriptionController extends CI_Controller {
 				$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
 				$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
 				$htmlApprovalNotification = $this->load->view('admin/club_member_temp', array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
-				$this->common->sendMail($userRow->email, 'Approval Notification', $htmlApprovalNotification);
+				$this->common->sendMail($userRow->email, 'Action Required - Your New Muthaiga Residents Association ClubMember.app Account Activation', $htmlApprovalNotification);
 
 				$membershipTypeName = get_table('m_membership_type', 'membership_type_id', $userRow->membership_type_id, 'name');
-				$htmlSubscriptionPayment = $this->load->view('admin/subscription_payment_temp', array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$postData['amount'], 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
-				$this->common->sendMail($userRow->email, 'Subscription Payment', $htmlSubscriptionPayment);
-			}
+				$htmlSubscriptionPayment = $this->load->view('admin/subscription_payment_temp', array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$postData['amount'], 'payment_at'=>$postData['payment_at'], 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
+				$this->common->sendMail($userRow->email, 'New Muthaiga Residents Association Subscription Payment Required', $htmlSubscriptionPayment);
+			} 
 			else
 			{
 				$description = 'Subscription added successfully.';
@@ -251,6 +251,112 @@ class SubscriptionController extends CI_Controller {
 			$route = 'dashboard';
 		}
 		redirect($route, 'refresh');
+	}
+
+	public function viewSubscriptionModal($subscription_id = null, $payment_history_id = null)
+	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+		$customer_db_setting_id = $session_data['customer_db_setting_id'];
+
+		$data = [
+			'subscriptionRow' => null,
+			'paymentHistoryRow' => null,
+			'memberRow' => null,
+			'membershipFeeTypeName' => 'Not specified',
+			'currencyName' => '',
+			'currencySign' => '',
+			'paymentStatusName' => 'Not recorded',
+			'paymentStatusClass' => 'bg-blue-lt',
+			'paymentMethodName' => 'Not recorded',
+		];
+
+		$customerDBSettingRow = $this->db->select('*')
+			->from('customer_db_setting')
+			->where('customer_db_setting_id', $customer_db_setting_id)
+			->get()
+			->row();
+
+		if ($customerDBSettingRow) {
+			$tenantDatabase = $customerDBSettingRow->database_name;
+
+			if (!empty($subscription_id)) {
+				$subscriptionRow = $this->db->from($tenantDatabase . '.subscription')
+					->where('subscription_id', $subscription_id)
+					->get()
+					->row();
+
+				if ($subscriptionRow) {
+					$data['subscriptionRow'] = $subscriptionRow;
+
+					$memberId = $subscriptionRow->user_id ?? null;
+					if (!empty($memberId)) {
+						$memberRow = $this->db->from($tenantDatabase . '.user')
+							->where('user_id', $memberId)
+							->get()
+							->row();
+						if ($memberRow) {
+							$data['memberRow'] = $memberRow;
+						}
+					}
+
+					$feeTypeId = $subscriptionRow->membership_fee_type_id ?? null;
+					if (!empty($feeTypeId)) {
+						$feeTypeName = get_table($tenantDatabase . '.membership_fee_type', 'membership_fee_type_id', $feeTypeId, 'name');
+						if (!empty($feeTypeName)) {
+							$data['membershipFeeTypeName'] = $feeTypeName;
+						}
+					}
+
+					$currencyId = $subscriptionRow->currency_id ?? null;
+					if (!empty($currencyId)) {
+						$currencyName = get_table('m_currency', 'currency_id', $currencyId, 'name');
+						$currencySign = get_table('m_currency', 'currency_id', $currencyId, 'sign');
+						$data['currencyName'] = !empty($currencyName) ? $currencyName : '';
+						$data['currencySign'] = !empty($currencySign) ? $currencySign : '';
+					}
+				}
+			}
+
+			if (!empty($payment_history_id)) {
+				$paymentHistoryRow = $this->db->from($tenantDatabase . '.payment_history')
+					->where('payment_history_id', $payment_history_id)
+					->get()
+					->row();
+
+				if ($paymentHistoryRow) {
+					$data['paymentHistoryRow'] = $paymentHistoryRow;
+
+					$paymentStatusId = $paymentHistoryRow->payment_status_id ?? null;
+					if (!empty($paymentStatusId)) {
+						$statusName = get_table('m_payment_status', 'payment_status_id', $paymentStatusId, 'name');
+						if (!empty($statusName)) {
+							$data['paymentStatusName'] = $statusName;
+							$normalizedStatus = strtolower($statusName);
+							if (strpos($normalizedStatus, 'paid') !== false || strpos($normalizedStatus, 'success') !== false) {
+								$data['paymentStatusClass'] = 'bg-green-lt';
+							} elseif (strpos($normalizedStatus, 'pending') !== false || strpos($normalizedStatus, 'process') !== false) {
+								$data['paymentStatusClass'] = 'bg-yellow-lt';
+							} elseif (strpos($normalizedStatus, 'fail') !== false || strpos($normalizedStatus, 'declin') !== false || strpos($normalizedStatus, 'overdue') !== false) {
+								$data['paymentStatusClass'] = 'bg-red-lt';
+							} else {
+								$data['paymentStatusClass'] = 'bg-blue-lt';
+							}
+						}
+					}
+
+					$paymentMethodId = $paymentHistoryRow->payment_method_id ?? null;
+					if (!empty($paymentMethodId)) {
+						$methodName = get_table('m_payment_method', 'payment_method_id', $paymentMethodId, 'name');
+						if (!empty($methodName)) {
+							$data['paymentMethodName'] = $methodName;
+						}
+					}
+				}
+			}
+		}
+
+		return $this->load->view('admin/view_subscription_modal', $data);
 	}
 
 	//membership_fee_type_id`, `membership_type_id`, `name`, `amount`, `currency_id`, `year`

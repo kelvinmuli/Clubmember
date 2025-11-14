@@ -74,19 +74,22 @@
 										<?php $s = 0; if (isset($subscriptionData)): foreach($subscriptionData as $data): ?>
 											<tr>
 												<td class="w-1"><?=++$s?>.</td>
-												<td><?= get_table($customerDBSettingRow->database_name.'.user', 'user_id', $data->user_id, 'full_legal_name')?></td>
-												<td><?= get_table($customerDBSettingRow->database_name.'.membership_fee_type', 'membership_fee_type_id', $data->membership_fee_type_id, 'name')?></td>
-												<td><?= date('d M Y', strtotime($data->due_at)) ?></td>
-												<td><?= date('d M Y', strtotime($data->payment_at))?></td>
-												<td><?= get_table('m_currency', 'currency_id', $data->currency_id, 'sign')?></td>
-												<td><?= $data->amount?></td>
-												<td><?= get_table('m_payment_status', 'payment_status_id', $data->payment_status_id, 'name')?></td>
-												<td><?= date('d M Y', strtotime($data->created_at)) ?></td>
+												<td><?=get_table($customerDBSettingRow->database_name.'.user', 'user_id', $data->user_id, 'full_legal_name')?></td>
+												<td><?=get_table($customerDBSettingRow->database_name.'.membership_fee_type', 'membership_fee_type_id', $data->membership_fee_type_id, 'name')?></td>
+												<td><?=date('d M Y', strtotime($data->due_at)) ?></td>
+												<td><?=date('d M Y', strtotime($data->payment_at))?></td>
+												<td><?=get_table('m_currency', 'currency_id', $data->currency_id, 'sign')?></td>
+												<td><?=$data->amount?></td>
+												<td><?=get_table('m_payment_status', 'payment_status_id', $data->payment_status_id, 'name')?></td>
+												<td><?=date('d M Y', strtotime($data->created_at)) ?></td>
 												<?php if ($viewUserRight || $approveUserRight): ?>
 													<td>
 														<span class="dropdown">
 															<button class="btn dropdown-toggle" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
 															<div class="dropdown-menu dropdown-menu-end">
+																<a class="dropdown-item" onclick="viewSubscriptionModal('<?=$data->subscription_id?>', '<?=$data->payment_history_id?>')">
+																	<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg> View Details
+																</a>
 																<a href="#" class="dropdown-item" onclick="sendPaymentReminder('<?=$data->subscription_id?>', '<?=$data->payment_history_id?>')">
 																	<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> Send Payment Reminder
 																</a>
@@ -97,6 +100,10 @@
 																<?php endif; if ($data->payment_status_id != '1732371146921'): ?>
 																	<a class="dropdown-item" onclick="paymentInfoModal('<?=$data->user_id?>', '<?=$data->payment_history_id?>')">
 																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> Payment Info
+																	</a>
+																<?php endif; if ($data->payment_status_id == '1732371146921'): ?>
+																	<a class="dropdown-item" onclick="paymentReceiptModal('<?=$data->user_id?>', '<?=$data->payment_history_id?>')">
+																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> Payment Receipt
 																	</a>
 																<?php endif; ?>
 															</div>
@@ -151,5 +158,18 @@
 					}
 				}
 			});
+		}
+
+		paymentReceiptModal = function (userId, paymentHistoryId) {
+			$.ajax({
+				url: base_url + 'payment-receipt-modal/' + userId + '/' + paymentHistoryId,
+				success: function(response) {
+					document.getElementById('modal-view-add-edit-remove-print').innerHTML = response;
+					$('#modal-view-add-edit-remove-print').modal('show');
+				}
+			});
+			// showModal('payment-receipt-modal/' + userId + '/' + paymentHistoryId, function() {
+			// 	alert('here');
+			// });
 		}
 	</script>
