@@ -56,7 +56,7 @@ class UserController extends CI_Controller {
 		$this->load->view('admin/templates/footer_view', $data);
 	}
 
-	public function memberView($membership_type_id, $active)
+	public function memberView($membership_type_id, $active=0)
 	{
 		$this->common->checkSession();
 		$session_data = $this->common->loadSession();
@@ -106,10 +106,10 @@ class UserController extends CI_Controller {
 									<div class="dropdown-menu dropdown-menu-end">
 										<a class="dropdown-item" href="'.base_url('profile/'.$user->user_id.'/'.$customer_db_setting_id).'">View</a>';
 										if ($approveUserRight):
-											$actions .= '<a class="dropdown-item" onclick="approveUserModal(\''.$user->user_id.'\', \''.$user->membership_type_id.'\', \''.$customer_db_setting_id.'\', \'all-user\')">Approve</a>';
+											$actions .= '<a class="dropdown-item" onclick="approveUserModal(\''.$user->user_id.'\', \''.($user->membership_type_id == 'N/A' ? '0' : $user->membership_type_id).'\', \''.$customer_db_setting_id.'\', \'all-user\')">Approve</a>';
 										endif;
 										if ($editUserRight):
-											$actions .= '<a class="dropdown-item" onclick="editUserModal(\''.$user->user_id.'\', \''.$customer_db_setting_id.'\')">Edit</a>';
+											$actions .= '<a class="dropdown-item" onclick="editUserModal(\''.$user->user_id.'\', \''.($user->membership_type_id == 'N/A' ? '0' : $user->membership_type_id).'\', \''.$customer_db_setting_id.'\')">Edit</a>';
 										endif;
 										if ($removeUserRight):
 											$actions .= '<a class="dropdown-item" onclick="deleteUserModal(\''.$user->user_id.'\', \''.$customer_db_setting_id.'\')"><span style="color: red;">Delete</span></a>';
@@ -380,6 +380,248 @@ class UserController extends CI_Controller {
 		redirect($redirect, 'refresh');
 	}
 
+	public function editUserModal($user_id, $membership_type_id, $customer_db_setting_id, $header='all-user')
+	{
+		$this->common->checkSession(array('dialog'=>1));
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+		$genderData = $this->db->select('*')->from('m_gender')->where('active', 1)->get()->result();
+		$countryData = $this->db->select('*')->from('m_country')->where('active', 1)->get()->result();
+		$titleData = $this->db->select('*')->from('m_title')->where('active', 1)->get()->result();
+		$membershipTypeRow = $this->db->select('*')->from('m_membership_type')->where('membership_type_id', $membership_type_id)->get()->row();
+
+		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Edit User Profile</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+
+						<form action="'.base_url('edit-user').'" method="POST" enctype="multipart/form-data">	
+							<input id="user_id" name="user_id" type="text" value="'.$userRow->user_id.'" hidden>		
+							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>	
+							<input id="header" name="header" type="text" value="'.$header.'" hidden>	
+							<div class="modal-body">
+								<div class="row">
+									<div class="col-lg-6">	
+										<div class="mb-3">
+											<label class="form-label">Photo</label>
+											<input id="url" name="url" type="file" class="form-control btn-pill" placeholder="Upload Your Photo">
+										</div>	
+									</div>
+									<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
+										<div class="mb-3">
+											<label class="form-label">Title</label>
+											<select id="title_id" name="title_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+												<option selected disabled>Select Title</option>';
+												if (isset($titleData)): foreach($titleData as $data):
+													$modal .= '<option value="'.$data->title_id.'" '.($userRow->title_id == $data->title_id ? 'selected' : '').'>'.$data->name.'</option>';
+												endforeach; endif;
+											$modal .= '</select>
+										</div>
+									</div>
+									<div class="col-lg-6">	
+										<div class="mb-3">
+											<label class="form-label">Full Legal Name*</label>
+											<input id="full_legal_name" name="full_legal_name" type="text" class="form-control btn-pill" placeholder="Your Full Legal Name" value="'.($userRow->full_legal_name).'" required>
+										</div>	
+									</div>	
+									<div class="col-lg-6">	
+										<div class="mb-3">
+											<label class="form-label">Phone Number*</label>
+											<input id="phone_number" name="phone_number" type="number" class="form-control btn-pill" placeholder="Enter your phone number" value="'.($userRow->phone_number).'" required>
+										</div>	
+									</div>
+									<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
+										<div class="mb-3">
+											<label class="form-label">Gender</label>
+											<select id="gender_id" name="gender_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+												<option selected disabled>Select Gender</option>';
+												if (isset($genderData)): foreach($genderData as $data):
+													$modal .= '<option value="'.$data->gender_id.'" '.($userRow->gender_id == $data->gender_id ? 'selected' : '').'>'.$data->name.'</option>';
+												endforeach; endif;
+											$modal .= '</select>
+										</div>
+									</div>
+									<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>							
+										<div class="mb-3">
+											<label class="form-label">Date of Birth</label>
+											<input id="birth" name="birth" type="date" class="form-control btn-pill" value="'.($userRow->birth).'" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+										</div>
+									</div>
+									<div class="col-lg-6">							
+										<div class="mb-3">
+											<label class="form-label">Email Address</label>
+											<input id="email" name="email" type="email" class="form-control btn-pill" placeholder="Enter your email address" value="'.($userRow->email).'">
+										</div>	
+									</div>
+									<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>	
+										<div class="mb-3">
+											<label class="form-label">ID Number / Passport Number</label>
+											<input id="id_no" name="id_no" type="number" class="form-control btn-pill" placeholder="Enter your id number" value="'.($userRow->id_no).'">
+										</div>	
+									</div>';
+									if (!in_array($userRow->user_type_id, array('4734656482', '4534654653'))):
+										$modal .= '<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Residential Address</label>
+												<input id="residential_address" name="residential_address" type="text" class="form-control btn-pill" placeholder="Enter Residential Address" value="'.($userRow->residential_address).'">
+											</div>	
+										</div>
+										<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Postal Address</label>
+												<input id="postal_address" name="postal_address" type="text" class="form-control btn-pill" placeholder="Enter Postal Address" value="'.($userRow->postal_address).'">
+											</div>	
+										</div>
+										<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Postal Code</label>
+												<input id="postal_code" name="postal_code" type="text" class="form-control btn-pill" placeholder="Enter Postal Code" value="'.($userRow->postal_code).'">
+											</div>	
+										</div>
+										<div class="col-lg-6">
+											<div class="mb-3">
+												<label class="form-label">Country</label>
+												<select id="country_id" name="country_id" class="form-select btn-pill" required>
+													<option selected disabled>Select Country</option>';
+													if (isset($countryData)): foreach($countryData as $data):
+														$modal .= '<option value="'.$data->country_id.'">'.$data->name.'</option>';
+													endforeach; endif;
+												$modal .= '</select>
+											</div>
+										</div>
+										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>							
+											<div class="mb-3">
+												<label class="form-label">Town</label>
+												<input id="town_id" name="town_id" type="text" class="form-control btn-pill" placeholder="Enter Town">
+											</div>	
+										</div>
+										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>							
+											<div class="mb-3">
+												<label class="form-label">Joining Date</label>
+												<input id="joining_at" name="joining_at" type="date" class="form-control btn-pill" placeholder="Enter Joining Date" value="'.($userRow->joining_at).'">
+											</div>	
+										</div>
+										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
+											<div class="mb-3">
+												<label class="form-label">Membership Type '.($membershipTypeRow->name ?? '').'</label>
+												<select id="membership_fee_type_id" name="membership_fee_type_id" class="form-select btn-pill" '.($membership_type_id == '1755816508873' ? '' : 'required').'>
+													<option selected disabled>Select Membership Type '.($membershipTypeRow->name ?? '').'</option>';
+													if (isset($memberFeeTypeData)): foreach($memberFeeTypeData as $data):
+														$modal .= '<option value="'.$data->membership_fee_type_id.'">'.$data->name.'-'.$data->year.'-'.$data->amount.'</option>';
+													endforeach; endif;
+												$modal .= '</select>
+											</div>
+										</div>';
+									endif;
+								$modal .='</div>
+							</div>';
+							if (in_array($userRow->user_type_id, array('4734656482', '4534654653'))):
+								$modal .='<div class="modal-body">
+									<div class="row">
+										<div class="col-lg-12">							
+											<div class="mb-3">
+												<label class="form-label">Password</label>
+												<input id="password" name="password" type="password" class="form-control btn-pill" placeholder="Enter Password">
+											</div>	
+										</div>
+									</div>
+								</div>';
+							endif;
+							if (!in_array($userRow->user_type_id, array('4734656482', '4534654653'))):
+								$modal .='<div class="modal-body" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>
+									<div class="row">
+										<div class="col-lg-6">							
+											<div class="mb-3">
+												<label class="form-label">Membership No.</label>
+												<input id="membership_no" name="membership_no" type="text" class="form-control btn-pill" placeholder="Enter Membership No." value="'.($userRow->membership_no).'">
+											</div>	
+										</div>
+										<div class="col-lg-6" '.($membership_type_id == '1755816508873' ? 'hidden' : '').'>							
+											<div class="mb-3">
+												<label class="form-label">Sub Reference No.</label>
+												<input id="sub_reference_no" name="sub_reference_no" type="text" class="form-control btn-pill" placeholder="Enter Sub Reference No." value="'.($userRow->sub_reference_no).'">
+											</div>	
+										</div>
+									</div>
+								</div>';
+							endif;
+							$modal .='<div class="modal-body">
+								<div class="row">
+									<div class="col-lg-6">							
+										<div class="mb-3">
+											<label class="form-label">Contact Name</label>
+											<input id="contact_name" name="contact_name" type="text" class="form-control btn-pill" placeholder="Enter Contact Name" value="'.($userRow->contact_name).'">
+										</div>	
+									</div>
+									<div class="col-lg-6">							
+										<div class="mb-3">
+											<label class="form-label">Contact No.</label>
+											<input id="contact_phone_no" name="contact_phone_no" type="number" class="form-control btn-pill" placeholder="Enter Contact No." value="'.($userRow->contact_phone_no).'">
+										</div>	
+									</div>
+								</div>
+							</div>
+							<div class="modal-body">
+								<div class="row">
+									<div class="col-lg-12">							
+										<div class="mb-3">
+											<label class="form-label">Notes</label>
+											<textarea id="remark" name="remark" type="text" class="form-control" placeholder="Enter Notes">'.$userRow->remark.'</textarea>
+										</div>	
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<a href="#" class="btn btn-link link-secondary " data-bs-dismiss="modal">Cancel</a>
+								<button href="#" type="submit" class="btn btn-primary ms-auto btn-pill">
+									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> Save Changes
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>';
+		print_r($modal);
+	}
+	
+	
+	public function editUser()
+	{
+		$postData = $this->input->post();
+		$customer_db_setting_id = $postData['customer_db_setting_id'];
+		$header = $postData['header'];
+		$user_id = $postData['user_id'];
+		unset($postData['customer_db_setting_id'], $postData['header'], $postData['user_id']);
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+
+		if (isset($_FILES['url']['name']))
+		{
+			$path = "assets/img/";
+			$image = do_file_upload('url', $path);
+			$postData['url'] = $path.$image['file']['file_name'];
+		}
+		else
+		{
+			unset($postData['url']);
+		}
+
+		if (!empty($postData['password'])) {
+			$postData['password'] = password_hash($postData['password'], PASSWORD_DEFAULT);
+		} else {
+			unset($postData['password']);
+		}
+
+		$this->db->where('user_id', $user_id);
+		$this->db->update($customerDBSettingRow->database_name.'.user', $postData);
+		$description = 'User profile updated successfully. ✔️';
+		$this->session->set_flashdata('message', $description);
+		$redirect = $header == 'all-user' ? $header.'/'.$postData['user_type_id'].'/'.$customer_db_setting_id : 'profile/'.$user_id.'/'.$customer_db_setting_id.'/'.$postData['user_option_id'];
+		redirect($redirect, 'refresh');
+	}
+	
 	public function addUserMuthaiga()
 	{
 		// 'title' => $title,
@@ -419,7 +661,8 @@ class UserController extends CI_Controller {
 
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', '1705386384290')->get()->row();
 		$titleRow = $this->db->select('*')->from('m_title')->where('name', $postData['title'])->get()->row();
-		$res = $this->db->insert($customerDBSettingRow->database_name.'.user', array('user_id'=>generate_uuid(),'user_type_id'=>'1755383886420','title_id'=>$titleRow->title_id ?? $postData['title'], 'full_legal_name'=>$postData['fulllegalname'], 'email'=>$postData['email'], 'phone_number'=>$postData['mobile_no'], 'membership_type_id'=>$postData['member_type'], 'membership_no'=>$postData['membership_no'], 'id_no'=>$postData['id_passport_no'], 'sub_reference_no'=>$postData['regular_lr_no'], 'residential_address'=>$postData['physical_address'], 'postal_code'=>$postData['postal_code'], 'postal_address'=>$postData['postal_address'], 'remark'=>$postData['notes'], 'user_origin_id'=>'176874226539'));
+		$genderRow = $this->db->select('*')->from('m_gender')->like('name', $postData['gender'])->get()->row();
+		$res = $this->db->insert($customerDBSettingRow->database_name.'.user', array('user_id'=>generate_uuid(),'user_type_id'=>'1755383886420','title_id'=>$titleRow->title_id ?? $postData['title'], 'full_legal_name'=>$postData['fulllegalname'], 'email'=>$postData['email'], 'phone_number'=>$postData['phone_no'], 'mobile_number'=>$postData['mobile_no'], 'gender_id'=>$genderRow->gender_id ?? $postData['gender'], 'membership_type_id'=>$postData['member_type'], 'membership_no'=>$postData['membership_no'], 'id_no'=>$postData['id_passport_no'], 'sub_reference_no'=>$postData['regular_lr_no'], 'residential_address'=>$postData['physical_address'], 'postal_code'=>$postData['postal_code'], 'postal_address'=>$postData['postal_address'], 'street_name'=>$postData['street_name'], 'remark'=>$postData['notes'], 'user_origin_id'=>'176874226539'));
 		if ($res)
 		{
 			return $this->output
@@ -511,5 +754,62 @@ class UserController extends CI_Controller {
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$user_id.' : User for '.$description));
 		redirect($header == 'dashboard' ? $header : $header.'/'.$userRow->user_type_id.'/'.$customer_db_setting_id, 'refresh');
+	}
+
+	public function deleteUserModal($user_id, $customer_db_setting_id)
+	{
+		$this->common->checkSession(array('dialog'=>1));
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+
+		$modal ='<div class="modal-dialog modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Delete User</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+
+						<form action="'.base_url('delete-user').'" method="POST" enctype="multipart/form-data">	
+							<input id="user_id" name="user_id" type="text" value="'.$user_id.'" hidden>
+							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>
+							<div class="modal-body">
+								<p>Are you sure you want to delete <strong>'.$userRow->full_legal_name.'</strong> ?</p>
+							</div>
+							<div class="modal-footer">
+								<a href="#" class="btn btn-link link-secondary " data-bs-dismiss="modal">
+									Cancel
+								</a>
+								<button href="#" type="submit" class="btn btn-danger ms-auto btn-pill">
+									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24">
+										<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+										<line x1="4" y1="7" x2="20" y2="7" />
+										<line x1="10" y1="11" x2="10" y2="17" />
+										<line x1="14" y1="11" x2="14" y2="17" />
+										<path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
+										<path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+									</svg>
+									Delete User
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>';
+		print_r($modal);
+	}
+
+	public function deleteUser()
+	{
+		$postData = $this->input->post();
+		$customer_db_setting_id = $postData['customer_db_setting_id'];
+		$user_id = $postData['user_id'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+
+		$this->db->delete($customerDBSettingRow->database_name.'.user', array('user_id'=>$user_id));
+		$description = $userRow->full_legal_name.' Deleted Successfully. ✔️';
+		$this->session->set_flashdata('message', $description);
+		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$user_id.' : User for '.$description));
+		redirect('all-user/'.$userRow->user_type_id.'/'.$customer_db_setting_id, 'refresh');
 	}
 }

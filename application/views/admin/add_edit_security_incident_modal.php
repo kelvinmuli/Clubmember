@@ -8,6 +8,7 @@
     $locationValue = $isEdit ? ($incidentRow->location ?? '') : '';
     $reportedByValue = $isEdit ? ($incidentRow->reported_by ?? '') : '';
     $typeValue = $isEdit ? ($incidentRow->incident_type_id ?? '') : '';
+    $statusValue = $isEdit ? ($incidentRow->incident_status_id ?? '') : '';
     $descriptionValue = $isEdit ? ($incidentRow->description ?? '') : '';
     $activeValue = $isEdit && isset($incidentRow->active) ? (string) $incidentRow->active : '';
 ?>
@@ -53,10 +54,10 @@
 
                 <div class="mb-0">
                     <label class="form-label" for="security_incident_active">Status</label>
-                    <select class="form-select" id="security_incident_active" name="active" required>
+                    <select class="form-select" id="security_incident_active" name="incident_status_id" required>
                         <option value="N/A" selected disabled>Select Status</option>
-                        <?php foreach ($activeData as $active): ?>
-                            <option value="<?=$active->num?>" <?=$activeValue === (string) $active->num ? 'selected' : ''?>><?=$active->name?></option>
+                        <?php foreach ($incidentStatusData as $status): ?>
+                            <option value="<?=$status->incident_status_id?>" <?=$isEdit ? ($status->incident_status_id == $statusValue ? 'selected' : '') : ''?>><?=$status->name?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>

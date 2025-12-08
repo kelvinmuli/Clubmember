@@ -61,19 +61,19 @@
                    	<?php } ?>
 
                   <form action="<?=base_url('reset-now')?>" method="POST">
-										<input type="text" id="user_id" name="user_id" class="form-control" value="<?=$userRow->user_id?>" hidden/>
-										<input type="text" id="customer_db_setting_id" name="customer_db_setting_id" class="form-control" value="<?=$customer_db_setting_id?>" hidden/>
+										<input type="text" id="user_id" name="user_id" class="form-control" value="<?=$userRow->user_id ?? ''?>" hidden/>
+										<input type="text" id="customer_db_setting_id" name="customer_db_setting_id" class="form-control" value="<?=$customer_db_setting_id ?? ''?>" hidden/>
                     <div class="mb-3">
                       <label class="form-label">Email address</label>
-                      <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com" autocomplete="off" value="<?=$userRow->email?>" disabled/>
+                      <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com" autocomplete="off" value="<?=$userRow->email ?? ''?>" disabled/>
                     </div>
                     <div class="mb-2">
                       <label class="form-label">Password</label>
                       <div class="input-group input-group-flat">
-                        <input type="password" id="pwd" name="new_password" class="form-control" placeholder="Your password" autocomplete="off" />
+                        <input type="password" id="new_pwd" name="new_password" class="form-control" placeholder="Your password" autocomplete="off" />
                         <span class="input-group-text">
-                          <a href="#" class="link-secondary" title="Show password" data-bs-toggle="tooltip"
-                            ><!-- Download SVG icon from http://tabler.io/icons/icon/eye -->
+                          <a href="#" class="link-secondary toggle-password" title="Show password" data-target="#new_pwd" data-bs-toggle="tooltip">
+                            <!-- Download SVG icon from http://tabler.io/icons/icon/eye -->
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="24"
@@ -87,18 +87,19 @@
                               class="icon icon-1"
                             >
                               <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
-                              <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg
-                          ></a>
+                              <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+                            </svg>
+                          </a>
                         </span>
                       </div>
                     </div>
 					<div class="mb-2">
                       <label class="form-label">Confirm Password</label>
                       <div class="input-group input-group-flat">
-                        <input type="password" id="pwd" name="confirm_new_password" class="form-control" placeholder="Your confirm password" autocomplete="off" />
+                        <input type="password" id="confirm_pwd" name="confirm_new_password" class="form-control" placeholder="Your confirm password" autocomplete="off" />
                         <span class="input-group-text">
-                          <a href="#" class="link-secondary" title="Show password" data-bs-toggle="tooltip"
-                            ><!-- Download SVG icon from http://tabler.io/icons/icon/eye -->
+                          <a href="#" class="link-secondary toggle-password" title="Show password" data-target="#confirm_pwd" data-bs-toggle="tooltip">
+                            <!-- Download SVG icon from http://tabler.io/icons/icon/eye -->
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               width="24"
@@ -112,8 +113,9 @@
                               class="icon icon-1"
                             >
                               <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
-                              <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg
-                          ></a>
+                              <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+                            </svg>
+                          </a>
                         </span>
                       </div>
                     </div>
@@ -357,5 +359,30 @@
       });
     </script>
     <!-- END PAGE SCRIPTS -->
+    <script>
+      (function () {
+        const eyeSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">\n  <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />\n  <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />\n</svg>';
+        const eyeOffSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">\n  <path d="M2 2l20 20" />\n  <path d="M17.94 17.94A10 10 0 0 1 12 20c-3.6 0-6.6-2-9-6c1.64-2.74 3.86-4.83 6.44-6.16" />\n</svg>';
+
+        document.addEventListener('click', function (e) {
+          const btn = e.target.closest('.toggle-password');
+          if (!btn) return;
+          e.preventDefault();
+          const target = btn.getAttribute('data-target');
+          if (!target) return;
+          const input = document.querySelector(target);
+          if (!input) return;
+          if (input.type === 'password') {
+            input.type = 'text';
+            btn.setAttribute('title', 'Hide password');
+            btn.innerHTML = eyeOffSvg;
+          } else {
+            input.type = 'password';
+            btn.setAttribute('title', 'Show password');
+            btn.innerHTML = eyeSvg;
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

@@ -23,6 +23,8 @@ class SecurityIncidentController extends CI_Controller
 
         $incidentData = $this->db->select('*')->from($customerDbSettingRow->database_name . '.security_incident')->order_by('incident_at', 'DESC')->order_by('created_at', 'DESC')->get()->result();
         $incidentTypeData = $this->db->from('m_incident_type')->where('active', 1)->get()->result();
+		$incidentStatusData = $this->db->from('m_incident_status')->where('active', 1)->get()->result();
+		$data['incidentStatusData'] = $incidentStatusData;
         $activeData = $this->db->select('*')
             ->from('m_active')
             ->where('active', 1)
@@ -31,14 +33,16 @@ class SecurityIncidentController extends CI_Controller
             ->result();
 
         $incidentTypeIndex = $this->buildIncidentTypeIndex($incidentTypeData);
+        $incidentStatusIndex = $this->buildIncidentStatusIndex($incidentStatusData);
         $activeIndex = $this->buildActiveIndex($activeData);
 
         $data['customer_db_setting_id'] = $customerDbSettingId;
         $data['incidentData'] = $incidentData;
         $data['incidentTypeIndex'] = $incidentTypeIndex;
+        $data['incidentStatusIndex'] = $incidentStatusIndex;
         $data['activeIndex'] = $activeIndex;
-        $data['chartData'] = $this->buildChartData($incidentData, $incidentTypeIndex, $activeIndex);
-        $data['summary'] = $this->buildSummary($incidentData);
+        $data['chartData'] = $this->buildChartData($incidentData, $incidentTypeIndex, $incidentStatusIndex);
+        $data['summary'] = $this->buildSummary($incidentData, $incidentStatusIndex);
 
         $this->load->view('admin/templates/header_view', $data);
         $this->load->view('admin/security_incident_view', $data);
@@ -59,6 +63,7 @@ class SecurityIncidentController extends CI_Controller
 
         $data['security_incident_id'] = generate_uuid();
         $data['incidentTypeData'] = $this->db->from('m_incident_type')->where('active', 1)->get()->result();
+		$data['incidentStatusData'] = $this->db->from('m_incident_status')->where('active', 1)->get()->result();
         $data['activeData'] = $this->db->select('*')->from('m_active')->where('active', 1)->order_by('name', 'ASC')->get()->result();
 
         return $this->load->view('admin/add_edit_security_incident_modal', $data);
@@ -140,6 +145,7 @@ class SecurityIncidentController extends CI_Controller
         $data['security_incident_id'] = $security_incident_id;
 		$data['incidentRow'] = $this->db->select('*')->from($customerDbSettingRow->database_name.'.security_incident')->where('security_incident_id', $security_incident_id)->get()->row();
         $data['incidentTypeData'] = $this->db->select('*')->from('m_incident_type')->where('active', 1)->get()->result();
+		$data['incidentStatusData'] = $this->db->from('m_incident_status')->where('active', 1)->get()->result();
         $data['activeData'] = $this->db->select('*')->from('m_active')->where('active', 1)->order_by('name', 'ASC')->get()->result();
 
         return $this->load->view('admin/add_edit_security_incident_modal', $data);
@@ -151,12 +157,10 @@ class SecurityIncidentController extends CI_Controller
         $sessionData = $this->common->loadSession();
         $customerDbSettingId = $sessionData['customer_db_setting_id'];
 
-        $postData = $this->input->post(null, true);
+        $postData = $this->input->post();
+		// print_r(json_encode($postData));
+		// exit;
         $securityIncidentId = $postData['security_incident_id'] ?? '';
-        if (empty($securityIncidentId)) {
-            $this->session->set_flashdata('warning', 'Security incident update failed.');
-            redirect('security-incident', 'refresh');
-        }
 
         $postData['incident_at'] = $this->sanitizeDateTime($postData['incident_at'] ?? null);
         $postData['location'] = $this->sanitizeText($postData['location'] ?? '');
@@ -173,19 +177,9 @@ class SecurityIncidentController extends CI_Controller
             ->where('customer_db_setting_id', $customerDbSettingId)
             ->get()
             ->row();
-
-        $incidentTable = $customerDbSettingRow ? $customerDbSettingRow->database_name . '.security_incident' : null;
-
-        if ($incidentTable && $this->db->table_exists($incidentTable)) {
-            $this->db->update(
-                $incidentTable,
-                $postData,
-                array('security_incident_id' => $securityIncidentId)
-            );
-            $this->session->set_flashdata('success', 'Security incident updated successfully.');
-        } else {
-            $this->session->set_flashdata('warning', 'Security incident update failed.');
-        }
+			
+        $this->db->update($customerDbSettingRow->database_name . '.security_incident', $postData, array('security_incident_id' => $securityIncidentId));
+        $this->session->set_flashdata('success', 'Security incident updated successfully.');
 
         redirect('security-incident', 'refresh');
     }
@@ -299,6 +293,30 @@ class SecurityIncidentController extends CI_Controller
         return $index;
     }
 
+    private function buildIncidentStatusIndex(array $incidentStatusData) {
+        $index = [];
+        foreach ($incidentStatusData as $row) {
+            if (!isset($row->incident_status_id) || $row->incident_status_id === '') {
+                continue;
+            }
+
+            $id = (string) $row->incident_status_id;
+            $label = isset($row->name) && $row->name !== '' ? $row->name : 'Status ' . $id;
+
+            $index[$id] = array('label' => $label);
+
+            if (isset($row->text_class) && $row->text_class !== '') {
+                $index[$id]['text_class'] = $row->text_class;
+            }
+
+            if (isset($row->description) && $row->description !== '') {
+                $index[$id]['description'] = $row->description;
+            }
+        }
+
+        return $index;
+    }
+
     private function buildActiveIndex(array $activeData) {
         $index = [];
         foreach ($activeData as $row) {
@@ -332,7 +350,7 @@ class SecurityIncidentController extends CI_Controller
         return $index;
     }
 
-    private function buildChartData(array $incidentData, array $incidentTypeIndex, array $activeIndex) {
+    private function buildChartData(array $incidentData, array $incidentTypeIndex, array $incidentStatusIndex) {
         $typeCounts = [];
         $timelineCounts = [];
         $statusCounts = [];
@@ -343,8 +361,8 @@ class SecurityIncidentController extends CI_Controller
                 : 'unknown';
             $typeCounts[$typeId] = ($typeCounts[$typeId] ?? 0) + 1;
 
-            $statusKey = isset($incident->active) && $incident->active !== ''
-                ? (string) $incident->active
+            $statusKey = isset($incident->incident_status_id) && $incident->incident_status_id !== ''
+                ? (string) $incident->incident_status_id
                 : 'unknown';
             $statusCounts[$statusKey] = ($statusCounts[$statusKey] ?? 0) + 1;
 
@@ -394,7 +412,20 @@ class SecurityIncidentController extends CI_Controller
         $statusSeries = [];
         if (!empty($statusCounts)) {
             foreach ($statusCounts as $statusKey => $count) {
-                $label = $activeIndex[$statusKey] ?? ($statusKey === 'unknown' ? 'Unknown' : 'Status ' . $statusKey);
+                $label = 'Status ' . $statusKey;
+                if ($statusKey === 'unknown') {
+                    $label = 'Unknown';
+                }
+
+                if ($statusKey !== 'unknown' && isset($incidentStatusIndex[$statusKey])) {
+                    $statusMeta = $incidentStatusIndex[$statusKey];
+                    if (is_array($statusMeta)) {
+                        $label = $statusMeta['label'] ?? $label;
+                    } else {
+                        $label = $statusMeta;
+                    }
+                }
+
                 $statusLabels[] = $label;
                 $statusSeries[] = $count;
             }
@@ -424,21 +455,28 @@ class SecurityIncidentController extends CI_Controller
         );
     }
 
-    private function buildSummary(array $incidentData) {
+    private function buildSummary(array $incidentData, array $incidentStatusIndex = array()) {
         $total = count($incidentData);
-        $activeCount = 0;
-        $inactiveCount = 0;
         $recentTimestamp = null;
         $locations = [];
         $reporters = [];
+        $statusCounts = [];
+        $unknownStatusCount = 0;
+
+        foreach ($incidentStatusIndex as $statusId => $meta) {
+            $statusCounts[(string) $statusId] = 0;
+        }
 
         foreach ($incidentData as $incident) {
-            if (isset($incident->active)) {
-                if ((int) $incident->active === 1) {
-                    $activeCount++;
-                } else {
-                    $inactiveCount++;
+            if (isset($incident->incident_status_id) && $incident->incident_status_id !== '') {
+                $statusId = (string) $incident->incident_status_id;
+                if (!array_key_exists($statusId, $statusCounts)) {
+                    $statusCounts[$statusId] = 0;
                 }
+
+                $statusCounts[$statusId]++;
+            } else {
+                $unknownStatusCount++;
             }
 
             if (!empty($incident->incident_at)) {
@@ -457,10 +495,43 @@ class SecurityIncidentController extends CI_Controller
             }
         }
 
+        $statusSummary = [];
+        foreach ($statusCounts as $statusId => $count) {
+            $meta = $incidentStatusIndex[$statusId] ?? null;
+            $label = 'Status ' . $statusId;
+            $textClass = null;
+            $description = null;
+
+            if (is_array($meta)) {
+                $label = $meta['label'] ?? $label;
+                $textClass = $meta['text_class'] ?? null;
+                $description = $meta['description'] ?? null;
+            } elseif (is_string($meta)) {
+                $label = $meta;
+            }
+
+            $statusSummary[] = array(
+                'id' => (string) $statusId,
+                'label' => $label,
+                'count' => $count,
+                'text_class' => $textClass,
+                'description' => $description,
+            );
+        }
+
+        if ($unknownStatusCount > 0) {
+            $statusSummary[] = array(
+                'id' => 'unknown',
+                'label' => 'Unknown',
+                'count' => $unknownStatusCount,
+                'text_class' => null,
+                'description' => 'Incidents without a recorded status',
+            );
+        }
+
         return array(
             'total' => $total,
-            'active' => $activeCount,
-            'inactive' => $inactiveCount,
+            'statuses' => $statusSummary,
             'recent' => $recentTimestamp ? date('d M Y H:i', $recentTimestamp) : null,
             'location_count' => count($locations),
             'reporter_count' => count($reporters),

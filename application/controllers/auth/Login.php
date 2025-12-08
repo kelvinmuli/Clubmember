@@ -53,55 +53,52 @@ class Login extends CI_Controller {
 
 	 public function VerifyLogin()
 	 {
-	    $postData = $this->input->post();
-		$email = $postData['email'];
-		$password = $postData['password'];
+		$postData = $this->input->post();
+		$email = isset($postData['email']) ? $postData['email'] : '';
+		$password = isset($postData['password']) ? $postData['password'] : '';
 
-		$showError = false;
 		$systemRow = $this->db->select('*')->from('m_system')->where('id', 1)->get()->row();
 		$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->where('active', 1)->get()->result();
 		$userRow = $this->db->select('*')->from('user')->where('email', $email)->get()->row();
+
+		// Check tenant databases first
 		foreach ($customerDBSettingData as $customerDBSetting) 
 		{
 			if ($customerDBSetting->customer_db_setting_id != '1755387775468')
 			{
 				$userInnerRow = $this->db->select('*')->from($customerDBSetting->database_name.'.user')->where('email', $email)->get()->row();
-				if (password_verify($password, $userInnerRow->password))
+				if ($userInnerRow && !empty($userInnerRow->password) && password_verify($password, $userInnerRow->password))
 				{
 					$user = json_decode(json_encode($userInnerRow), true);
 					$user['customer_db_setting_id'] = $customerDBSetting->customer_db_setting_id;
 					$this->session->set_userdata(GlobalModel::SESSION, $user);
-					$description = 'Welcome back ' . $userInnerRow->full_legal_name . '. ✔️';
+					$description = 'Welcome back ' . ($userInnerRow->full_legal_name ?? $email) . '. ✔️';
 					$this->session->set_flashdata('message', $description);
 					$userRightData = $this->db->select('*')->from('user_right')->where('user_type_id', $userInnerRow->user_type_id)->get()->row();
 					$moduleData = $this->db->select('*')->from('m_module')->where('module_id', $userRightData->module_id)->get()->row();
-					// $this->db->insert('system_log', array('system_log_id' => generate_uuid(), 'log_type_id' => '1636952180', 'description' => $email . ' : ' . $description));
-					// redirect($moduleData->path, 'reload');
 					redirect('dashboard', 'reload');
+					return;
 				}
 			}
 		}
 
-		if (password_verify($password, $userRow->password))
+		// Check main user table
+		if ($userRow && !empty($userRow->password) && password_verify($password, $userRow->password))
 		{
 			$user = json_decode(json_encode($userRow), true);
 			$user['customer_db_setting_id'] = '1755387775468';
 			$this->session->set_userdata(GlobalModel::SESSION, $user);
-			$description = 'Welcome back ' . $userRow->full_legal_name . '. ✔️';
+			$description = 'Welcome back ' . ($userRow->full_legal_name ?? $email) . '. ✔️';
 			$this->session->set_flashdata('message', $description);
 			$userRightData = $this->db->select('*')->from('user_right')->where('user_type_id', $userRow->user_type_id)->get()->row();
 			$moduleData = $this->db->select('*')->from('m_module')->where('module_id', $userRightData->module_id)->get()->row();
-			// $this->db->insert('system_log', array('system_log_id' => generate_uuid(), 'log_type_id' => '1636952180', 'description' => $email . ' : ' . $description));
-			// redirect($moduleData->path, 'reload');
 			redirect('dashboard', 'reload');
-		} 
-		elseif ($showError)
-		{
-			$description = 'Hello '.$email.' Kindly Contact '.$systemRow->company.' for help. Thank You.';
-			$this->session->set_flashdata('message', $description);
-			// $this->db->insert('system_log', array('system_log_id' => generate_uuid(), 'log_type_id' => '1636952180', 'description' => $email . ' : ' . $description));
-			redirect('home', 'reload');
+			return;
 		}
+
+		// If we reached here, login failed — show error on login page
+		$this->session->set_flashdata('err', 'Invalid credentials.');
+		redirect('login', 'reload');
 	}
 	
 	public function verifyLoginFront(){
@@ -166,7 +163,7 @@ class Login extends CI_Controller {
 
     }
 
-	public function resetPassword($user_id, $customer_db_setting_id)
+	public function resetPassword($user_id='N/A', $customer_db_setting_id='1755387775468')
 	{
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$data['userRow'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();

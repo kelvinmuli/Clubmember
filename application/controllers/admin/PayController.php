@@ -28,7 +28,7 @@ class PayController extends CI_Controller {
 	}
 
 
-	public function paymentInfoModal($user_id, $universal_id='')
+	public function paymentInfoModal($user_id, $payment_history_id='')
 	{
 		$this->common->checkSession(array('dialog'=>1));
 		$session_data = $this->common->loadSession();
@@ -37,8 +37,9 @@ class PayController extends CI_Controller {
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
 		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
-		$membershipFeeTypeRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('membership_fee_type_id', $userRow->membership_fee_type_id)->get()->row();
-		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('user_id', $user_id)->get()->row();//->where('universal_id', $universal_id)
+		$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('user_id', $user_id)->get()->row();
+		$membershipFeeTypeRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('membership_fee_type_id', $subscriptionRow->membership_fee_type_id)->get()->row();
+		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
 
 		$modal ='<div class="modal-dialog modal-lg" role="document">
 					<div class="modal-content">
@@ -49,12 +50,14 @@ class PayController extends CI_Controller {
 						
 						<div class="modal-body">
 							<input type="hidden" name="user_id" value="'.$user_id.'">
-							<input type="hidden" name="universal_id" value="'.$universal_id.'">
+							<input type="hidden" name="universal_id" value="'.$paymentHistoryRow->universal_id.'">
 							<div class="col-sm-8 col-xs-6">
 								<h4 class="widget-title">Subscription Details</h4>
 								<p><strong>Club Name:</strong> '.$customerRow->full_legal_name.'</p>
 								<p><strong>Member Name:</strong> '.$userRow->full_legal_name.'</p>
 								<p><strong>Membership Type:</strong> '.($membershipFeeTypeRow->name ?? '').'</p>
+								<p><strong>Start Date:</strong> '.date('jS M Y', strtotime($subscriptionRow->start_at ?? '')).'</p>
+								<p></p><strong>Due Date:</strong> '.date('jS M Y', strtotime($subscriptionRow->due_at)).'</p>
 							</div>
 						</div>
 						<div class="modal-body">
@@ -71,7 +74,7 @@ class PayController extends CI_Controller {
 								<div class="col-lg-6">
 									<div class="mb-3">
 										<label for="category_name">Phone Number: Eg.(254700000000)</label>
-										<input type="text" class="form-control remove-sharp" name="phone_no" id="phone_no" value="'.$userRow->phone_number.'">
+										<input type="text" class="form-control remove-sharp" name="phone_no" id="phone_no" value="'.(empty($userRow->phone_number) ? $userRow->mobile_number : $userRow->phone_number).'">
 									</div>
 								</div>
 								<div class="col-lg-6">
@@ -90,14 +93,14 @@ class PayController extends CI_Controller {
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							<button type="submit" class="btn btn-primary" onclick="payModal(\''.$user_id.'\', \''.$paymentHistoryRow->payment_history_id.'\')">Make payment now</button>
+							<button type="submit" class="btn btn-primary" onclick="payModal(\''.$user_id.'\', \''.$payment_history_id.'\', document.getElementById(\'phone_no\').value)">Make payment now</button>
 						</div>
 					</div>
 				</div>';
 		print_r($modal);
 	}
 
-	public function payModal($user_id, $payment_history_id='1760556915749')
+	public function payModal($user_id, $payment_history_id='1760556915749', $phone_no = '', $data='')
 	{
 		$this->common->checkSession(array('dialog'=>1));
 		$session_data = $this->common->loadSession();
@@ -105,10 +108,38 @@ class PayController extends CI_Controller {
 		$customer_db_setting_id = $session_data['customer_db_setting_id'];
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		// $customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
-		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		$paymentHistoryRow = null;
+		if (!empty($data)) {
+			$payment_history_id = generate_uuid();
+			$dataExplode = explode('-', $data);
+			$universal_id = $dataExplode[0] ?? '';
+			$bill_amount = $dataExplode[1] ?? '0';
+			$module_id = $dataExplode[2] ?? '';
+			$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('universal_id', $universal_id)->get()->row();
+			if (empty($paymentHistoryRow)) {
+				$this->db->insert($customerDBSettingRow->database_name.'.payment_history', array(
+					'payment_history_id' => $payment_history_id,
+					'universal_id' => $universal_id,
+					'module_id' => $module_id,
+					'user_id' => $user_id,
+					'bill_amount' => $bill_amount,
+					'currency_id' => '1700743959986', // KES
+					'payment_method_id' => '1700743964240', // M-PESA
+					'payment_status_id' => '1700743972533', // Pending
+				));
+			} else {
+				$payment_history_id = $paymentHistoryRow->payment_history_id ?? 'N/A';
+				$this->db->where('payment_history_id', $payment_history_id)->update($customerDBSettingRow->database_name.'.payment_history', array(
+					'bill_amount' => $bill_amount,
+				));
+			}
+		} else {
+			$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		}
 		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
 		$customerDBSettingIdPaymentHistoryId = substr($customer_db_setting_id, -7).'C'.substr($payment_history_id, -7);
-		$ipayRow = $this->ipayPost($userRow->phone_number,$userRow->email,$paymentHistoryRow->bill_amount, $customerDBSettingIdPaymentHistoryId);
+		$phoneToUse = !empty($phone_no) ? $phone_no : (empty($userRow->phone_number) ? $userRow->mobile_number : $userRow->phone_number);
+		$ipayRow = $this->ipayPost($phoneToUse, $userRow->email, $paymentHistoryRow->bill_amount, $customerDBSettingIdPaymentHistoryId);
 		// $ipayRow = $this->ipayPost('072738079','ivickinya@gmail.com','10', generate_uuid());
 		$modal ='<div class="modal-dialog modal-lg" role="document">
 					<div class="modal-content">
@@ -188,13 +219,16 @@ class PayController extends CI_Controller {
 		$customerDBSettingIdPaymentHistoryId = explode('C', $obj->p4);
 		$customerDbSettingId = $customerDBSettingIdPaymentHistoryId[0];
 		$paymentHistoryId = $customerDBSettingIdPaymentHistoryId[1];
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$customerDBSettingIdPaymentHistoryId));
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$customerDbSettingId));
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$paymentHistoryId));
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('customer_db_setting_id', $customerDbSettingId)->get()->row();	
 		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->like('payment_history_id', $paymentHistoryId)->get()->row();
 		$subscription = $this->db->update($customerDBSettingRow->database_name.'.subscription', array('payment_at'=>date('Y-m-d')), array('subscription_id'=>$paymentHistoryRow->universal_id));
 		$payment_history = $this->db->update($customerDBSettingRow->database_name.'.payment_history', array('payment_status_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$obj->txncd, 'paid_amount'=>$obj->mc), array('payment_history_id'=>$paymentHistoryRow->payment_history_id));
-		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'paymentHistoryRow -> '.json_encode($paymentHistoryRow)));
-		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'subscription -> '.$subscription));
-		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'payment_history -> '.$payment_history));
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'paymentHistoryRow -> '.json_encode($paymentHistoryRow)));
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'subscription -> '.$subscription));
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'payment_history -> '.$payment_history));
 		// $subscriptionData = $this->db->select('*')->from('club_subscription')->where('subscription_id', $obj->p4)->get()->row();
 		// $memberData = $this->db->select('*')->from('users')->where('user_id', $subscriptionData->member_userid)->get()->row();
 		// $this->send_mail($memberData->email,$memberData->name,$subscriptionData->member,$subscriptionData->subscription_id,$subscriptionData->amount,$subscriptionData->membership_fee_type,$subscriptionData->payment_method,$subscriptionData->txncd);

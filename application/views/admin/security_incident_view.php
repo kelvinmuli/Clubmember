@@ -4,15 +4,26 @@
 	$incidentData = $incidentData ?? [];
 	$incidentTypeIndex = $incidentTypeIndex ?? [];
 	$activeIndex = $activeIndex ?? [];
+	$incidentStatusIndex = $incidentStatusIndex ?? [];
 	$summaryDefaults = array(
 		'total' => 0,
-		'active' => 0,
-		'inactive' => 0,
 		'recent' => null,
 		'location_count' => 0,
 		'reporter_count' => 0,
+		'statuses' => array(),
 	);
 	$summary = array_merge($summaryDefaults, $summary ?? []);
+	$statusSummary = $summary['statuses'] ?? [];
+	$statusCards = !empty($statusSummary) ? array_slice($statusSummary, 0, 2) : [];
+	if (empty($statusCards)) {
+		$statusCards[] = array(
+			'id' => 'no-status',
+			'label' => 'Status',
+			'count' => 0,
+			'text_class' => 'text-primary',
+			'description' => 'No status data available',
+		);
+	}
 	$chartData = $chartData ?? array(
 		'type' => array('labels' => array(), 'series' => array()),
 		'timeline' => array('categories' => array(), 'series' => array(array('name' => 'Incidents', 'data' => array()))),
@@ -78,28 +89,27 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-sm-6 col-lg-3">
-					<div class="card card-sm">
-						<div class="card-body">
-							<div class="d-flex align-items-center">
-								<div class="subheader">Active</div>
+				<?php foreach ($statusCards as $statusCard): ?>
+					<?php
+						$statusLabel = isset($statusCard['label']) ? $statusCard['label'] : 'Status';
+						$statusCount = isset($statusCard['count']) ? (int) $statusCard['count'] : 0;
+						$statusTextClass = !empty($statusCard['text_class']) ? $statusCard['text_class'] : 'text-primary';
+						$statusDescription = isset($statusCard['description']) && $statusCard['description'] !== ''
+							? $statusCard['description']
+							: 'Incidents labeled ' . $statusLabel;
+					?>
+					<div class="col-sm-6 col-lg-3">
+						<div class="card card-sm">
+							<div class="card-body">
+								<div class="d-flex align-items-center">
+									<div class="subheader"><?=htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8')?></div>
+								</div>
+								<div class="h1 mb-0 <?=htmlspecialchars($statusTextClass, ENT_QUOTES, 'UTF-8')?>"><?=(int) $statusCount?></div>
+								<div class="text-secondary"><?=htmlspecialchars($statusDescription, ENT_QUOTES, 'UTF-8')?></div>
 							</div>
-							<div class="h1 mb-0 text-green"><?=$summary['active']?></div>
-							<div class="text-secondary">Open investigations</div>
 						</div>
 					</div>
-				</div>
-				<div class="col-sm-6 col-lg-3">
-					<div class="card card-sm">
-						<div class="card-body">
-							<div class="d-flex align-items-center">
-								<div class="subheader">Inactive</div>
-							</div>
-							<div class="h1 mb-0 text-orange"><?=$summary['inactive']?></div>
-							<div class="text-secondary">Closed or resolved incidents</div>
-						</div>
-					</div>
-				</div>
+				<?php endforeach; ?>
 				<div class="col-sm-6 col-lg-3">
 					<div class="card card-sm">
 						<div class="card-body">
@@ -179,7 +189,7 @@
 													$typeLabel = $getTypeLabel($incident->incident_type_id ?? '');
 													$description = !empty($incident->description) ? $incident->description : 'No description provided.';
 													$statusKey = isset($incident->active) ? (string) $incident->active : 'unknown';
-													$statusLabel = $getStatusLabel($statusKey);
+													$statusLabel = get_table('m_incident_status', 'incident_status_id', $incident->incident_status_id, 'name');
 												?>
 												<tr>
 													<td class="text-muted"><?=++$i?>.</td>
@@ -193,7 +203,7 @@
 													<?php if ($viewUserRight || $editUserRight || $removeUserRight): ?>
 														<td class="text-end">
 															<span class="dropdown">
-																<button class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
+																<button class="btn dropdown-toggle" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
 																<div class="dropdown-menu dropdown-menu-end">
 																	<a class="dropdown-item" href="javascript:void(0);" onclick="viewSecurityIncidentModal('<?=$incidentId?>');">
 																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View

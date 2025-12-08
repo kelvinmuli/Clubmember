@@ -20,11 +20,15 @@ class PetitionSetupController extends CI_Controller {
             ->get()
             ->row();
 
-        $data['petitionSetupData'] = $this->db->select('*')
-            ->from($customerDBSettingRow->database_name . '.petition_setup')
+        $tenantDatabase = $customerDBSettingRow->database_name;
+
+        $petitionQuery = $this->db->select('*')
+            ->from($tenantDatabase . '.petition_setup')
             ->order_by('created_at', 'DESC')
-            ->get()
-            ->result();
+            ->get();
+
+        $data['petitionSetupData'] = $petitionQuery->result();
+        $data['petitionSummary'] = $this->calculatePetitionSummary($tenantDatabase, $data['petitionSetupData']);
         $data['customer_db_setting_id'] = $customer_db_setting_id;
 
         $this->load->view('admin/templates/header_view', $data);
@@ -199,6 +203,67 @@ class PetitionSetupController extends CI_Controller {
         redirect('petition-setup', 'refresh');
     }
 
+    private function calculatePetitionSummary($tenantDatabase, $petitionSetupData)
+    {
+        $summary = [
+            'total_petitions' => 0,
+            'active_petitions' => 0,
+            'open_petitions' => 0,
+            'closed_petitions' => 0,
+            'target_signatures' => 0,
+            'collected_signatures' => 0,
+            'progress_percent' => 0,
+        ];
+
+        if (empty($petitionSetupData)) {
+            return $summary;
+        }
+
+        $summary['total_petitions'] = count($petitionSetupData);
+
+        $signatureCounts = $this->db->select('petition_setup_id, COUNT(*) AS signature_count')
+            ->from($tenantDatabase . '.petition_signature')
+            ->group_by('petition_setup_id')
+            ->get()
+            ->result();
+
+        $signatureIndex = [];
+        foreach ($signatureCounts as $row) {
+            $signatureIndex[$row->petition_setup_id] = (int) $row->signature_count;
+        }
+
+        $now = time();
+
+        foreach ($petitionSetupData as $petition) {
+            $activeValue = isset($petition->active) ? (int) $petition->active : null;
+            if ($activeValue === 1) {
+                $summary['active_petitions'] += 1;
+            }
+
+            $closingAt = isset($petition->closing_at) && !empty($petition->closing_at) ? strtotime($petition->closing_at) : null;
+            $isOpen = ($closingAt === null || $closingAt >= $now);
+            if ($isOpen) {
+                $summary['open_petitions'] += 1;
+            } else {
+                $summary['closed_petitions'] += 1;
+            }
+
+            $targetSignatures = isset($petition->no_of_signature) ? (int) $petition->no_of_signature : 0;
+            $summary['target_signatures'] += $targetSignatures;
+
+            $collected = $signatureIndex[$petition->petition_setup_id] ?? 0;
+            $summary['collected_signatures'] += $collected;
+        }
+
+        if ($summary['target_signatures'] > 0) {
+            $summary['progress_percent'] = min(100, round(($summary['collected_signatures'] / $summary['target_signatures']) * 100));
+        } else {
+            $summary['progress_percent'] = $summary['collected_signatures'] > 0 ? 100 : 0;
+        }
+
+        return $summary;
+    }
+
     public function petitionSignatureView($petition_setup_id = null)
     {
         $this->common->checkSession();
@@ -241,6 +306,186 @@ class PetitionSetupController extends CI_Controller {
         $this->load->view('admin/templates/header_view', $data);
         $this->load->view('admin/petition_signature_view', $data);
         $this->load->view('admin/templates/footer_view', $data);
+    }
+
+    public function exportPetitionSignatures($petition_setup_id = null, $format = 'csv')
+    {
+        $this->common->checkSession();
+        $session_data = $this->common->loadSession();
+        $customer_db_setting_id = $session_data['customer_db_setting_id'];
+
+        if (empty($petition_setup_id)) {
+            show_error('Invalid petition id', 400);
+            return;
+        }
+
+        $customerDBSettingRow = $this->db->select('*')
+            ->from('customer_db_setting')
+            ->where('customer_db_setting_id', $customer_db_setting_id)
+            ->get()
+            ->row();
+
+        if (!$customerDBSettingRow) {
+            show_error('Tenant database not found', 500);
+            return;
+        }
+
+        $tenantDatabase = $customerDBSettingRow->database_name;
+
+        $petitionRow = $this->db->from($tenantDatabase . '.petition_setup')
+            ->where('petition_setup_id', $petition_setup_id)
+            ->get()
+            ->row();
+
+        $signatures = $this->db->select('*')
+            ->from($tenantDatabase . '.petition_signature')
+            ->where('petition_setup_id', $petition_setup_id)
+            ->order_by('signed_at', 'DESC')
+            ->get()
+            ->result();
+
+        // Prepare filename and headers
+        $now = date('Ymd_His');
+        $petitionSlug = preg_replace('/[^A-Za-z0-9\-]/', '_', strtolower($petitionRow->name ?? $petition_setup_id));
+        $ext = strtolower($format) === 'excel' ? 'xls' : 'csv';
+        $filename = "petition_signatures_{$petitionSlug}_{$now}.{$ext}";
+
+        if (strtolower($format) === 'pdf') {
+            // Build HTML table for PDF with fixed column widths and basic styles
+            $html = '<style>';
+            $html .= 'table { border-collapse: collapse; table-layout: fixed; width:100%; font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size:10pt; }';
+            $html .= 'th, td { border: 1px solid #777; padding: 6px; vertical-align: top; word-wrap: break-word; }';
+            $html .= 'th { background: #f5f5f5; font-weight: bold; }';
+            $html .= '.col-member{width:20%}.col-phone{width:12%}.col-units{width:6%}.col-method{width:12%}.col-sign{width:18%}.col-consent{width:6%}.col-signed{width:10%}.col-state{width:8%}.col-status{width:4%}.col-created{width:4%}';
+            $html .= '</style>';
+
+            $html .= '<h2 style="margin:0 0 6px 0;">' . htmlentities($petitionRow->name ?? 'Petition Signatures') . '</h2>';
+            $html .= '<p style="margin:0 0 12px 0;">Created At: ' . (!empty($petitionRow->created_at) ? htmlentities($petitionRow->created_at) : '') . '</p>';
+
+            $html .= '<table cellpadding="4" cellspacing="0">';
+            $html .= '<thead><tr>';
+            $html .= '<th class="col-member">Member Name</th>';
+            $html .= '<th class="col-phone">Phone Number</th>';
+            $html .= '<th class="col-units">Units</th>';
+            $html .= '<th class="col-method">Signature Method</th>';
+            $html .= '<th class="col-sign">Signature URL</th>';
+            $html .= '<th class="col-consent">Consent</th>';
+            $html .= '<th class="col-signed">Signed At</th>';
+            $html .= '<th class="col-state">State</th>';
+            $html .= '<th class="col-status">Status</th>';
+            $html .= '<th class="col-created">Created At</th>';
+            $html .= '</tr></thead><tbody>';
+
+            foreach ($signatures as $s) {
+                $memberName = get_table($tenantDatabase . '.user', 'user_id', $s->user_id, 'full_legal_name') ?: '';
+                $phone = get_table($tenantDatabase . '.user', 'user_id', $s->user_id, 'phone_number') ?: '';
+                $consent = (isset($s->consent) && (int)$s->consent === 1) ? 'Yes' : 'No';
+                $statusName = get_table('m_active', 'num', $s->active ?? 0, 'name') ?: '';
+
+                $html .= '<tr>';
+                $html .= '<td class="col-member">' . htmlentities($memberName) . '</td>';
+                $html .= '<td class="col-phone">' . htmlentities($phone) . '</td>';
+                $html .= '<td class="col-units">' . (int) ($s->no_of_unit ?? 0) . '</td>';
+                $html .= '<td class="col-method">' . htmlentities($s->signature_method_id ?? '') . '</td>';
+                $html .= '<td class="col-sign">' . htmlentities($s->signature_url ?? '') . '</td>';
+                $html .= '<td class="col-consent">' . htmlentities($consent) . '</td>';
+                $html .= '<td class="col-signed">' . (!empty($s->signed_at) ? htmlentities($s->signed_at) : '') . '</td>';
+                $html .= '<td class="col-state">' . htmlentities($s->state ?? '') . '</td>';
+                $html .= '<td class="col-status">' . htmlentities($statusName) . '</td>';
+                $html .= '<td class="col-created">' . (!empty($s->created_at) ? htmlentities($s->created_at) : '') . '</td>';
+                $html .= '</tr>';
+            }
+
+            $html .= '</tbody></table>';
+
+            // Try to use TCPDF if available
+            if (!class_exists('TCPDF')) {
+                if (file_exists(APPPATH . 'libraries/tcpdf/tcpdf.php')) {
+                    require_once(APPPATH . 'libraries/tcpdf/tcpdf.php');
+                }
+            }
+
+            if (class_exists('TCPDF')) {
+                $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+                $pdf->SetCreator(PDF_CREATOR);
+                $pdf->SetAuthor('Clubmember');
+                $pdf->SetTitle($petitionRow->name ?? 'Petition Signatures');
+
+                // Header callback: show petition title and generated datetime
+                $pdf->setHeaderCallback(function($pdf) use ($petitionRow) {
+                    $pdf->SetFont('dejavusans', 'B', 12);
+                    $title = htmlentities($petitionRow->name ?? 'Petition Signatures');
+                    $pdf->Cell(0, 6, $title, 0, 1, 'L', 0, '', 0, false, 'T', 'M');
+                    $pdf->SetFont('dejavusans', '', 9);
+                    $pdf->Cell(0, 6, 'Generated: ' . date('d M Y H:i'), 0, 1, 'L', 0, '', 0, false, 'T', 'M');
+                    $pdf->Ln(2);
+                });
+
+                // Footer callback: page numbers
+                $pdf->setFooterCallback(function($pdf) {
+                    $pdf->SetY(-15);
+                    $pdf->SetFont('dejavusans', '', 9);
+                    $pdf->Cell(0, 10, 'Page ' . $pdf->getAliasNumPage() . ' / ' . $pdf->getAliasNbPages(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
+                });
+
+                // Margins and auto page break leave room for header/footer
+                $pdf->SetMargins(12, 28, 12);
+                $pdf->SetAutoPageBreak(true, 18);
+                $pdf->setPrintHeader(true);
+                $pdf->setPrintFooter(true);
+
+                $pdf->AddPage();
+                $pdf->SetFont('dejavusans', '', 10);
+                $pdf->writeHTML($html, true, false, true, false, '');
+                $pdf->Output($filename, 'D');
+                exit;
+            }
+
+            show_error('PDF generation library (TCPDF) not found. Please install TCPDF in application/libraries/tcpdf/', 500);
+            return;
+        }
+
+        if (strtolower($format) === 'excel') {
+            header('Content-Type: application/vnd.ms-excel');
+        } else {
+            header('Content-Type: text/csv; charset=utf-8');
+        }
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+        $out = fopen('php://output', 'w');
+
+        // Header row
+        $columns = [
+            'Petition Title', 'Petition Created At', 'Member Name', 'Phone Number', 'Units', 'Signature Method', 'Signature URL', 'Consent', 'Signed At', 'State', 'Status', 'Created At'
+        ];
+        fputcsv($out, $columns);
+
+        foreach ($signatures as $s) {
+            $memberName = get_table($tenantDatabase . '.user', 'user_id', $s->user_id, 'full_legal_name') ?: '';
+            $phone = get_table($tenantDatabase . '.user', 'user_id', $s->user_id, 'phone_number') ?: '';
+            $consent = (isset($s->consent) && (int)$s->consent === 1) ? 'Yes' : 'No';
+            $statusName = get_table('m_active', 'num', $s->active ?? 0, 'name') ?: '';
+
+            $row = [
+                $petitionRow->name ?? '',
+                !empty($petitionRow->created_at) ? $petitionRow->created_at : '',
+                $memberName,
+                $phone,
+                (int) ($s->no_of_unit ?? 0),
+                $s->signature_method_id ?? '',
+                $s->signature_url ?? '',
+                $consent,
+                !empty($s->signed_at) ? $s->signed_at : '',
+                $s->state ?? '',
+                $statusName,
+                !empty($s->created_at) ? $s->created_at : '',
+            ];
+
+            fputcsv($out, $row);
+        }
+
+        fclose($out);
+        exit;
     }
 
     public function addPetitionSignatureModal($petition_setup_id = null)

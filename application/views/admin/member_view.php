@@ -61,7 +61,6 @@
 											<th>Residental Address</th>
 											<th>LR/No.</th>
 											<th>Origin</th>
-											<th>Status</th>
 											<th>Created At</th>	
 											<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>								
 												<th>Actions</th>
@@ -73,14 +72,13 @@
 											<tr>
 												<td><?=$key + 1?></td>
 												<td><?=$user->full_legal_name?></td>
-												<td><?=$user->phone_number?></td>
+												<td><?=empty($user->phone_number) ? $user->mobile_number : $user->phone_number?></td>
 												<td><?=$user->email?></td>
 												<td><?=get_table($customerDBSettingRow->database_name.'.membership_fee_type', 'membership_fee_type_id', $user->membership_fee_type_id, 'name')?></td>
 												<td><?=$user->membership_no?></td>
 												<td><?=$user->residential_address?></td>
 												<td><?=$user->sub_reference_no?></td>
 												<td><?=get_table('m_user_origin', 'user_origin_id', $user->user_origin_id, 'name')?></td>
-												<td><?=get_table('m_active', 'num', $user->active, 'name_two')?></td>
 												<td><?=date_format(date_create($user->created_at),"y M d H:i:s")?></td>
 												<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
 													<td>

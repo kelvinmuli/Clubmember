@@ -37,18 +37,15 @@ class SubscriptionController extends CI_Controller {
 		if ($session_data['user_type_id'] == GlobalModel::CLUB_ADMIN_TYPE)
 		{
 			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('ph.payment_status_id', $payment_status_id)->where('s.active', 1)->get()->result();
-			
 		}
 		elseif ($session_data['user_type_id'] == GlobalModel::MEMBER_TYPE)
 		{
-			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('s.user_id', $session_data['user_id'])->where('ph.payment_status_id', $payment_status_id)->where('s.active', 1)->get()->result();
+			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('ph.payment_status_id', $payment_status_id)->where('s.user_id', $session_data['user_id'])->where('s.active', 1)->get()->result();
 		}
 		
 		$data['paymentStatusId'] = $payment_status_id;
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
 		$data['subscriptionData'] = $subscriptionData ?? [];
-		// print_r(json_encode($data['subscriptionData']));
-		// exit;
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('admin/subscription_view', $data);
@@ -75,7 +72,6 @@ class SubscriptionController extends CI_Controller {
 		$membershipFeeTypeData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('active', 1)->get()->result();
 		$currencyData = $this->db->select('*')->from('m_currency')->where('active', 1)->get()->result();
 		$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->get()->result();
-		$activeData = $this->db->select('*')->from('m_active')->where('active', 1)->get()->result();
 
 		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
@@ -92,15 +88,16 @@ class SubscriptionController extends CI_Controller {
 							<input id="subscription_id" name="subscription_id" type="text" value="'.generate_uuid().'" hidden>
 							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>
 							<input id="member_id" name="member_id" type="text" value="'.$session_data['user_id'].'" hidden>
-							<input id="payment_status_id" name="payment_status_id" type="text" value="'.$payment_status_id.'" hidden>
+							<input id="payment_status_id" name="payment_status_id" type="text" value="'.(empty($payment_status_id) ? '1732351802222' : $payment_status_id).'" hidden>
 							<input id="membership_type_id" name="membership_type_id" type="text" value="'.$membership_type_id.'" hidden>
+							<input id="active" name="active" type="number" value="'.(empty($payment_status_id) ? '0' : '1').'" hidden> 
 							<input id="header" name="header" type="text" value="'.$header.'" hidden>
 							<div class="modal-body">
 								<div class="row">
 									<div class="col-lg-6">
 										<div class="mb-3">
 											<label class="form-label">Member</label>
-											<select id="user_id" name="user_id" class="form-select btn-pill">
+											<select id="user_id" name="user_id" class="form-select btn-pill" required>
 												<option selected disabled>Select Member</option>';
 												if (isset($userData)): foreach($userData as $data):
 													$selected = $data->user_id == $user_id ? 'selected' : '';
@@ -112,7 +109,7 @@ class SubscriptionController extends CI_Controller {
 									<div class="col-lg-6">
 										<div class="mb-3">
 											<label class="form-label">Membership Type</label>
-											<select id="membership_fee_type_id" name="membership_fee_type_id" class="form-select btn-pill">
+											<select id="membership_fee_type_id" name="membership_fee_type_id" class="form-select btn-pill" required>
 												<option selected disabled>Select Membership Type</option>';
 												if (isset($membershipFeeTypeData)): foreach($membershipFeeTypeData as $data):
 													$selected = $data->membership_fee_type_id == (!empty($membershipFeeTypeRow) ? $membershipFeeTypeRow->membership_fee_type_id : '') ? 'selected' : '';
@@ -124,8 +121,7 @@ class SubscriptionController extends CI_Controller {
 									<div class="col-lg-6">
 										<div class="mb-3">
 											<label class="form-label">Currency</label>
-											<select id="currency_id" name="currency_id" class="form-select btn-pill">
-												<option selected disabled>Select Currency</option>';
+											<select id="currency_id" name="currency_id" class="form-select btn-pill" required>';
 												if (isset($currencyData)): foreach($currencyData as $data):
 													$selected = $data->currency_id == (!empty($membershipFeeTypeRow) ? $membershipFeeTypeRow->currency_id : '') ? 'selected' : '';
 													$modal .= '<option value="'.$data->currency_id.'" '.$selected.'>'.$data->name.'</option>';
@@ -147,7 +143,7 @@ class SubscriptionController extends CI_Controller {
 									</div>
 									<div class="col-lg-6">
 										<div class="mb-3">
-											<label for="due_at" class="form-label">Start Date</label>
+											<label for="start_at" class="form-label">Start Date</label>
 											<input id="start_at" name="start_at" type="date" class="form-control btn-pill" required>
 										</div>
 									</div>
@@ -155,6 +151,12 @@ class SubscriptionController extends CI_Controller {
 										<div class="mb-3">
 											<label for="due_at" class="form-label">Due Date</label>
 											<input id="due_at" name="due_at" type="date" class="form-control btn-pill" required>
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="mb-3">
+											<label for="end_at" class="form-label">End Date</label>
+											<input id="end_at" name="end_at" type="date" class="form-control btn-pill" required>
 										</div>
 									</div>
 									<div class="col-lg-6">
@@ -168,21 +170,8 @@ class SubscriptionController extends CI_Controller {
 									        <label for="payment_at" class="form-label">Notes</label>
 									        <textarea id="remark" name="remark" class="form-control" rows="3"></textarea>
 									    </div>
-									</div>';
-									if (empty($payment_status_id)):
-										$modal .= '<div class="col-lg-6">
-											<div class="mb-3">
-												<label class="form-label">Approval Status</label>
-												<select id="active" name="active" class="form-select btn-pill">
-													<option selected disabled>Select Approval Status</option>';
-													if (isset($activeData)): foreach($activeData as $data):
-														$modal .= '<option value="'.$data->num.'">'.$data->name_two.'</option>';
-													endforeach; endif;
-												$modal .= '</select>
-											</div>
-										</div>';
-									endif;
-								$modal .= '</div>
+									</div>
+								</div>
 							</div>
 							<div class="modal-footer">
 								<a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">Cancel</a>
@@ -223,11 +212,17 @@ class SubscriptionController extends CI_Controller {
 				$this->db->update($customerDBSettingRow->database_name.'.user', array('active'=>1), array('user_id'=>$postData['user_id']));
 				$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
 				$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
-				$htmlApprovalNotification = $this->load->view('admin/club_member_temp', array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
+				$clubMemberData = array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id));
+				$clubMemberData['userRow'] = $userRow;
+				$clubMemberData['customerRow'] = $customerRow;
+				$htmlApprovalNotification = $this->load->view('admin/club_member_temp', $clubMemberData, true);
 				$this->common->sendMail($userRow->email, 'Action Required - Your New Muthaiga Residents Association ClubMember.app Account Activation', $htmlApprovalNotification);
 
 				$membershipTypeName = get_table('m_membership_type', 'membership_type_id', $userRow->membership_type_id, 'name');
-				$htmlSubscriptionPayment = $this->load->view('admin/subscription_payment_temp', array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$postData['amount'], 'payment_at'=>$postData['payment_at'], 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
+				$subscriptionPaymentData = array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$postData['amount'], 'due_at'=>$postData['due_at'], 'notes'=>$postData['remark'], 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id));
+				$subscriptionPaymentData['userRow'] = $userRow;
+				$subscriptionPaymentData['customerRow'] = $customerRow;
+				$htmlSubscriptionPayment = $this->load->view('admin/subscription_payment_temp', $subscriptionPaymentData, true);
 				$this->common->sendMail($userRow->email, 'New Muthaiga Residents Association Subscription Payment Required', $htmlSubscriptionPayment);
 			} 
 			else
@@ -246,7 +241,7 @@ class SubscriptionController extends CI_Controller {
 		} elseif ($header == 'all-user') {
 			$route = $header.'/'.$payment_status_id;
 		} elseif ($header == 'member') {
-			$route = $header.'/'.$membership_type_id.'1';
+			$route = $header.'/'.$membership_type_id.'/1';
 		} else {
 			$route = 'dashboard';
 		}

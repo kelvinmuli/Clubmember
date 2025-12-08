@@ -2,6 +2,15 @@
 $pageTitle = isset($moduleMenu) && !empty($moduleMenu->name) ? $moduleMenu->name : 'Projects';
 $modulePath = isset($moduleMenu) && !empty($moduleMenu->path) ? $moduleMenu->path : 'projects';
 $projectData = $projectData ?? [];
+$projectSummary = $projectSummary ?? [
+	'total_projects' => 0,
+	'active_projects' => 0,
+	'completed_projects' => 0,
+	'budget_allocated' => 0.0,
+	'budget_used' => 0.0,
+];
+$pagination = $pagination ?? ['page' => 1, 'per_page' => 12, 'total' => 0, 'pages' => 1];
+$basePageUrl = base_url($modulePath);
 ?>
 
 <div class="page-wrapper">
@@ -40,6 +49,47 @@ $projectData = $projectData ?? [];
 						<div class="card-header">
 							<h3 class="card-title mb-0"><?=$pageTitle?></h3>
 						</div>
+						
+						<div class="card-body">
+							<div class="row g-3 g-md-4">
+								<div class="col-6 col-md-3">
+									<div class="d-flex align-items-center">
+										<span class="avatar bg-blue-lt text-blue me-3"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-briefcase" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7l1.664 -3.327a1 1 0 0 1 .894 -.547h12.884a1 1 0 0 1 .894 .547l1.664 3.327" /><path d="M21 7v11a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11" /><path d="M8 7v-4h8v4" /><path d="M12 12h.01" /><path d="M3 13a20 20 0 0 0 18 0" /></svg></span>
+										<div>
+											<div class="text-secondary text-uppercase fs-11">Total Projects</div>
+											<div class="h3 mb-0"><?=number_format($projectSummary['total_projects'])?></div>
+										</div>
+									</div>
+								</div>
+								<div class="col-6 col-md-3">
+									<div class="d-flex align-items-center">
+										<span class="avatar bg-green-lt text-green me-3"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4.5 21l5.5 -5.5" /><path d="M5 21l-1 -4l4 1" /><path d="M10 14l11 -11" /><path d="M16 4l4 4" /><path d="M15 9l-1 1" /><path d="M3 12a6 6 0 0 1 6 6" /></svg></span>
+										<div>
+											<div class="text-secondary text-uppercase fs-11">Active</div>
+											<div class="h3 mb-0"><?=number_format($projectSummary['active_projects'])?></div>
+										</div>
+									</div>
+								</div>
+								<div class="col-6 col-md-3">
+									<div class="d-flex align-items-center">
+										<span class="avatar bg-purple-lt text-purple me-3"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-check" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg></span>
+										<div>
+											<div class="text-secondary text-uppercase fs-11">Completed</div>
+											<div class="h3 mb-0"><?=number_format($projectSummary['completed_projects'])?></div>
+										</div>
+									</div>
+								</div>
+								<div class="col-6 col-md-3">
+									<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
+										<span class="avatar bg-orange-lt text-orange me-3 mb-2 mb-md-0"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-currency-dollar" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3a4 4 0 0 1 4 4c0 3 -4 5 -4 8" /><path d="M12 17v4" /><path d="M8 8a4 4 0 0 1 4 -4" /><path d="M8 12c0 3 4 5 4 8" /></svg></span>
+										<div class="w-100">
+											<div class="text-secondary text-uppercase fs-11">Budget (Alloc / Used)</div>
+											<div class="fw-semibold"><?=number_format($projectSummary['budget_allocated'], 2)?> / <span class="text-orange"><?=number_format($projectSummary['budget_used'], 2)?></span></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 
@@ -76,26 +126,26 @@ $projectData = $projectData ?? [];
 												<img src="<?=$thumbnailSrc?>" alt="<?=$projectName?>" class="avatar avatar-xl object-cover">
 											<?php else: ?>
 												<span class="avatar avatar-xl bg-azure-lt text-uppercase fw-bold">
-													<?=htmlspecialchars(strtoupper(substr(trim($projectName), 0, 1)), ENT_QUOTES, 'UTF-8')?>
+													<?=strtoupper(substr(trim($projectName), 0, 1))?>
 												</span>
 											<?php endif; ?>
 										</div>
 										<div class="flex-grow-1">
 											<div class="d-flex justify-content-between align-items-start">
 												<div>
-													<h4 class="card-title mb-1"><?=htmlspecialchars($projectName, ENT_QUOTES, 'UTF-8')?></h4>
+													<h4 class="card-title mb-1"><?=$projectName?></h4>
 													<div class="text-muted small">Created <?=!empty($project->created_at) ? date('d M Y H:i', strtotime($project->created_at)) : 'N/A'?></div>
 												</div>
 												<div class="text-end">
-													<span class="badge bg-purple-lt mb-1"><?=htmlspecialchars($statusName, ENT_QUOTES, 'UTF-8')?></span>
-													<div><span class="badge <?=$activeClass?>"><?=htmlspecialchars($activeBadge, ENT_QUOTES, 'UTF-8')?></span></div>
+													<span class="badge bg-purple-lt mb-1"><?=$statusName?></span>
+													<div><span class="badge <?=$activeClass?>"><?=$activeBadge?></span></div>
 												</div>
 											</div>
-											<p class="text-muted only-so-big mt-2 mb-3"><?=htmlspecialchars($projectDescription, ENT_QUOTES, 'UTF-8')?></p>
+											<p class="text-muted only-so-big mt-2 mb-3"><?=$projectDescription?></p>
 											<?php if (!empty($dependence)): ?>
 												<div class="mb-3">
 													<span class="badge bg-blue-lt">Dependencies</span>
-													<div class="text-muted small mt-1"><?=htmlspecialchars($dependence, ENT_QUOTES, 'UTF-8')?></div>
+													<div class="text-muted small mt-1"><?=$dependence?></div>
 												</div>
 											<?php endif; ?>
 											<div class="row g-2 mb-3">
@@ -125,7 +175,7 @@ $projectData = $projectData ?? [];
 											<?php if (!empty($notes)): ?>
 												<div class="border rounded p-2 bg-light-lt mb-3">
 													<div class="small text-muted">Notes</div>
-													<div><?=htmlspecialchars($notes, ENT_QUOTES, 'UTF-8')?></div>
+													<div><?=$notes?></div>
 												</div>
 											<?php endif; ?>
 											<div class="d-flex justify-content-between align-items-center">
@@ -165,6 +215,53 @@ $projectData = $projectData ?? [];
 						</div>
 					</div>
 				<?php endif; ?>
+
+				<?php if (!empty($projectData)): ?>
+					<div class="col-12">
+						<nav aria-label="Project pagination">
+							<ul class="pagination justify-content-center mt-4">
+								<?php
+									$currentPage = (int) $pagination['page'];
+									$totalPages = (int) $pagination['pages'];
+									$perPage = (int) $pagination['per_page'];
+									$queryParams = $_GET;
+									$queryParams['per_page'] = $perPage;
+									$buildUrl = function($page) use ($basePageUrl, $queryParams) {
+										$queryParams['page'] = $page;
+										return $basePageUrl . '?' . http_build_query($queryParams);
+									};
+								?>
+								<li class="page-item <?=$currentPage <= 1 ? 'disabled' : ''?>">
+									<a class="page-link" href="<?=$currentPage > 1 ? $buildUrl($currentPage - 1) : '#'?>" tabindex="-1" aria-disabled="<?=$currentPage <= 1 ? 'true' : 'false'?>">Prev</a>
+								</li>
+								<?php
+									$start = max(1, $currentPage - 2);
+									$end = min($totalPages, $currentPage + 2);
+									if ($start > 1) {
+										echo '<li class="page-item"><a class="page-link" href="' . $buildUrl(1) . '">1</a></li>';
+										if ($start > 2) {
+											echo '<li class="page-item disabled"><span class="page-link">&hellip;</span></li>';
+										}
+									}
+
+									for ($page = $start; $page <= $end; $page++) {
+										echo '<li class="page-item ' . ($page == $currentPage ? 'active' : '') . '"><a class="page-link" href="' . $buildUrl($page) . '">' . $page . '</a></li>';
+									}
+
+									if ($end < $totalPages) {
+										if ($end < $totalPages - 1) {
+											echo '<li class="page-item disabled"><span class="page-link">&hellip;</span></li>';
+										}
+										echo '<li class="page-item"><a class="page-link" href="' . $buildUrl($totalPages) . '">' . $totalPages . '</a></li>';
+									}
+								?>
+								<li class="page-item <?=$currentPage >= $totalPages ? 'disabled' : ''?>">
+									<a class="page-link" href="<?=$currentPage < $totalPages ? $buildUrl($currentPage + 1) : '#'?>" aria-disabled="<?=$currentPage >= $totalPages ? 'true' : 'false'?>">Next</a>
+								</li>
+							</ul>
+						</nav>
+					</div>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
@@ -174,10 +271,6 @@ $projectData = $projectData ?? [];
 	addProjectModal = function () {
 		showModal(base_url + 'add-project-modal', function () {});
 	};
-
-		viewProjectModal = function (projectId) {
-			showModal(base_url + 'view-project-modal/' + projectId, function () {});
-		};
 
 	editProjectModal = function (projectId) {
 		showModal(base_url + 'edit-project-modal/' + projectId, function () {});

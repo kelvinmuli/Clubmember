@@ -152,9 +152,19 @@
 			});
 		}
 
-		function deleteUserModal(user_id) {
+		function editUserModal(user_id, membership_type_id, customer_db_setting_id) {
 			$.ajax({
-				url: base_url + "delete-user-modal/" + user_id,
+				url: base_url + "edit-user-modal/" + user_id + "/" + membership_type_id + "/" + customer_db_setting_id,
+				success: function(response) {
+					document.getElementById('modal-view-edit-print-user').innerHTML = response;
+					$('#modal-view-edit-print-user').modal('show');
+				}
+			});
+		}
+
+		function deleteUserModal(user_id, customer_db_setting_id) {
+			$.ajax({
+				url: base_url + "delete-user-modal/" + user_id + "/" + customer_db_setting_id,
 				success: function(response) {
 					document.getElementById('modal-view-edit-print-user').innerHTML = response;
 					$('#modal-view-edit-print-user').modal('show');

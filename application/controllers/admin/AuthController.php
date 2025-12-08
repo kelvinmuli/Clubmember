@@ -13,19 +13,43 @@ class AuthController extends CI_Controller {
 		
 	}
 
-	public function forgotPassword($customer_db_setting_id='')
+	public function forgotPassword($customer_db_setting_id='1755387775468')
+	{
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('sub_domain', 'muthaiga')->or_where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
+
+		$this->load->view('admin/forgot_password_view', $data);
+	}	
+
+	public function resetPassword($customer_db_setting_id='1755387775468')
 	{
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('sub_domain', 'muthaiga')->or_where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
 		$this->load->view('admin/forgot_password_view', $data);
-	}	
+	}
 
 	public function resetPasswordNow()
 	{
 		$postData = $this->input->post();
-		$customer_db_setting_id = $postData['customer_db_setting_id'];
+		$customer_db_setting_id = $postData['customer_db_setting_id'] ?? '1755387775468';
 		$email = $postData['email'];
+		
+		$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->where('active', 1)->get()->result();
+		// Check tenant databases first
+		foreach ($customerDBSettingData as $customerDBSetting) 
+		{
+			$userInnerRow = $this->db->select('*')->from($customerDBSetting->database_name.'.user')->where('email', $email)->get()->row();
+			// print_r(json_encode($userInnerRow));
+			// exit;
+			if (isset($userInnerRow->email) && $userInnerRow->email == $email)
+			{
+				$customer_db_setting_id = $customerDBSetting->customer_db_setting_id;
+				// return;
+			}
+		}
+		// exit;
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('email', $email)->get()->row();
 		if (empty($email) && empty($userRow))

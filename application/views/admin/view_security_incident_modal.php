@@ -12,8 +12,8 @@
 				$incidentAt = !empty($incidentRow->incident_at) ? date('d M Y H:i', strtotime($incidentRow->incident_at)) : 'Not recorded';
 				$createdAt = !empty($incidentRow->created_at) ? date('d M Y H:i', strtotime($incidentRow->created_at)) : 'Not recorded';
 				$updatedAt = !empty($incidentRow->updated_at) ? date('d M Y H:i', strtotime($incidentRow->updated_at)) : 'Never updated';
-				$typeName = !empty($incidentTypeName) ? $incidentTypeName : 'Unclassified';
-				$statusName = !empty($statusName) ? $statusName : 'Unknown';
+				$typeName = !empty($incidentTypeName) ? get_table('m_incident_type', 'incident_type_id', $incidentRow->incident_type_id, 'name') : 'Unclassified';
+				$statusName = !empty($incidentRow->incident_status_id) ? get_table('m_incident_status', 'incident_status_id', $incidentRow->incident_status_id, 'name') : 'Unknown';
 				$statusClass = !empty($statusClass) ? $statusClass : 'bg-yellow-lt';
 			?>
 			<div class="modal-body">

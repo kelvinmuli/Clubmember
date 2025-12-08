@@ -71,6 +71,19 @@
     <center>
       <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center" valign="top">
         <tbody>
+					<!-- Header / Logo -->
+          <tr>
+            <td style="padding:20px; text-align:left;">
+              <!-- Replace with your logo img or plain text -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align:middle;">
+                    <img src="<?=base_url($customerRow->logo)?>" alt="<?=$customerRow->full_legal_name?> logo" width="120" style="display:block;">
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
           <tr>
             <td>
               <table border="0" cellpadding="0" cellspacing="0" align="center" valign="top" bgcolor="#ffffff" style="padding: 0 20px !important;max-width: 500px;width: 90%;">
@@ -123,8 +136,11 @@
 																								
 																								<p>Welcome aboard!</p>
 
-                                                <p>— New Muthaiga Residents Association</p>
+                                                <p>New Muthaiga Residents Association</p>
 
+																								<p>Copyright @ 2025</p>
+																								<p>Website: https://newmuthaigaresidentsassociation.com</p>
+																								<p>Email: committee@newmuthaigaresidentsassociation.com</p>
                                                <p style="margin:0;margin-top:20px;line-height:0;"></p>
                                                
                             </td>

@@ -12,7 +12,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>ClubMember.app - Stella Member Experiences - Login</title>
+    <title>ClubMember.app - Stella Member Experiences - Reset Password</title>
     <!-- BEGIN GLOBAL MANDATORY STYLES -->
     <link href="<?=base_url()?>assets/admin/dist/css/tabler.css?1747674012" rel="stylesheet" />
     <!-- END GLOBAL MANDATORY STYLES -->
@@ -45,77 +45,36 @@
               <div class="text-center mb-4">
                 <!-- BEGIN NAVBAR LOGO -->
                 <a href="/" class="logo">
-                  <img src="<?=base_url('assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="70%">
+                  <img src="<?=base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="50%">
                 </a>
               </div>
-
-
               <div class="card card-md">
                 <div class="card-body">
-                  <h2 class="h2 text-center mb-4">Login</h2>
+                  <h2 class="h2 text-center mb-4">Forgot Password</h2>
 
-                   <?php if ($this->session->flashdata()) { ?>
-                        <?php $alert = empty($this->session->flashdata('err')) ? 'alert-success' : 'alert-danger' ?>
-                        <div class="alert alert-danger" role="alert">
-                            <?= $this->session->flashdata('message'); ?>
-                            <?= $this->session->flashdata('err'); ?>
-                        </div>
-                   <?php } ?>
+                   	<?php if ($this->session->flashdata()) { ?>
+											<?php $alert = empty($this->session->flashdata('err')) ? 'alert-success' : 'alert-danger' ?>
+											<div class="alert alert-danger" role="alert">
+													<?= $this->session->flashdata('message'); ?>
+													<?= $this->session->flashdata('err'); ?>
+											</div>
+                   	<?php } ?>
 
-                  <form action="<?=base_url('admindologin');?>" method="POST">
+                  <form action="<?=base_url('reset-password-now')?>" method="POST">
+										<input type="text" id="customer_db_setting_id" name="customer_db_setting_id" class="form-control" value="<?=$customerDBSettingRow->customer_db_setting_id?>" hidden/>
                     <div class="mb-3">
                       <label class="form-label">Email address</label>
-                      <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com" autocomplete="off" />
-                    </div>
-                    <div class="mb-2">
-                      <label class="form-label">Password</label>
-                      <div class="input-group input-group-flat">
-                        <input type="password" id="pwd" name="password" class="form-control" placeholder="Your password" autocomplete="off" />
-                        <span class="input-group-text">
-                          <a href="#" class="link-secondary toggle-password" title="Show password" data-target="#pwd" data-bs-toggle="tooltip">
-                            <!-- Download SVG icon from http://tabler.io/icons/icon/eye -->
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              class="icon icon-1"
-                            >
-                              <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
-                              <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
-                            </svg>
-                          </a>
-                        </span>
-                      </div>
-                      <div class="mb-3">
-												<a href="<?=base_url('forgot-password/'.(isset($customerDBSettingRow->customer_db_setting_id) ? $customerDBSettingRow->customer_db_setting_id : ''))?>" class="form-label" style="float: right; font-size: 12px;">
-													Forgot password?
-												</a>	
-											</div>
-                    </div>
-                    
+                      <input type="email" name="email" id="email" class="form-control" placeholder="your@email.com" autocomplete="off"/>
+                    </div>        
                     <div class="form-footer">
-                      <button type="submit" class="btn btn-primary w-100">Sign in</button>
+                      <button type="submit" class="btn btn-primary w-100">Reset</button>
                     </div>
                   </form>
                 </div>
-
-
               </div>
-             
             </div>
           </div>
           <div class="col-lg d-none d-lg-block">
-            <a href="/" class="logo">
-							<?php if (isset($customerRow) && $customerRow->customer_id != '17765689954') { ?>
-								<img src="<?=base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="30%">
-							<?php } ?>
-						</a>
             <svg class="img d-block mx-auto" xmlns="http://www.w3.org/2000/svg" height="400" fill="none" viewBox="0 0 800 600">
               <style>
                 :where(.theme-dark, [data-bs-theme="dark"]) .tblr-illustrations-boy-with-key-a {
@@ -340,47 +299,6 @@
           window.history.pushState({}, "", url);
         });
         checkItems();
-      });
-    </script>
-    <script>
-      // Toggle password visibility for elements with .toggle-password
-      document.addEventListener('DOMContentLoaded', function () {
-        var eyeSvg = function() {
-          return `
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
-              <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
-              <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
-            </svg>`;
-        };
-        var eyeOffSvg = function() {
-          return `
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
-              <path d="M3 3l18 18" />
-              <path d="M10.58 10.58a3.5 3.5 0 0 0 4.84 4.84" />
-              <path d="M9.88 5.11c.89-.18 1.79-.11 2.61.2" />
-              <path d="M14.12 18.89c-.89.18-1.79.11-2.61-.2" />
-              <path d="M21 12c-2.4 4-5.4 6-9 6-1.08 0-2.12-.15-3.09-.43" />
-            </svg>`;
-        };
-
-        document.querySelectorAll('.toggle-password').forEach(function(btn) {
-          btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            var selector = this.getAttribute('data-target') || this.dataset.target;
-            if (!selector) return;
-            var input = document.querySelector(selector);
-            if (!input) return;
-            if (input.type === 'password') {
-              input.type = 'text';
-              this.innerHTML = eyeOffSvg();
-              this.setAttribute('title', 'Hide password');
-            } else {
-              input.type = 'password';
-              this.innerHTML = eyeSvg();
-              this.setAttribute('title', 'Show password');
-            }
-          });
-        });
       });
     </script>
     <!-- END PAGE SCRIPTS -->

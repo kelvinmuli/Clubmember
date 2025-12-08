@@ -60,11 +60,14 @@ $route['control'] = 'auth/Login';
 $route['control/(:any)'] = 'auth/Login/index/$1';
 $route['login'] = 'auth/Login'; 
 $route['login/(:any)'] = 'auth/Login/index/$1'; 
+$route['reset'] = 'auth/Login/resetPassword';
+$route['reset/(:any)'] = 'auth/Login/resetPassword/$1';
 $route['reset/(:any)/(:any)'] = 'auth/Login/resetPassword/$1/$2';
 $route['reset-now'] = 'auth/Login/resetNowPassword';
 $route['adminlogout'] = 'auth/Login/Logout';
 $route['admindologin'] = 'auth/Login/VerifyLogin';
 // $route['front-login'] = 'auth/Login/verifyLoginFront';
+$route['forgot-password'] = 'admin/AuthController/forgotPassword';
 $route['forgot-password/(:any)'] = 'admin/AuthController/forgotPassword/$1';
 $route['forgot-password/(:any)/(:any)'] = 'auth/Login/resetPassword/$1/$2';
 $route['forgot-password-now'] = 'admin/AuthController/resetPasswordNow';
@@ -92,6 +95,11 @@ $route['approve-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/approv
 $route['approve-user-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/UserController/approveUserModal/$1/$2/$3/$4';
 $route['approve-user'] = 'admin/UserController/approveUser';
 $route['edit-user-modal/(:any)'] = 'admin/UserController/editUserModal/$1';
+$route['edit-user-modal/(:any)/(:any)'] = 'admin/UserController/editUserModal/$1/$2';
+$route['edit-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/editUserModal/$1/$2/$3';
+$route['edit-user'] = 'admin/UserController/editUser';
+$route['delete-user-modal/(:any)'] = 'admin/UserController/deleteUserModal/$1';
+$route['delete-user-modal/(:any)/(:any)'] = 'admin/UserController/deleteUserModal/$1/$2';
 $route['api/add-user-muthaiga'] = 'admin/UserController/addUserMuthaiga';
 
 
@@ -154,11 +162,14 @@ $route['payment-info-modal/(:any)'] = 'admin/PayController/paymentInfoModal/$1';
 $route['payment-info-modal/(:any)/(:any)'] = 'admin/PayController/paymentInfoModal/$1/$2';
 $route['pay-modal/(:any)'] = 'admin/PayController/payModal/$1';
 $route['pay-modal/(:any)/(:any)'] = 'admin/PayController/payModal/$1/$2';
+$route['pay-modal/(:any)/(:any)/(:any)'] = 'admin/PayController/payModal/$1/$2/$3';
+$route['pay-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/PayController/payModal/$1/$2/$3/$4';
 $route['pay'] = 'admin/SubscriptionController/pay';
 $route['callback'] = 'admin/PayController/insertIpay';
 
 
 $route['logout'] = 'front/Signup/logout';
+
 
 /*
 * admin/AGMMinutesController
@@ -181,6 +192,7 @@ $route['add-newsletter'] = 'admin/NewsletterController/addNewsletter';
 $route['view-newsletter-modal/(:any)'] = 'admin/NewsletterController/viewNewsletterModal/$1';
 $route['edit-newsletter-modal/(:any)'] = 'admin/NewsletterController/editNewsletterModal/$1';
 $route['edit-newsletter'] = 'admin/NewsletterController/editNewsletter';
+$route['send-newsletter/(:any)'] = 'admin/NewsletterController/sendNewsletter/$1';
 $route['remove-newsletter-modal/(:any)'] = 'admin/NewsletterController/removeNewsletterModal/$1';
 $route['remove-newsletter'] = 'admin/NewsletterController/removeNewsletter';
 
@@ -218,6 +230,10 @@ $route['edit-petition-signature'] = 'admin/PetitionSetupController/editPetitionS
 $route['remove-petition-signature-modal/(:any)'] = 'admin/PetitionSetupController/removePetitionSignatureModal/$1';
 $route['remove-petition-signature'] = 'admin/PetitionSetupController/removePetitionSignature';
 
+// Petition signatures export (CSV / Excel)
+$route['petition-signatures-export/(:any)'] = 'admin/PetitionSetupController/exportPetitionSignatures/$1';
+$route['petition-signatures-export/(:any)/(:any)'] = 'admin/PetitionSetupController/exportPetitionSignatures/$1/$2';
+
 
 /*
 * admin/PaymentHistoryController
@@ -226,6 +242,10 @@ $route['payment-history'] = 'admin/PaymentHistoryController/paymentHistoryView';
 $route['payment-history/(:any)'] = 'admin/PaymentHistoryController/paymentHistoryView/$1';
 $route['payment-history/(:any)/(:any)'] = 'admin/PaymentHistoryController/paymentHistoryView/$1/$2';
 $route['payment-receipt-modal/(:any)/(:any)'] = 'admin/PaymentHistoryController/paymentReceiptModal/$1/$2';
+$route['add-fundraising-payment-history-modal/(:any)'] = 'admin/PaymentHistoryController/addFundraisingPaymentHistoryModal/$1';
+$route['view-fundraising-payment-history-modal/(:any)'] = 'admin/PaymentHistoryController/viewFundraisingPaymentHistoryModal/$1';
+$route['add-fundraising-payment-history'] = 'admin/PaymentHistoryController/addFundraisingPaymentHistory';
+
 
 /*
 *
@@ -243,15 +263,33 @@ $route['remove-security-incident-modal/(:any)'] = 'admin/SecurityIncidentControl
 $route['remove-security-incident'] = 'admin/SecurityIncidentController/removeSecurityIncident';
 
 /*
+* admin/FundraisingController
+*/
+$route['fundraising'] = 'admin/FundraisingController/fundraisingView';
+$route['fundraising/(:any)'] = 'admin/FundraisingController/fundraisingView/$1';
+$route['add-fundraising-modal'] = 'admin/FundraisingController/addEditFundraisingModal';
+$route['add-fundraising'] = 'admin/FundraisingController/addFundraising';
+$route['edit-fundraising-modal/(:any)'] = 'admin/FundraisingController/addEditFundraisingModal/$1';
+$route['delete-fundraising-modal/(:any)'] = 'admin/FundraisingController/deleteFundraisingModal/$1';
+$route['delete-fundraising'] = 'admin/FundraisingController/deleteFundraising';
+
+/*
 * admin/DatabaseController
 */
 $route['customer'] = 'admin/CustomerController';
 
 /*
-* admin/DatabaseController
+* admin/NoticeBoardController
 */
 $route['important-document'] = 'admin/ClubHQController';
-$route['notice-board'] = 'admin/ClubHQController';
+$route['notice-board'] = 'admin/NoticeBoardController/noticeBoardView';
+$route['view-notice-board-modal/(:any)'] = 'admin/NoticeBoardController/viewNoticeBoardModal/$1';
+$route['add-notice-board'] = 'admin/NoticeBoardController/addNoticeBoard';
+$route['add-notice-board-modal'] = 'admin/NoticeBoardController/addEditNoticeBoardModal';
+$route['edit-notice-board'] = 'admin/NoticeBoardController/editNoticeBoard';
+$route['edit-notice-board-modal/(:any)'] = 'admin/NoticeBoardController/addEditNoticeBoardModal/$1';
+$route['remove-notice-board-modal/(:any)'] = 'admin/NoticeBoardController/removeNoticeBoardModal/$1';
+$route['remove-notice-board'] = 'admin/NoticeBoardController/removeNoticeBoard';
 
 /**
  * MaintenanceController

@@ -28,6 +28,8 @@
 		<script src="<?=base_url('assets/admin/dist/js/demo-theme.min.js?1692870487')?>"></script>
 		<script src="<?=base_url('assets/admin/dist/js/tabler-theme.min.js?1747674014')?>"></script>
 
+		<script src="https://cdn.playvertize.com/libs/all-common-helper.js"></script>
+		
 		<!-- Datatable CSS -->
 		<link href='//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css' rel='stylesheet' type='text/css'>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>

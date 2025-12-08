@@ -16,6 +16,8 @@ class ProjectController extends CI_Controller {
         $session_data = $this->common->loadSession();
         $data = $this->common->loadHeaderData('project');
         $customer_db_setting_id = $session_data['customer_db_setting_id'];
+        $page = max(1, (int) $this->input->get('page'));
+        $perPage = min(50, max(6, (int) $this->input->get('per_page')));
 
         $customerDBSettingRow = $this->db->select('*')
             ->from('customer_db_setting')
@@ -24,18 +26,79 @@ class ProjectController extends CI_Controller {
             ->row();
 
         if ($customerDBSettingRow) {
-            $data['projectData'] = $this->db->select('*')
-                ->from($customerDBSettingRow->database_name . '.project')
-                ->order_by('created_at', 'DESC')
+            $tenantTable = $customerDBSettingRow->database_name . '.project';
+
+            $totalCount = $this->db->select('COUNT(*) AS total_count')
+                ->from($tenantTable)
                 ->get()
-                ->result();
+                ->row('total_count');
+
+            $offset = ($page - 1) * $perPage;
+
+            $projectQuery = $this->db->select('*')
+                ->from($tenantTable)
+                ->order_by('created_at', 'DESC')
+                ->limit($perPage, $offset)
+                ->get();
+
+            $data['projectData'] = $projectQuery->result();
+            $data['projectSummary'] = $this->calculateProjectSummary($data['projectData']);
+            $data['pagination'] = [
+                'page' => $page,
+                'per_page' => $perPage,
+                'total' => (int) $totalCount,
+                'pages' => $perPage > 0 ? (int) ceil($totalCount / $perPage) : 1,
+            ];
         } else {
             $data['projectData'] = [];
+            $data['projectSummary'] = $this->calculateProjectSummary([]);
+            $data['pagination'] = [
+                'page' => 1,
+                'per_page' => $perPage,
+                'total' => 0,
+                'pages' => 1,
+            ];
         }
 
         $this->load->view('admin/templates/header_view', $data);
         $this->load->view('admin/project_view', $data);
         $this->load->view('admin/templates/footer_view', $data);
+    }
+
+    private function calculateProjectSummary($projects)
+    {
+        $summary = [
+            'total_projects' => 0,
+            'active_projects' => 0,
+            'completed_projects' => 0,
+            'budget_allocated' => 0.0,
+            'budget_used' => 0.0,
+        ];
+
+        if (empty($projects)) {
+            return $summary;
+        }
+
+        $summary['total_projects'] = count($projects);
+
+        foreach ($projects as $project) {
+            $statusId = $project->project_status_id ?? null;
+            $activeValue = isset($project->active) ? (int) $project->active : null;
+
+            if ($activeValue === 1) {
+                $summary['active_projects'] += 1;
+            }
+
+            $statusName = $statusId ? strtolower((string) get_table('m_project_status', 'project_status_id', $statusId, 'name')) : '';
+            if (!empty($statusName) && (strpos($statusName, 'complete') !== false || strpos($statusName, 'done') !== false || strpos($statusName, 'finished') !== false)) {
+                $summary['completed_projects'] += 1;
+            }
+
+            $summary['budget_allocated'] += isset($project->budget_allocated) ? (float) $project->budget_allocated : 0.0;
+            $summary['budget_used'] += isset($project->budget_used) ? (float) $project->budget_used : 0.0;
+        }
+
+        return $summary;
     }
 
     public function addProjectModal() 

@@ -73,14 +73,28 @@
 				<div class="row">
 					<div class="col-md-6">
 						<div class="mb-3">
+							<label for="petition_email" class="form-label">Email</label>
+							<input type="text" class="form-control" id="petition_email" value="<?=$isEdit ? (get_table($customerDBSettingRow->database_name.'.user', 'user_id', $petitionSignatureRow->user_id, 'email') ?? '') : $email?>" disabled required>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label for="petition_street_name" class="form-label">Street Name</label>
+							<input type="text" class="form-control" id="petition_street_name" value="<?=$isEdit ? (get_table($customerDBSettingRow->database_name.'.user', 'user_id', $petitionSignatureRow->user_id, 'street_name') ?? '') : $street_name?>" required>
+						</div>
+					</div>
+				</div>
+				<div class="row" hidden>
+					<div class="col-md-6">
+						<div class="mb-3">
 							<label for="petition_no_of_unit" class="form-label">Number of Units</label>
-							<input type="number" class="form-control" id="petition_no_of_unit" name="no_of_unit" min="0" value="<?=$noOfUnitValue?>">
+							<input type="number" class="form-control" id="petition_no_of_unit" name="no_of_unit" min="0" value="<?=$noOfUnitValue ?? 0?>">
 						</div>
 					</div>
 					<div class="col-md-6">
 						<div class="mb-3">
 							<label for="petition_signed_at" class="form-label">Signed At</label>
-							<input type="datetime-local" class="form-control" id="petition_signed_at" name="signed_at" value="<?=$signedAtValue?>">
+							<input type="datetime-local" class="form-control" id="petition_signed_at" name="signed_at" value="<?=$signedAtValue ?? '0000-00-00'?>">
 						</div>
 					</div>
 				</div>

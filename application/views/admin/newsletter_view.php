@@ -1,6 +1,28 @@
 <?php
 $pageTitle = isset($moduleMenu) && !empty($moduleMenu->name) ? $moduleMenu->name : 'Newsletters';
 $modulePath = isset($moduleMenu) && !empty($moduleMenu->path) ? $moduleMenu->path : 'newsletter';
+$newsletterData = $newsletterData ?? [];
+$newsletterSummary = $newsletterSummary ?? [
+	'total_newsletters' => 0,
+	'active_newsletters' => 0,
+	'inactive_newsletters' => 0,
+	'recent_newsletters' => 0,
+	'with_thumbnails' => 0,
+	'latest_newsletter_at' => null,
+];
+$pagination = $pagination ?? ['page' => 1, 'per_page' => 12, 'total' => 0, 'pages' => 1];
+$basePageUrl = base_url($modulePath);
+
+$totalNewsletters = max(0, (int) ($newsletterSummary['total_newsletters'] ?? 0));
+$activeNewsletters = max(0, (int) ($newsletterSummary['active_newsletters'] ?? 0));
+$inactiveNewsletters = max(0, (int) ($newsletterSummary['inactive_newsletters'] ?? 0));
+$recentNewsletters = max(0, (int) ($newsletterSummary['recent_newsletters'] ?? 0));
+$withThumbnails = max(0, (int) ($newsletterSummary['with_thumbnails'] ?? 0));
+$latestNewsletterLabel = !empty($newsletterSummary['latest_newsletter_at']) ? date('d M Y H:i', strtotime($newsletterSummary['latest_newsletter_at'])) : 'Not yet created';
+$denominator = max(1, $totalNewsletters);
+$activePercent = $totalNewsletters > 0 ? round(($activeNewsletters / $denominator) * 100) : 0;
+$inactivePercent = $totalNewsletters > 0 ? round(($inactiveNewsletters / $denominator) * 100) : 0;
+$thumbnailPercent = $totalNewsletters > 0 ? round(($withThumbnails / $denominator) * 100) : 0;
 ?>
 
 <div class="page-wrapper">
@@ -32,14 +54,63 @@ $modulePath = isset($moduleMenu) && !empty($moduleMenu->path) ? $moduleMenu->pat
 
     <div class="page-body">
         <div class="container-fluid">
-            <div class="row row-deck row-cards">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title"><?=$pageTitle?></h3>
-                        </div>
-                    </div>
-                </div>
+			<div class="row row-deck row-cards">
+				<div class="col-12">
+					<div class="card mb-3">
+						<div class="card-header">
+							<h3 class="card-title mb-0"><?=$pageTitle?></h3>
+						</div>
+						<div class="card-body">
+							<div class="row g-3 g-md-4">
+								<div class="col-6 col-md-3">
+									<div class="d-flex align-items-center">
+										<span class="avatar bg-blue-lt text-blue me-3"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="3" y="5" width="18" height="14" rx="2" /><polyline points="3 7 12 13 21 7" /></svg></span>
+										<div>
+											<div class="text-secondary text-uppercase fs-11">Total Newsletters</div>
+											<div class="h3 mb-0"><?=number_format($totalNewsletters)?></div>
+											<div class="small text-muted mt-1">
+												<?=number_format($withThumbnails)?> with thumbnails
+												<span class="badge bg-blue-lt ms-1"><?=$thumbnailPercent?>%</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-6 col-md-3">
+									<div class="d-flex align-items-center">
+										<span class="avatar bg-green-lt text-green me-3"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-send" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="10" y1="14" x2="21" y2="3" /><path d="M21 3l-6 18a0.55 .55 0 0 1 -1 0l-3.5 -7.5l-7.5 -3.5a0.55 .55 0 0 1 0 -1l18 -6" /></svg></span>
+										<div>
+											<div class="text-secondary text-uppercase fs-11">Active</div>
+											<div class="h3 mb-0"><?=number_format($activeNewsletters)?></div>
+											<div class="small text-muted mt-1">
+												<span class="badge bg-green-lt text-green me-1"><?=$activePercent?>%</span>of total
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-6 col-md-3">
+									<div class="d-flex align-items-center">
+										<span class="avatar bg-red-lt text-red me-3"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="3" y="4" width="18" height="4" rx="2" /><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" /><line x1="10" y1="12" x2="14" y2="12" /></svg></span>
+										<div>
+											<div class="text-secondary text-uppercase fs-11">Inactive</div>
+											<div class="h3 mb-0"><?=number_format($inactiveNewsletters)?></div>
+											<div class="small text-muted mt-1"><span class="badge bg-red-lt text-red me-1"><?=$inactivePercent?>%</span>of catalog</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-6 col-md-3">
+									<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center">
+										<span class="avatar bg-cyan-lt text-cyan me-3 mb-2 mb-md-0"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 15" /></svg></span>
+										<div class="w-100">
+											<div class="text-secondary text-uppercase fs-11">Recent (30 days)</div>
+											<div class="h3 mb-0"><?=number_format($recentNewsletters)?></div>
+											<div class="small text-muted mt-1">Latest: <?=$latestNewsletterLabel?></div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 
 				<?php if (!empty($newsletterData)): ?>
 					<?php foreach ($newsletterData as $newsletter): ?>
@@ -83,6 +154,10 @@ $modulePath = isset($moduleMenu) && !empty($moduleMenu->path) ? $moduleMenu->pat
 																<a href="javascript:void(0);" class="dropdown-item" onclick="removeNewsletterModal('<?=$newsletter->newsletter_id?>')">
 																	<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="4" y1="7" x2="20" y2="7" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg> Delete
 																</a>
+															<?php endif; if (in_array($user_type_id, [GlobalModel::ADMIN_TYPE, GlobalModel::CLUB_ADMIN_TYPE])): ?>
+																<a href="<?=base_url('send-newsletter/'.$newsletter->newsletter_id)?>" class="dropdown-item">
+																	<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4h16v16H4z" /><path d="M4 4l8 8m0 0l8 -8m-8 8v8" /></svg> Send Newsletter
+																</a>
 															<?php endif; ?>
 														</div>
 													</span>
@@ -95,8 +170,60 @@ $modulePath = isset($moduleMenu) && !empty($moduleMenu->path) ? $moduleMenu->pat
 						</div>
 					<?php endforeach; ?>
 				<?php else: ?>
-					<div class="text-center text-muted py-5">
-						<span class="badge bg-red-lt">No newsletters found.</span>
+					<div class="col-12">
+						<div class="card">
+							<div class="card-body text-center py-5">
+								<span class="badge bg-red-lt">No newsletters found.</span>
+							</div>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if (!empty($newsletterData) && ($pagination['pages'] ?? 1) > 1): ?>
+					<div class="col-12">
+						<nav aria-label="Newsletter pagination">
+							<ul class="pagination justify-content-center mt-4">
+								<?php
+									$currentPage = (int) ($pagination['page'] ?? 1);
+									$totalPages = (int) ($pagination['pages'] ?? 1);
+									$perPage = (int) ($pagination['per_page'] ?? 12);
+									$queryParams = $_GET;
+									$queryParams['per_page'] = $perPage;
+									$basePaginationUrl = $basePageUrl;
+									$buildUrl = function ($page) use ($basePaginationUrl, $queryParams) {
+										$queryParams['page'] = $page;
+										return $basePaginationUrl . '?' . http_build_query($queryParams);
+									};
+								?>
+								<li class="page-item <?=$currentPage <= 1 ? 'disabled' : ''?>">
+									<a class="page-link" href="<?=$currentPage > 1 ? $buildUrl($currentPage - 1) : '#'?>" tabindex="-1" aria-disabled="<?=$currentPage <= 1 ? 'true' : 'false'?>">Prev</a>
+								</li>
+								<?php
+									$start = max(1, $currentPage - 2);
+									$end = min($totalPages, $currentPage + 2);
+									if ($start > 1) {
+										echo '<li class="page-item"><a class="page-link" href="' . $buildUrl(1) . '">1</a></li>';
+										if ($start > 2) {
+											echo '<li class="page-item disabled"><span class="page-link">&hellip;</span></li>';
+										}
+									}
+
+									for ($page = $start; $page <= $end; $page++) {
+										echo '<li class="page-item ' . ($page == $currentPage ? 'active' : '') . '"><a class="page-link" href="' . $buildUrl($page) . '">' . $page . '</a></li>';
+									}
+
+									if ($end < $totalPages) {
+										if ($end < $totalPages - 1) {
+											echo '<li class="page-item disabled"><span class="page-link">&hellip;</span></li>';
+										}
+										echo '<li class="page-item"><a class="page-link" href="' . $buildUrl($totalPages) . '">' . $totalPages . '</a></li>';
+									}
+								?>
+								<li class="page-item <?=$currentPage >= $totalPages ? 'disabled' : ''?>">
+									<a class="page-link" href="<?=$currentPage < $totalPages ? $buildUrl($currentPage + 1) : '#'?>" aria-disabled="<?=$currentPage >= $totalPages ? 'true' : 'false'?>">Next</a>
+								</li>
+							</ul>
+						</nav>
 					</div>
 				<?php endif; ?>
             </div>

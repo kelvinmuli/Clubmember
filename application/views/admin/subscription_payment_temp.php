@@ -71,15 +71,29 @@
     <center>
       <table width="100%" border="0" cellpadding="0" cellspacing="0" align="center" valign="top">
         <tbody>
+					<!-- Header / Logo -->
+          <tr>
+            <td style="padding:20px; text-align:left;">
+              <!-- Replace with your logo img or plain text -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="vertical-align:middle;">
+                    <img src="<?=base_url($customerRow->logo)?>" alt="<?=$customerRow->full_legal_name?> logo" width="120" style="display:block;">
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
           <tr>
             <td>
               <table border="0" cellpadding="0" cellspacing="0" align="center" valign="top" bgcolor="#ffffff" style="padding: 0 20px !important;max-width: 500px;width: 90%;">
                 <tbody>
                   <tr>
                     <td bgcolor="#ffffff" align="center" style="padding: 10px 0 0px 0;"><!--[if (gte mso 9)|(IE)]><table align="center" border="0" cellspacing="0" cellpadding="0" width="350">
-<tr>
-<td align="center" valign="top" width="350">
-<![endif]-->
+											<tr>
+											<td align="center" valign="top" width="350">
+											<![endif]-->
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px;border-bottom: 1px solid #e4e4e4 ;">
                         <tbody>
                           <tr>
@@ -88,7 +102,7 @@
                           </tr>
                         </tbody>
                       </table><!--[if (gte mso 9)|(IE)]></td></tr></table>
-<![endif]-->
+												<![endif]-->
                     </td>
                   </tr>
                   <tr>
@@ -117,40 +131,44 @@
 
                           
                           <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Amount Due:</b>   <?=$amount?></p>
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Due Date:</b> <?= date('jS M Y', strtotime($payment_at)); ?></p>
-
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Due Date:</b> <?=$due_at ?? date('d M Y', strtotime($due_at)); ?></p>
                           <br>
-
+													<p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Notes:</b> <?=$notes ?? ''?></p>
+													<br>
                           <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">To complete your payment:<br>
-                          Visit the url: <a href="https://nmra.clubmember.app/v1/login/1705386384290" target="_blank">https://nmra.clubmember.app/v1/login/1705386384290</a><br>
-                          Login to your ClubMember.app account with the password you just set up.<br>
-                          Head to the Subscriptions section.<br>
-                          Follow the prompts to pay securely.<br><br>
-                          Your support helps keep the association running smoothly — thank you!
+														Visit the url: <a href="https://nmra.clubmember.app/v1/login/1705386384290" target="_blank">https://nmra.clubmember.app/v1/login/1705386384290</a><br>
+														Login to your ClubMember.app account with the password you just set up.<br>
+														Head to the Subscriptions section.<br>
+														Follow the prompts to pay securely.<br><br>
+														Your support helps keep the association running smoothly — thank you!
                           </p>
+													<p>Copyright @ 2025</p>
+													<p>Website: https://newmuthaigaresidentsassociation.com</p>
+													<p>Email: committee@newmuthaigaresidentsassociation.com</p>
+												</tr>
                                                                             
-                  <tr>
-                    <td align="center">
-                      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-                        <tr>
-                          <td align="center" style="padding: 33px 0 33px 0;">
-                            <table border="0" cellspacing="0" cellpadding="0" width="100%">
-                              <tr>
-                                <p></p>
-                               
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </tbody>
-              </table><!--[if (gte mso 9)|(IE)]></td></tr></table>
-<![endif]-->
-        </td>
-        </tr>
-        <tr>
+											<tr>
+												<td align="center">
+													<table width="100%" border="0" cellspacing="0" cellpadding="0">
+														<tr>
+															<td align="center" style="padding: 33px 0 33px 0;">
+																<table border="0" cellspacing="0" cellpadding="0" width="100%">
+																	<tr>
+																		<p></p>
+																	
+																	</tr>
+																</table>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</tbody>
+									</table><!--[if (gte mso 9)|(IE)]></td></tr></table>
+		<![endif]-->
+						</td>
+						</tr>
+						<tr>
           <td bgcolor="#ffffff" align="center" style="padding: 0;"><!--[if (gte mso 9)|(IE)]><table align="center" border="0" cellspacing="0" cellpadding="0" width="350">
 <tr>
 <td align="center" valign="top" width="350">

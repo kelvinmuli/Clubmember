@@ -29,6 +29,14 @@ $columnCount = $hasActions ? 11 : 10;
 								<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> Add Signature
 							</a>
 						<?php endif; ?>
+							<div class="btn-group">
+								<button class="btn btn-outline-secondary dropdown-toggle btn-pill" data-bs-toggle="dropdown">Download report</button>
+								<ul class="dropdown-menu dropdown-menu-end">
+									<li><a class="dropdown-item" href="<?=base_url('petition-signatures-export/'.$petition_setup_id.'/csv')?>">CSV</a></li>
+									<li><a class="dropdown-item" href="<?=base_url('petition-signatures-export/'.$petition_setup_id.'/excel')?>">Excel</a></li>
+									<li><a class="dropdown-item" href="<?=base_url('petition-signatures-export/'.$petition_setup_id.'/pdf')?>">PDF</a></li>
+								</ul>
+							</div>
 					</div>
 				</div>
 			</div>
@@ -51,7 +59,7 @@ $columnCount = $hasActions ? 11 : 10;
 											<th class="w-1">#</th>
 											<th>Full Name</th>
 											<th>Phone Number</th>
-											<th>Units</th>
+											<!-- <th>Units</th> -->
 											<th>Signature Method</th>
 											<th>Signature</th>
 											<th>Consent</th>
@@ -70,8 +78,8 @@ $columnCount = $hasActions ? 11 : 10;
 												<td><?=++$index?>.</td>
 												<td><?=get_table($customerDBSettingRow->database_name.'.user', 'user_id', $signature->user_id, 'full_legal_name') ?? ''?></td>
 												<td><?=get_table($customerDBSettingRow->database_name.'.user', 'user_id', $signature->user_id, 'phone_number') ?? ''?></td>
-												<td><?=number_format((int) ($signature->no_of_unit ?? 0))?></td>
-												<td><?=$signature->signature_method_id ?? ''?></td>
+												<!-- <td><?=number_format((int) ($signature->no_of_unit ?? 0))?></td> -->
+												<td><?=get_table('m_signature_method', 'signature_method_id', $signature->signature_method_id ?? '', 'name') ?? ''?></td>
 												<td>
 													<?php if (!empty($signature->signature_url)): ?>
 														<a href="<?=base_url($signature->signature_url)?>" target="_blank" rel="noopener">View</a>
@@ -86,7 +94,7 @@ $columnCount = $hasActions ? 11 : 10;
 														<span class="badge bg-red-lt">No</span>
 													<?php endif; ?>
 												</td>
-												<td><?=!empty($signature->signed_at) ? date('d M Y H:i', strtotime($signature->signed_at)) : 'Pending'?></td>
+												<td><?=!empty($signature->signed_at) ? date('d M Y H:i', strtotime($signature->signed_at)) : date('d M Y H:i', strtotime($signature->created_at))?></td>
 												<td><?=$signature->state ?? 'N/A'?></td>
 												<td>
 													<?php
