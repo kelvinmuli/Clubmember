@@ -52,7 +52,7 @@
                                     $withAttachments = max(0, (int) ($noticeSummary['with_attachments'] ?? 0));
                                     $withThumbnails = max(0, (int) ($noticeSummary['with_thumbnails'] ?? 0));
                                     $recentNotices = max(0, (int) ($noticeSummary['recent_notices'] ?? 0));
-                                    $latestLabel = !empty($noticeSummary['latest_notice_at']) ? date('d M Y H:i', strtotime($noticeSummary['latest_notice_at'])) : 'Not yet created';
+                                    $latestLabel = !empty($noticeSummary['latest_notice_at']) ? date('d M Y', strtotime($noticeSummary['latest_notice_at'])) : 'Not yet created';
                                     $den = max(1, $totalNotices);
                                     $attachPct = $totalNotices > 0 ? round(($withAttachments / $den) * 100) : 0;
                                     $thumbPct = $totalNotices > 0 ? round(($withThumbnails / $den) * 100) : 0;
@@ -109,7 +109,7 @@
                             $description = $notice->description ?? '';
                             $thumbnail = trim($notice->thumbnail_url ?? '');
                             $attachment = trim($notice->attachment_url ?? '');
-                            $createdAt = !empty($notice->created_at) ? date('d M Y H:i', strtotime($notice->created_at)) : 'N/A';
+                            $createdAt = !empty($notice->created_at) ? date('d M Y', strtotime($notice->created_at)) : 'N/A';
                             $thumbnailSrc = '';
                             if (!empty($thumbnail)) {
                                 $thumbnailSrc = filter_var($thumbnail, FILTER_VALIDATE_URL) ? $thumbnail : base_url($thumbnail);

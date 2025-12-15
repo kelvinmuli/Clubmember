@@ -121,26 +121,29 @@
                                             </tr>
                           <tr>
                             <td bgcolor="#ffffff" align="left" style="padding:0; color: #666666; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400;-webkit-font-smoothing:antialiased;"> 
-                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"> Great news — your account has been approved for the <?=$club_name?> on ClubMember.app!</p>
+                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"> Great news your account has been approved for the <?=$club_name?> on ClubMember.app!</p>
+
                                                  <br>
                                                 
 
                                                 <br>
                                                 <p><b>To get started:</b></p>
-                                                <p>1. Confirm your email address by clicking the link below (within 48 hours).<br>
+                                                <br>
+                                                <p>
+                                                1. Confirm your email address by clicking the link below (within 48 hours).<br>
                                                 2. Set your password to activate your account.<br>
-                                                3. Once done, you can <b>log in anytime</b> to pay your subscriptions, and explore member features.
-                                                </p>
+                                                3. Once done, you can log in anytime to pay your subscriptions, and explore member features.
+                                                </p><br>
 
-                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">If you have any questions or need help, feel free to reach out.</p>
+                                                <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">If you have any questions or need help, feel free to reach out.</p><br>
 																								
-																								<p>Welcome aboard!</p>
+																								<p>Welcome aboard!</p><br>
 
-                                                <p>New Muthaiga Residents Association</p>
-
-																								<p>Copyright @ 2025</p>
-																								<p>Website: https://newmuthaigaresidentsassociation.com</p>
-																								<p>Email: committee@newmuthaigaresidentsassociation.com</p>
+                                                <p>Copyright @ 2025 New Muthaiga Residents Association</p><br>
+                                                
+																								<p><b>Website:</b> https://newmuthaigaresidentsassociation.com</p>
+																								<p><b>Email:</b> committee@newmuthaigaresidentsassociation.com</p>
+																								
                                                <p style="margin:0;margin-top:20px;line-height:0;"></p>
                                                
                             </td>

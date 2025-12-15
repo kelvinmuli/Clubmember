@@ -168,7 +168,7 @@ class SecurityIncidentController extends CI_Controller
         $postData['incident_type_id'] = !empty($postData['incident_type_id']) ? $postData['incident_type_id'] : null;
         $postData['description'] = $this->sanitizeText($postData['description'] ?? '', false);
         $postData['active'] = isset($postData['active']) && $postData['active'] !== '' ? (int) $postData['active'] : 1;
-        $postData['updated_at'] = date('Y-m-d H:i:s');
+        $postData['updated_at'] = date('d M Y');
 
         unset($postData['security_incident_id']);
 
@@ -217,11 +217,8 @@ class SecurityIncidentController extends CI_Controller
         $sessionData = $this->common->loadSession();
         $customerDbSettingId = $sessionData['customer_db_setting_id'];
 
-        $securityIncidentId = $this->input->post('security_incident_id', true);
-        if (empty($securityIncidentId)) {
-            $this->session->set_flashdata('warning', 'Security incident removal failed.');
-            redirect('security-incident', 'refresh');
-        }
+		$postData = $this->input->post();
+        $securityIncidentId = $postData['security_incident_id'];
 
         $customerDbSettingRow = $this->db->select('*')
             ->from('customer_db_setting')
@@ -229,12 +226,8 @@ class SecurityIncidentController extends CI_Controller
             ->get()
             ->row();
 
-        $incidentTable = $customerDbSettingRow ? $customerDbSettingRow->database_name . '.security_incident' : null;
-
-        if ($incidentTable && $this->db->table_exists($incidentTable)) {
-            $this->db->where('security_incident_id', $securityIncidentId);
-            $this->db->delete($incidentTable);
-            $this->session->set_flashdata('success', 'Security incident removed successfully.');
+        if ($this->db->delete($customerDbSettingRow->database_name . '.security_incident', array('security_incident_id'=>$securityIncidentId))) {
+           $this->session->set_flashdata('success', 'Security incident removed successfully.');
         } else {
             $this->session->set_flashdata('warning', 'Security incident removal failed.');
         }
@@ -248,7 +241,7 @@ class SecurityIncidentController extends CI_Controller
         }
 
         $timestamp = strtotime($value);
-        return $timestamp ? date('Y-m-d H:i:s', $timestamp) : null;
+        return $timestamp ? date('d M Y', $timestamp) : null;
     }
 
     private function sanitizeText($value, $stripTags = true) {
@@ -532,7 +525,7 @@ class SecurityIncidentController extends CI_Controller
         return array(
             'total' => $total,
             'statuses' => $statusSummary,
-            'recent' => $recentTimestamp ? date('d M Y H:i', $recentTimestamp) : null,
+            'recent' => $recentTimestamp ? date('d M Y', $recentTimestamp) : null,
             'location_count' => count($locations),
             'reporter_count' => count($reporters),
         );

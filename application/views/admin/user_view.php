@@ -32,6 +32,10 @@
 								</span>
 							</div>
 						<?php endif; ?>
+						<button class="btn btn-outline-primary btn-pill" onclick="importUsersModal('<?=$userTypeId?>', $('#customer_db_setting_id').val(), '')">
+							<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+							Import CSV
+						</button>
 					</div>
               	</div>
             </div>
@@ -142,6 +146,10 @@
 			});
 		}
 
+		function importUsersModal(user_type_id, customer_db_setting_id, membership_type_id) {
+			showModal(base_url + 'import-user-modal/' + user_type_id + '/' + customer_db_setting_id + '/' + (membership_type_id || ''), function () {});
+		}
+
 		function addUserModal(user_type_id, membership_type_id) {
 			$.ajax({
 				url: base_url + "add-user-modal/" + user_type_id + "/" + membership_type_id + "/" + $('#customer_db_setting_id').val(),
@@ -155,16 +163,6 @@
 		function editUserModal(user_id, membership_type_id, customer_db_setting_id) {
 			$.ajax({
 				url: base_url + "edit-user-modal/" + user_id + "/" + membership_type_id + "/" + customer_db_setting_id,
-				success: function(response) {
-					document.getElementById('modal-view-edit-print-user').innerHTML = response;
-					$('#modal-view-edit-print-user').modal('show');
-				}
-			});
-		}
-
-		function deleteUserModal(user_id, customer_db_setting_id) {
-			$.ajax({
-				url: base_url + "delete-user-modal/" + user_id + "/" + customer_db_setting_id,
 				success: function(response) {
 					document.getElementById('modal-view-edit-print-user').innerHTML = response;
 					$('#modal-view-edit-print-user').modal('show');

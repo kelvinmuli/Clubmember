@@ -19,16 +19,27 @@
 						<div class="mb-3">
 							<label for="thumbnail_url" class="form-label">Thumbnail</label>
 							<input type="file" class="form-control" id="thumbnail_url" name="thumbnail_url">
-						<?php if (isset($newsletterRow->thumbnail_url) && !empty($newsletterRow->thumbnail_url)): ?>
-							<p class="mt-2">
-								Current Thumbnail: <a href="<?=base_url($newsletterRow->thumbnail_url)?>" target="_blank" rel="noopener"><?=basename($newsletterRow->thumbnail_url)?></a>
-							</p>
-						<?php endif; ?>
+							<?php if (isset($newsletterRow->thumbnail_url) && !empty($newsletterRow->thumbnail_url)): ?>
+								<p class="mt-2">
+									Current Thumbnail: <a href="<?=base_url($newsletterRow->thumbnail_url)?>" target="_blank" rel="noopener"><?=basename($newsletterRow->thumbnail_url)?></a>
+								</p>
+							<?php endif; ?>
 					</div>
 				</div>
 				<div class="mb-3">
 					<label for="description" class="form-label">Description</label>
 					<textarea class="form-control" id="add_edit_description" name="description" rows="3" required><?=isset($newsletterRow->description) ? $newsletterRow->description : ''?></textarea>
+				</div>
+				<div class="col-md-6">
+					<div class="mb-3">
+						<label for="file_url" class="form-label">File</label>
+						<input type="file" class="form-control" id="file_url" name="file_url">
+						<?php if (isset($newsletterRow->file_url) && !empty($newsletterRow->file_url)): ?>
+							<p class="mt-2">
+								Current File: <a href="<?=base_url($newsletterRow->file_url)?>" target="_blank" rel="noopener"><?=basename($newsletterRow->file_url)?></a>
+							</p>
+						<?php endif; ?>
+					</div>
 				</div>
 				<div class="col-md-6">
 					<div class="mb-3">

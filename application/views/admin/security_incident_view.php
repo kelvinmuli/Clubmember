@@ -116,7 +116,7 @@
 							<div class="d-flex align-items-center">
 								<div class="subheader">Most Recent</div>
 							</div>
-							<div class="h1 mb-0"><?=$summary['recent'] ? $summary['recent'] : 'N/A'?></div>
+							<div class="h1 mb-0" style="font-size: 17px;"><?=$summary['recent'] ? $summary['recent'] : 'N/A'?></div>
 							<div class="text-secondary">Unique reporters: <?=$summary['reporter_count']?></div>
 						</div>
 					</div>
@@ -184,8 +184,8 @@
 													$incidentId = $incident->security_incident_id ?? '';
 													$location = !empty($incident->location) ? $incident->location : 'Unknown location';
 													$reportedBy = !empty($incident->reported_by) ? $incident->reported_by : 'Unknown reporter';
-													$incidentAt = !empty($incident->incident_at) ? date('d M Y H:i', strtotime($incident->incident_at)) : 'Not recorded';
-													$createdAt = !empty($incident->created_at) ? date('d M Y H:i', strtotime($incident->created_at)) : 'Not recorded';
+													$incidentAt = !empty($incident->incident_at) ? date('d M Y', strtotime($incident->incident_at)) : 'Not recorded';
+													$createdAt = !empty($incident->created_at) ? date('d M Y', strtotime($incident->created_at)) : 'Not recorded';
 													$typeLabel = $getTypeLabel($incident->incident_type_id ?? '');
 													$description = !empty($incident->description) ? $incident->description : 'No description provided.';
 													$statusKey = isset($incident->active) ? (string) $incident->active : 'unknown';

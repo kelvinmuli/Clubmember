@@ -97,9 +97,17 @@ $route['approve-user'] = 'admin/UserController/approveUser';
 $route['edit-user-modal/(:any)'] = 'admin/UserController/editUserModal/$1';
 $route['edit-user-modal/(:any)/(:any)'] = 'admin/UserController/editUserModal/$1/$2';
 $route['edit-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/editUserModal/$1/$2/$3';
+$route['edit-user-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/UserController/editUserModal/$1/$2/$3/$4';
 $route['edit-user'] = 'admin/UserController/editUser';
 $route['delete-user-modal/(:any)'] = 'admin/UserController/deleteUserModal/$1';
 $route['delete-user-modal/(:any)/(:any)'] = 'admin/UserController/deleteUserModal/$1/$2';
+$route['delete-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/deleteUserModal/$1/$2/$3';
+$route['delete-user'] = 'admin/UserController/deleteUser';
+$route['import-user-modal/(:any)'] = 'admin/UserController/importUserModal/$1';
+$route['import-user-modal/(:any)/(:any)'] = 'admin/UserController/importUserModal/$1/$2';
+$route['import-user-modal/(:any)/(:any)/(:any)'] = 'admin/UserController/importUserModal/$1/$2/$3';
+$route['download-user-import-template'] = 'admin/UserController/downloadUserImportTemplate';
+$route['import-users'] = 'admin/UserController/importUsers';
 $route['api/add-user-muthaiga'] = 'admin/UserController/addUserMuthaiga';
 
 
@@ -233,6 +241,7 @@ $route['remove-petition-signature'] = 'admin/PetitionSetupController/removePetit
 // Petition signatures export (CSV / Excel)
 $route['petition-signatures-export/(:any)'] = 'admin/PetitionSetupController/exportPetitionSignatures/$1';
 $route['petition-signatures-export/(:any)/(:any)'] = 'admin/PetitionSetupController/exportPetitionSignatures/$1/$2';
+$route['petition-signatures-export-html-modal/(:any)'] = 'admin/PetitionSetupController/exportHtmlModal/$1';
 
 
 /*

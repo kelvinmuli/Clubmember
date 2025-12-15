@@ -14,8 +14,18 @@
 							if (!empty($newsletterRow->thumbnail_url) && check_file_exists($newsletterRow->thumbnail_url)) {
 								$thumbnailSrc = base_url($newsletterRow->thumbnail_url);
 							}
+
+							$fileSrc = base_url('assets/admin/images/no-file.png');
+							if (!empty($newsletterRow->file_url) && check_file_exists($newsletterRow->file_url)) {
+								$fileSrc = base_url($newsletterRow->file_url);
+							}
 						?>
 						<img src="<?=$thumbnailSrc?>" alt="Newsletter thumbnail" class="img-fluid rounded border">
+						<?php if (!empty($newsletterRow->file_url)): ?>
+							<div class="mt-3">
+								<a class="btn btn-sm btn-outline-primary" href="<?=$fileSrc?>" target="_blank" rel="noopener">Download File</a>
+							</div>
+						<?php endif; ?>
 					</div>
 					<div class="col-md-8">
 						<dl class="row mb-0">

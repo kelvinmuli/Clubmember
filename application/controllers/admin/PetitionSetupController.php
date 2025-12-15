@@ -56,9 +56,9 @@ class PetitionSetupController extends CI_Controller {
         $postData = $this->input->post();
         $postData['no_of_signature'] = isset($postData['no_of_signature']) && $postData['no_of_signature'] !== '' ? (int) $postData['no_of_signature'] : 0;
         if (isset($postData['closing_at']) && !empty($postData['closing_at'])) {
-            $postData['closing_at'] = date('Y-m-d H:i:s', strtotime($postData['closing_at']));
+            $postData['closing_at'] = date('d M Y', strtotime($postData['closing_at']));
         }
-        $postData['created_at'] = date('Y-m-d H:i:s');
+        $postData['created_at'] = date('d M Y');
 
         $customerDBSettingRow = $this->db->select('*')
             ->from('customer_db_setting')
@@ -151,7 +151,7 @@ class PetitionSetupController extends CI_Controller {
             $postData['no_of_signature'] = $postData['no_of_signature'] !== '' ? (int) $postData['no_of_signature'] : 0;
         }
         if (isset($postData['closing_at']) && !empty($postData['closing_at'])) {
-            $postData['closing_at'] = date('Y-m-d H:i:s', strtotime($postData['closing_at']));
+            $postData['closing_at'] = date('d M Y', strtotime($postData['closing_at']));
         } else {
             $postData['closing_at'] = null;
         }
@@ -417,7 +417,7 @@ class PetitionSetupController extends CI_Controller {
                     $title = htmlentities($petitionRow->name ?? 'Petition Signatures');
                     $pdf->Cell(0, 6, $title, 0, 1, 'L', 0, '', 0, false, 'T', 'M');
                     $pdf->SetFont('dejavusans', '', 9);
-                    $pdf->Cell(0, 6, 'Generated: ' . date('d M Y H:i'), 0, 1, 'L', 0, '', 0, false, 'T', 'M');
+                    $pdf->Cell(0, 6, 'Generated: ' . date('d M Y'), 0, 1, 'L', 0, '', 0, false, 'T', 'M');
                     $pdf->Ln(2);
                 });
 
@@ -486,6 +486,82 @@ class PetitionSetupController extends CI_Controller {
 
         fclose($out);
         exit;
+    }
+
+    public function exportHtmlModal($petition_setup_id = null)
+    {
+        $this->common->checkSession(array('dialog' => 1));
+        $session_data = $this->common->loadSession();
+        $customer_db_setting_id = $session_data['customer_db_setting_id'];
+
+        if (empty($petition_setup_id)) {
+            show_error('Invalid petition id', 400);
+            return;
+        }
+
+        $customerDBSettingRow = $this->db->select('*')
+            ->from('customer_db_setting')
+            ->where('customer_db_setting_id', $customer_db_setting_id)
+            ->get()
+            ->row();
+
+        if (!$customerDBSettingRow) {
+            show_error('Tenant database not found', 500);
+            return;
+        }
+
+        $tenantDatabase = $customerDBSettingRow->database_name;
+
+        $petitionRow = $this->db->from($tenantDatabase . '.petition_setup')
+            ->where('petition_setup_id', $petition_setup_id)
+            ->get()
+            ->row();
+
+        $signatureRows = $this->db->select('s.*, u.full_legal_name, u.phone_number, u.membership_no')
+            ->from($tenantDatabase . '.petition_signature s')
+            ->join($tenantDatabase . '.user u', 'u.user_id = s.user_id', 'left')
+            ->where('s.petition_setup_id', $petition_setup_id)
+            ->order_by('s.signed_at', 'DESC')
+            ->get()
+            ->result();
+
+        $totalSignatures = is_array($signatureRows) ? count($signatureRows) : 0;
+        $uniqueMembers = 0;
+        $latestSignedAt = '';
+
+        $members = array();
+        $seenUsers = array();
+        if (!empty($signatureRows)) {
+            foreach ($signatureRows as $row) {
+                if (empty($latestSignedAt)) {
+                    $latestSignedAt = !empty($row->signed_at) ? $row->signed_at : ($row->created_at ?? '');
+                }
+
+                if (!empty($row->user_id) && !isset($seenUsers[$row->user_id])) {
+                    $seenUsers[$row->user_id] = true;
+                    $members[] = array(
+                        'user_id' => $row->user_id,
+                        'full_legal_name' => $row->full_legal_name ?? (get_table($tenantDatabase . '.user', 'user_id', $row->user_id, 'full_legal_name') ?: ''),
+                        'phone_number' => $row->phone_number ?? (get_table($tenantDatabase . '.user', 'user_id', $row->user_id, 'phone_number') ?: ''),
+                        'signature_url' => $row->signature_url ?? '',
+                        'signed_at' => !empty($row->signed_at) ? $row->signed_at : ($row->created_at ?? ''),
+                    );
+                }
+            }
+        }
+        $uniqueMembers = count($members);
+
+        $data = array(
+            'petitionRow' => $petitionRow,
+            'petition_setup_id' => $petition_setup_id,
+            'totalSignatures' => $totalSignatures,
+            'uniqueMembers' => $uniqueMembers,
+            'latestSignedAt' => $latestSignedAt,
+            'members' => $members,
+            'customerDBSettingRow' => $customerDBSettingRow,
+        );
+
+        return $this->load->view('admin/export_petition_signatures_html_modal', $data);
     }
 
     public function addPetitionSignatureModal($petition_setup_id = null)
@@ -605,9 +681,9 @@ class PetitionSetupController extends CI_Controller {
         $postData['petition_id'] = !empty($postData['petition_id']) ? $postData['petition_id'] : generate_uuid();
         $postData['no_of_unit'] = isset($postData['no_of_unit']) && $postData['no_of_unit'] !== '' ? (int) $postData['no_of_unit'] : 0;
         $postData['consent'] = isset($postData['consent']) && in_array($postData['consent'], ['1', 1, true, 'true'], true) ? 1 : 0;
-        $postData['signed_at'] = !empty($postData['signed_at']) ? date('Y-m-d H:i:s', strtotime($postData['signed_at'])) : null;
+        $postData['signed_at'] = !empty($postData['signed_at']) ? date('d M Y', strtotime($postData['signed_at'])) : null;
         $postData['active'] = isset($postData['active']) && $postData['active'] !== '' ? (int) $postData['active'] : 1;
-        $postData['updated_at'] = date('Y-m-d H:i:s');
+        $postData['updated_at'] = date('d M Y');
 
         
         $customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();

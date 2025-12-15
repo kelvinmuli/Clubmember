@@ -7,8 +7,8 @@
 	$activeData = $activeData ?? [];
 	$allocatedValue = $isEdit ? (float) ($projectRow->budget_allocated ?? 0) : 0;
 	$usedValue = $isEdit ? (float) ($projectRow->budget_used ?? 0) : 0;
-	$startAtValue = $isEdit && !empty($projectRow->start_at) ? date('Y-m-d\TH:i', strtotime($projectRow->start_at)) : '';
-	$dueAtValue = $isEdit && !empty($projectRow->due_at) ? date('Y-m-d\TH:i', strtotime($projectRow->due_at)) : '';
+	$startAtValue = $isEdit && !empty($projectRow->start_at) ? date('d M Y', strtotime($projectRow->start_at)) : '';
+	$dueAtValue = $isEdit && !empty($projectRow->due_at) ? date('d M Y', strtotime($projectRow->due_at)) : '';
 	$existingThumbnailUrl = $isEdit ? ($projectRow->thumbnail_url ?? '') : '';
 	$thumbnailPreviewUrl = '';
 	if (!empty($existingThumbnailUrl)) {

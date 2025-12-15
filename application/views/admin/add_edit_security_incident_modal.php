@@ -4,7 +4,7 @@
     $securityIncidentId = $isEdit ? ($incidentRow->security_incident_id ?? '') : ($security_incident_id ?? generate_uuid());
     $incidentTypeData = $incidentTypeData ?? [];
     $activeData = $activeData ?? [];
-    $incidentAtValue = $isEdit && !empty($incidentRow->incident_at) ? date('Y-m-d\TH:i', strtotime($incidentRow->incident_at)) : '';
+    $incidentAtValue = $isEdit && !empty($incidentRow->incident_at) ? date('d M Y', strtotime($incidentRow->incident_at)) : '';
     $locationValue = $isEdit ? ($incidentRow->location ?? '') : '';
     $reportedByValue = $isEdit ? ($incidentRow->reported_by ?? '') : '';
     $typeValue = $isEdit ? ($incidentRow->incident_type_id ?? '') : '';

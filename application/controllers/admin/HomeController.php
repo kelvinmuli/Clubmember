@@ -28,7 +28,7 @@ class HomeController extends CI_Controller {
      * So any other public methods not prefixed with an underscore will
      * map to /index.php/welcome/<method_name>
      * @see https://codeigniter.com/userguide3/general/urls.html
-     */
+     */ 
    	public function index() 
 	{
 		$this->common->checkSession();
@@ -42,7 +42,7 @@ class HomeController extends CI_Controller {
 			$customerData = $this->db->select('*')->from('customer')->where('active', 1)->get()->result();
 			$memberData = $this->db->select('*')->from('user')->where('user_type_id', '1755383886420')->where('active', 1)->get()->result();
 			//This year new members
-			$memberDataThisYear = $this->db->select('*')->from('user')->where('user_type_id', '1755383886420')->where('active', 1)->where('created_at >=', date('Y-m-d H:i:s', strtotime('first day of this year')))->get()->result();
+			$memberDataThisYear = $this->db->select('*')->from('user')->where('user_type_id', '1755383886420')->where('active', 1)->where('created_at >=', date('d M Y', strtotime('first day of this year')))->get()->result();
 			$userActiveData = $this->db->select('*')->from('user')->where('active', 1)->order_by('created_at', 'DESC')->get()->result();
 			$userInactiveData = $this->db->select('*')->from('user')->where('active', 1)->order_by('created_at', 'DESC')->get()->result();
 		}
@@ -55,7 +55,7 @@ class HomeController extends CI_Controller {
 			$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('active', 0)->limit(5)->order_by('created_at', 'DESC')->get()->result();
 			$memberData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', '1755383886420')->where('active', 1)->get()->result();
 			//This year new members
-			$memberDataThisYear = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', '1755383886420')->where('active', 1)->where('created_at >=', date('Y-m-d H:i:s', strtotime('first day of this year')))->get()->result();
+			$memberDataThisYear = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_type_id', '1755383886420')->where('active', 1)->where('created_at >=', date('d M Y', strtotime('first day of this year')))->get()->result();
 			foreach ($userData as $value) {
 				$userArrayData[$value->membership_type_id == 'N/A' ? '1755813965588' : $value->membership_type_id][] = $value;
 			}
@@ -489,7 +489,7 @@ class HomeController extends CI_Controller {
         }
 
         $timestamp = strtotime($value);
-        return $timestamp ? date('Y-m-d H:i:s', $timestamp) : null;
+        return $timestamp ? date('d M Y', $timestamp) : null;
     }
 
     private function sanitizeText($value, $stripTags = true) {
@@ -773,7 +773,7 @@ class HomeController extends CI_Controller {
 		return array(
 			'total' => $total,
 			'statuses' => $statusSummary,
-			'recent' => $recentTimestamp ? date('d M Y H:i', $recentTimestamp) : null,
+			'recent' => $recentTimestamp ? date('d M Y', $recentTimestamp) : null,
 			'location_count' => count($locations),
 			'reporter_count' => count($reporters),
 		);

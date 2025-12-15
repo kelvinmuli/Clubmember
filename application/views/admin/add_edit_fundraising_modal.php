@@ -7,12 +7,12 @@
     $goalAmount = ($existingRow && isset($existingRow->total_amount)) ? (float) $existingRow->total_amount : 0;
     $receivedAmount = ($existingRow && isset($existingRow->total_received)) ? (float) $existingRow->total_received : 0;
     $contributors = ($existingRow && isset($existingRow->number_of_contributor)) ? (int) $existingRow->number_of_contributor : 0;
-    $startDateValue = ($existingRow && !empty($existingRow->start_date)) ? date('Y-m-d', strtotime($existingRow->start_date)) : '';
-    $endDateValue = ($existingRow && !empty($existingRow->end_date)) ? date('Y-m-d', strtotime($existingRow->end_date)) : '';
+    $startDateValue = ($existingRow && !empty($existingRow->start_date)) ? date('d M Y', strtotime($existingRow->start_date)) : '';
+    $endDateValue = ($existingRow && !empty($existingRow->end_date)) ? date('d M Y', strtotime($existingRow->end_date)) : '';
     $reasonValue = ($existingRow && isset($existingRow->reason)) ? $existingRow->reason : '';
     $descriptionValue = ($existingRow && isset($existingRow->description)) ? $existingRow->description : '';
     $topContributorValue = ($existingRow && isset($existingRow->top_contributor)) ? $existingRow->top_contributor : '';
-    $updatedAtDisplay = ($existingRow && !empty($existingRow->updated_at)) ? date('d M Y H:i', strtotime($existingRow->updated_at)) : '';
+    $updatedAtDisplay = ($existingRow && !empty($existingRow->updated_at)) ? date('d M Y', strtotime($existingRow->updated_at)) : '';
 ?>
 
 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">

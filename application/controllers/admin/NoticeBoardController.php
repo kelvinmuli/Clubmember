@@ -113,7 +113,7 @@ class NoticeBoardController extends CI_Controller {
             $postData['attachment_url'] = file_upload('attachment_url', $notice_board_id);
         }
 
-        $postData['created_at'] = date('Y-m-d H:i:s');
+        $postData['created_at'] = date('d M Y');
 
         $customerDBSettingRow = $this->db->select('*')
             ->from('customer_db_setting')
@@ -145,7 +145,7 @@ class NoticeBoardController extends CI_Controller {
             $postData['attachment_url'] = file_upload('attachment_url', $notice_board_id);
         }
 
-        $postData['updated_at'] = date('Y-m-d H:i:s');
+        $postData['updated_at'] = date('d M Y');
 
         $customerDBSettingRow = $this->db->select('*')
             ->from('customer_db_setting')
@@ -272,7 +272,7 @@ class NoticeBoardController extends CI_Controller {
         }
 
         if ($summary['total_notices'] > 0) {
-            $recentThreshold = date('Y-m-d H:i:s', strtotime('-30 days'));
+            $recentThreshold = date('d M Y', strtotime('-30 days'));
             $recentCount = $this->db->from($tenantTable)
                 ->where('created_at >=', $recentThreshold)
                 ->count_all_results();

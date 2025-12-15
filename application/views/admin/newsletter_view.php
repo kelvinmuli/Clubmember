@@ -18,7 +18,7 @@ $activeNewsletters = max(0, (int) ($newsletterSummary['active_newsletters'] ?? 0
 $inactiveNewsletters = max(0, (int) ($newsletterSummary['inactive_newsletters'] ?? 0));
 $recentNewsletters = max(0, (int) ($newsletterSummary['recent_newsletters'] ?? 0));
 $withThumbnails = max(0, (int) ($newsletterSummary['with_thumbnails'] ?? 0));
-$latestNewsletterLabel = !empty($newsletterSummary['latest_newsletter_at']) ? date('d M Y H:i', strtotime($newsletterSummary['latest_newsletter_at'])) : 'Not yet created';
+$latestNewsletterLabel = !empty($newsletterSummary['latest_newsletter_at']) ? date('d M Y', strtotime($newsletterSummary['latest_newsletter_at'])) : 'Not yet created';
 $denominator = max(1, $totalNewsletters);
 $activePercent = $totalNewsletters > 0 ? round(($activeNewsletters / $denominator) * 100) : 0;
 $inactivePercent = $totalNewsletters > 0 ? round(($inactiveNewsletters / $denominator) * 100) : 0;
@@ -124,12 +124,20 @@ $thumbnailPercent = $totalNewsletters > 0 ? round(($withThumbnails / $denominato
 											<?php else: ?>
 												<span class="avatar avatar-xl bg-blue-lt text-uppercase fw-bold"><?=strtoupper(substr(trim($newsletter->name ?? 'N'), 0, 1))?></span>
 											<?php endif; ?>
+
+											<?php if (!empty($newsletter->file_url) && check_file_exists($newsletter->file_url)): ?>
+												<a href="<?=base_url($newsletter->file_url)?>" target="_blank" rel="noopener" class="d-block mt-2 text-center text-decoration-none" title="Download File">
+													<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-download" width="20" height="20" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><polyline points="7 11 12 16 17 11" /><line x1="12" y1="4" x2="12" y2="16" /></svg>
+												</a>
+											<?php else: ?>
+												<span class="d-block mt-2 text-center text-muted small">No file</span>
+											<?php endif; ?>
 										</div>
 										<div class="flex-grow-1">
 											<div class="d-flex justify-content-between align-items-start">
 												<div>
 													<h4 class="card-title mb-1"><?=$newsletter->name?></h4>
-													<div class="text-muted small">Created <?=!empty($newsletter->created_at) ? date('d M Y H:i', strtotime($newsletter->created_at)) : 'N/A'?></div>
+													<div class="text-muted small">Created <?=!empty($newsletter->created_at) ? date('d M Y', strtotime($newsletter->created_at)) : 'N/A'?></div>
 												</div>
 												<span class="badge <?=($newsletter->active === 1) ? 'bg-green-lt' : (($newsletter->active === 0) ? 'bg-red-lt' : 'bg-yellow-lt')?>"><?=get_table('m_active', 'num', $newsletter->active, 'name')?></span>
 											</div>

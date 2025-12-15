@@ -22,7 +22,7 @@ $formatDateTime = function ($value) {
         return 'N/A';
     }
     $timestamp = strtotime($value);
-    return $timestamp ? date('d M Y H:i', $timestamp) : (string) $value;
+    return $timestamp ? date('d M Y', $timestamp) : (string) $value;
 };
 $getStatusBadge = function ($status) {
     if (empty($status)) {
@@ -61,11 +61,10 @@ $getStatusBadge = function ($status) {
                         <thead>
                             <tr>
                                 <th>Date</th>
+								<th>Name</th>
                                 <th class="text-end">Bill</th>
                                 <th class="text-end">Paid</th>
-                                <th>Method</th>
                                 <th>Status</th>
-                                <th>Reference</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -92,15 +91,14 @@ $getStatusBadge = function ($status) {
                                 ?>
                                 <tr>
                                     <td><?=$displayDate?></td>
+									<td><?=get_table($customerDBSettingRow->database_name.'.user', 'user_id', $payment->user_id, 'full_legal_name')?></td>
                                     <td class="text-end"><?=$billAmount !== null ? $formatAmount($billAmount) : '—'?></td>
                                     <td class="text-end"><?=$effectiveAmount !== null ? $formatAmount($effectiveAmount) : '—'?></td>
-                                    <td><?=$methodName?></td>
                                     <td>
                                         <span class="badge <?=$badgeClass?>">
                                             <?=$statusName !== '' ? $statusName : 'Not recorded'?>
                                         </span>
                                     </td>
-                                    <td><?=$transactionRef?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>

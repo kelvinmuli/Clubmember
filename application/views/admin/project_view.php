@@ -105,8 +105,8 @@ $basePageUrl = base_url($modulePath);
 							if (!empty($thumbnailUrl)) {
 								$thumbnailSrc = filter_var($thumbnailUrl, FILTER_VALIDATE_URL) ? $thumbnailUrl : base_url($thumbnailUrl);
 							}
-							$startAt = !empty($project->start_at) ? date('d M Y H:i', strtotime($project->start_at)) : 'Not Set';
-							$dueAt = !empty($project->due_at) ? date('d M Y H:i', strtotime($project->due_at)) : 'Not Set';
+							$startAt = !empty($project->start_at) ? date('d M Y', strtotime($project->start_at)) : 'Not Set';
+							$dueAt = !empty($project->due_at) ? date('d M Y', strtotime($project->due_at)) : 'Not Set';
 							$statusId = $project->project_status_id ?? null;
 							$statusName = $statusId ? (get_table('m_project_status', 'project_status_id', $statusId, 'name') ?: 'Status Pending') : 'Status Pending';
 							$activeValue = $project->active ?? null;
@@ -134,7 +134,7 @@ $basePageUrl = base_url($modulePath);
 											<div class="d-flex justify-content-between align-items-start">
 												<div>
 													<h4 class="card-title mb-1"><?=$projectName?></h4>
-													<div class="text-muted small">Created <?=!empty($project->created_at) ? date('d M Y H:i', strtotime($project->created_at)) : 'N/A'?></div>
+													<div class="text-muted small">Created <?=!empty($project->created_at) ? date('d M Y', strtotime($project->created_at)) : 'N/A'?></div>
 												</div>
 												<div class="text-end">
 													<span class="badge bg-purple-lt mb-1"><?=$statusName?></span>
@@ -179,7 +179,7 @@ $basePageUrl = base_url($modulePath);
 												</div>
 											<?php endif; ?>
 											<div class="d-flex justify-content-between align-items-center">
-												<div class="text-muted small">Updated <?=!empty($project->updated_at) ? date('d M Y H:i', strtotime($project->updated_at)) : 'Never'?></div>
+												<div class="text-muted small">Updated <?=!empty($project->updated_at) ? date('d M Y', strtotime($project->updated_at)) : 'Never'?></div>
 												<?php if ($viewUserRight || $editUserRight || $removeUserRight): ?>
 													<span class="dropdown">
 														<button class="btn dropdown-toggle" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>

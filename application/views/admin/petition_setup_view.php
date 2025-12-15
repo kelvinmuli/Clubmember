@@ -121,7 +121,7 @@ $petitionSummary = $petitionSummary ?? [
 												<td><?=number_format((int) ($petition->no_of_signature ?? 0))?></td>
 												<td>
 													<?php if (!empty($petition->closing_at)): ?>
-														<?=date('d M Y H:i', strtotime($petition->closing_at))?>
+														<?=date('d M Y', strtotime($petition->closing_at))?>
 													<?php else: ?>
 														<span class="badge bg-blue-lt">Open</span>
 													<?php endif; ?>
@@ -133,7 +133,7 @@ $petitionSummary = $petitionSummary ?? [
 													?>
 													<span class="badge <?=$badgeClass?>"><?=$statusName ?: 'N/A'?></span>
 												</td>
-												<td><?=!empty($petition->created_at) ? date('d M Y H:i', strtotime($petition->created_at)) : 'N/A'?></td>
+												<td><?=!empty($petition->created_at) ? date('d M Y', strtotime($petition->created_at)) : 'N/A'?></td>
 												<?php if ($hasActions): ?>
 													<td>
 														<span class="dropdown">
@@ -167,6 +167,9 @@ $petitionSummary = $petitionSummary ?? [
 																	</a>
 																	<a href="<?=base_url('petition-signatures-export/'.$petition->petition_setup_id.'/pdf')?>" class="dropdown-item">
 																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7h10v10H7z" /><path d="M9 10h6" /><path d="M9 14h4" /></svg> Download PDF
+																	</a>
+																	<a href="javascript:void(0);" class="dropdown-item" onclick="exportHtmlModal('<?=$petition->petition_setup_id?>')">
+																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="18" height="18" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 9h1" /><path d="M9 13h6" /><path d="M9 17h6" /></svg> Export HTML Summary
 																	</a>
 																<?php endif; ?>
 															</div>
@@ -205,6 +208,10 @@ $petitionSummary = $petitionSummary ?? [
 
 	removePetitionSetupModal = function (petitionSetupId) {
 		showModal(base_url + 'remove-petition-setup-modal/' + petitionSetupId, function () {});
+	};
+
+	exportHtmlModal = function (petitionSetupId) {
+		showModal(base_url + 'petition-signatures-export-html-modal/' + petitionSetupId, function () {});
 	};
 
 </script>

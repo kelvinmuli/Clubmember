@@ -121,6 +121,7 @@ class PayController extends CI_Controller {
 					'payment_history_id' => $payment_history_id,
 					'universal_id' => $universal_id,
 					'module_id' => $module_id,
+					'customer_id' => $customerDBSettingRow->customer_id,
 					'user_id' => $user_id,
 					'bill_amount' => $bill_amount,
 					'currency_id' => '1700743959986', // KES
@@ -130,7 +131,11 @@ class PayController extends CI_Controller {
 			} else {
 				$payment_history_id = $paymentHistoryRow->payment_history_id ?? 'N/A';
 				$this->db->where('payment_history_id', $payment_history_id)->update($customerDBSettingRow->database_name.'.payment_history', array(
-					'bill_amount' => $bill_amount,
+					'universal_id' => $universal_id,
+					'module_id' => $module_id,
+					'customer_id' => $customerDBSettingRow->customer_id,
+					'user_id' => $user_id,
+					'bill_amount' => $bill_amount
 				));
 			}
 		} else {
@@ -219,15 +224,24 @@ class PayController extends CI_Controller {
 		$customerDBSettingIdPaymentHistoryId = explode('C', $obj->p4);
 		$customerDbSettingId = $customerDBSettingIdPaymentHistoryId[0];
 		$paymentHistoryId = $customerDBSettingIdPaymentHistoryId[1];
-		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$customerDBSettingIdPaymentHistoryId));
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>json_encode($customerDBSettingIdPaymentHistoryId)));
 		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$customerDbSettingId));
 		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$paymentHistoryId));
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('customer_db_setting_id', $customerDbSettingId)->get()->row();	
 		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->like('payment_history_id', $paymentHistoryId)->get()->row();
-		$subscription = $this->db->update($customerDBSettingRow->database_name.'.subscription', array('payment_at'=>date('Y-m-d')), array('subscription_id'=>$paymentHistoryRow->universal_id));
+		$moduleRow = $this->db->select('*')->from('m_module')->where('module_id', $paymentHistoryRow->module_id)->get()->row();
+		$module = 0;
+		if ($paymentHistoryRow->module_id == '17072386410') {// Subscription module
+			$module = $this->db->update($customerDBSettingRow->database_name.'.subscription', array('payment_at'=>date('d M Y')), array('subscription_id'=>$paymentHistoryRow->universal_id));
+		} elseif ($paymentHistoryRow->module_id == '17602075390') {// Fundraising module
+			$module = 1;//$this->db->update($customerDBSettingRow->database_name.'.fundraising', array('payment_at'=>date('d M Y')), array('fundraising_id'=>$paymentHistoryRow->universal_id));
+		} elseif ($paymentHistoryRow->module_id == '17872306643') {// Booking module
+			$module = $this->db->update($customerDBSettingRow->database_name.'.booking', array('payment_at'=>date('d M Y')), array('booking_id'=>$paymentHistoryRow->universal_id));
+		}
+		
 		$payment_history = $this->db->update($customerDBSettingRow->database_name.'.payment_history', array('payment_status_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$obj->txncd, 'paid_amount'=>$obj->mc), array('payment_history_id'=>$paymentHistoryRow->payment_history_id));
 		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'paymentHistoryRow -> '.json_encode($paymentHistoryRow)));
-		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'subscription -> '.$subscription));
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>($moduleRow->name ?? 'Module').' -> '.$module));
 		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'payment_history -> '.$payment_history));
 		// $subscriptionData = $this->db->select('*')->from('club_subscription')->where('subscription_id', $obj->p4)->get()->row();
 		// $memberData = $this->db->select('*')->from('users')->where('user_id', $subscriptionData->member_userid)->get()->row();

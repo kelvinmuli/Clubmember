@@ -140,11 +140,14 @@
 														Login to your ClubMember.app account with the password you just set up.<br>
 														Head to the Subscriptions section.<br>
 														Follow the prompts to pay securely.<br><br>
-														Your support helps keep the association running smoothly — thank you!
-                          </p>
-													<p>Copyright @ 2025</p>
-													<p>Website: https://newmuthaigaresidentsassociation.com</p>
-													<p>Email: committee@newmuthaigaresidentsassociation.com</p>
+
+														Your support helps keep the association running smoothly, thank you!
+                          </p><br>
+
+													<p>Copyright @ 2025 New Muthaiga Residents Association</p><br>
+                          
+                          <p><b>Website:</b> https://newmuthaigaresidentsassociation.com</p>
+                          <p><b>Email:</b> committee@newmuthaigaresidentsassociation.com</p>
 												</tr>
                                                                             
 											<tr>

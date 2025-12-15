@@ -56,6 +56,134 @@ class UserController extends CI_Controller {
 		$this->load->view('admin/templates/footer_view', $data);
 	}
 
+	public function importUserModal($user_type_id = '', $customer_db_setting_id = '', $membership_type_id = '')
+	{
+		$this->common->checkSession(array('dialog' => 1));
+		$session_data = $this->common->loadSession();
+
+		$data = array(
+			'user_type_id' => !empty($user_type_id) ? $user_type_id : GlobalModel::MEMBER_TYPE,
+			'customer_db_setting_id' => !empty($customer_db_setting_id) ? $customer_db_setting_id : $session_data['customer_db_setting_id'],
+			'membership_type_id' => $membership_type_id,
+			'template_url' => base_url('download-user-import-template'),
+		);
+
+		return $this->load->view('admin/import_users_modal', $data);
+	}
+
+	public function downloadUserImportTemplate()
+	{
+		$this->common->checkSession();
+
+		$headers = array('user_id','full_legal_name','phone_number','street_name','email','birth','id_no','residential_address','postal_address','postal_code','town_id','city_id','password','membership_no','contact_name','contact_phone_no','sub_reference_no');
+		$sample = array(generate_uuid(),'John Doe','254700000000','Main Street','john@example.com','1990-01-15','12345678','123 Baker St','P.O. Box 123','00100','1','1','Secret123','M-0001','Jane Doe','254701234567','LR-001');
+
+		header('Content-Type: text/csv');
+		header('Content-Disposition: attachment; filename="user_import_template.csv"');
+		header('Pragma: no-cache');
+		header('Expires: 0');
+
+		$output = fopen('php://output', 'w');
+		fputcsv($output, $headers);
+		fputcsv($output, $sample);
+		fclose($output);
+		exit;
+	}
+
+	public function importUsers()
+	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
+		$userTypeId = $this->input->post('user_type_id', true) ?: GlobalModel::MEMBER_TYPE;
+		$customerDbSettingId = $this->input->post('customer_db_setting_id', true) ?: $session_data['customer_db_setting_id'];
+		$membershipTypeId = $this->input->post('membership_type_id', true) ?: 'N/A';
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customerDbSettingId)->get()->row();
+		if (empty($customerDBSettingRow)) {
+			$this->session->set_flashdata('warning', 'Customer database not found.');
+			return redirect($_SERVER['HTTP_REFERER'] ?? 'home', 'refresh');
+		}
+
+		if (empty($_FILES['import_file']['tmp_name'])) {
+			$this->session->set_flashdata('warning', 'Please choose a CSV file to import.');
+			return redirect($_SERVER['HTTP_REFERER'] ?? 'home', 'refresh');
+		}
+
+		$handle = fopen($_FILES['import_file']['tmp_name'], 'r');
+		if (!$handle) {
+			$this->session->set_flashdata('warning', 'Unable to read the uploaded file.');
+			return redirect($_SERVER['HTTP_REFERER'] ?? 'home', 'refresh');
+		}
+
+		$userTable = $customerDBSettingRow->database_name . '.user';
+		$inserted = 0;
+		$updated = 0;
+		$rowNumber = 0;
+
+		while (($row = fgetcsv($handle)) !== false) {
+			$rowNumber++;
+			if ($rowNumber === 1 && isset($row[0]) && strtolower(trim($row[0])) === 'user_id') {
+				continue; // skip header
+			}
+
+			$row = array_map(function ($value) {
+				return trim((string) $value);
+			}, $row);
+
+			list($csvUserId, $fullName, $phoneNumber, $streetName, $email, $birth, $idNo, $residentialAddress, $postalAddress, $postalCode, $townId, $cityId, $plainPassword, $membershipNo, $contactName, $contactPhone, $subReference) = array_pad($row, 17, '');
+
+			if ($fullName === '' && $email === '' && $phoneNumber === '') {
+				continue; // skip empty row
+			}
+
+			$userId = $csvUserId !== '' ? $csvUserId : generate_uuid();
+			$passwordValue = $plainPassword !== '' ? $plainPassword : ($email !== '' ? explode('@', $email)[0] : generate_uuid());
+			$birthDate = null;
+			if ($birth !== '') {
+				$timestamp = strtotime($birth);
+				$birthDate = $timestamp ? date('Y-m-d', $timestamp) : null;
+			}
+
+			$userData = array(
+				'user_id' => $userId,
+				'user_type_id' => $userTypeId,
+				'membership_type_id' => $membershipTypeId,
+				'full_legal_name' => $fullName,
+				'phone_number' => $phoneNumber,
+				'street_name' => $streetName,
+				'email' => $email,
+				'birth' => $birthDate,
+				'id_no' => $idNo,
+				'residential_address' => $residentialAddress,
+				'postal_address' => $postalAddress,
+				'postal_code' => $postalCode,
+				'town_id' => $townId,
+				'city_id' => $cityId,
+				'password' => password_hash($passwordValue, PASSWORD_DEFAULT),
+				'membership_no' => $membershipNo,
+				'contact_name' => $contactName,
+				'contact_phone_no' => $contactPhone,
+				'sub_reference_no' => $subReference,
+				'active' => 1,
+				'created_at' => date('Y-m-d H:i:s'),
+			);
+
+			$existing = $this->db->from($userTable)->where('user_id', $userId)->get()->row();
+			if ($existing) {
+				$this->db->where('user_id', $userId)->update($userTable, $userData);
+				$updated++;
+			} else {
+				$this->db->insert($userTable, $userData);
+				$inserted++;
+			}
+		}
+
+		fclose($handle);
+		$this->session->set_flashdata('success', "Import complete. Added {$inserted}, updated {$updated}.");
+		return redirect($_SERVER['HTTP_REFERER'] ?? 'home', 'refresh');
+	}
+
 	public function memberView($membership_type_id, $active=0)
 	{
 		$this->common->checkSession();
@@ -78,7 +206,7 @@ class UserController extends CI_Controller {
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
 
 		$this->load->view('admin/templates/header_view', $headerData);
-		$this->load->view('admin/member_view', $data);
+		$this->load->view('admin/member_view', $data); 
 		$this->load->view('admin/templates/footer_view', $data);
 	}
 
@@ -121,7 +249,7 @@ class UserController extends CI_Controller {
 			$membershipFeeType = get_table($customerDBSettingRow->database_name.'.membership_fee_type', 'membership_fee_type_id', $user->membership_fee_type_id, 'name');
 			$origin = get_table('m_user_origin', 'user_origin_id', $user->user_origin_id, 'name');
 			$status = get_table('m_active', 'num', $user->active, 'name_two');
-			$createdAt = date_format(date_create($user->created_at),"y M d H:i:s");
+			$createdAt = date_format(date_create($user->created_at),"d M Y");
 			$userDataArray[] = array(++$u.'.', $user->full_legal_name, $user->phone_number, $user->email, $membershipFeeType, ($user->membership_no ?? '-'), $user->residential_address, $user->sub_reference_no, $origin, $status, $createdAt, $actions);
 		}
 
@@ -756,7 +884,7 @@ class UserController extends CI_Controller {
 		redirect($header == 'dashboard' ? $header : $header.'/'.$userRow->user_type_id.'/'.$customer_db_setting_id, 'refresh');
 	}
 
-	public function deleteUserModal($user_id, $customer_db_setting_id)
+	public function deleteUserModal($user_id, $customer_db_setting_id, $header='all-user')
 	{
 		$this->common->checkSession(array('dialog'=>1));
 
@@ -773,6 +901,7 @@ class UserController extends CI_Controller {
 						<form action="'.base_url('delete-user').'" method="POST" enctype="multipart/form-data">	
 							<input id="user_id" name="user_id" type="text" value="'.$user_id.'" hidden>
 							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>
+							<input id="header" name="header" type="text" value="'.$header.'" hidden>
 							<div class="modal-body">
 								<p>Are you sure you want to delete <strong>'.$userRow->full_legal_name.'</strong> ?</p>
 							</div>
@@ -803,6 +932,7 @@ class UserController extends CI_Controller {
 		$postData = $this->input->post();
 		$customer_db_setting_id = $postData['customer_db_setting_id'];
 		$user_id = $postData['user_id'];
+		$header = $postData['header'];
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
 
@@ -810,6 +940,6 @@ class UserController extends CI_Controller {
 		$description = $userRow->full_legal_name.' Deleted Successfully. ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$user_id.' : User for '.$description));
-		redirect('all-user/'.$userRow->user_type_id.'/'.$customer_db_setting_id, 'refresh');
+		redirect($header.'/'.$userRow->user_type_id.'/'.$customer_db_setting_id, 'refresh');
 	}
 }

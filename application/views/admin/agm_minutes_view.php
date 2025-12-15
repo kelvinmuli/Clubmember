@@ -74,7 +74,7 @@ $modulePath = isset($moduleMenu) && !empty($moduleMenu->path) ? $moduleMenu->pat
 													<?php endif; ?>
 												</td>
 												<td><span class="badge <?=$minute->active === 1 ? 'bg-green-lt' : ($minute->active === 0 ? 'bg-red-lt' : 'bg-yellow-lt')?>"><?=get_table('m_active', 'num', $minute->active, 'name')?></span></td>
-												<td><?=!empty($minute->created_at) ? date('d M Y H:i', strtotime($minute->created_at)) : 'N/A'?></td>
+												<td><?=!empty($minute->created_at) ? date('d M Y', strtotime($minute->created_at)) : 'N/A'?></td>
 												<?php if ($viewUserRight || $editUserRight || $removeUserRight): ?>
 													<td>
 														<span class="dropdown">

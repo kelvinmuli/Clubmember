@@ -107,7 +107,7 @@ class NewsletterController extends CI_Controller {
         }
 
         if ($summary['total_newsletters'] > 0) {
-            $recentThreshold = date('Y-m-d H:i:s', strtotime('-30 days'));
+            $recentThreshold = date('d M Y', strtotime('-30 days'));
             $recentCount = $this->db->from($tenantTable)
                 ->where('created_at >=', $recentThreshold)
                 ->count_all_results();
@@ -135,8 +135,13 @@ class NewsletterController extends CI_Controller {
         $customer_db_setting_id = $session_data['customer_db_setting_id'];
 
         $postData = $this->input->post();
+		$newsletter_id = $postData['newsletter_id'];
 		if (isset($_FILES['thumbnail_url']['name'])) {
-			$postData['thumbnail_url'] = file_upload('thumbnail_url', $postData['newsletter_id']);
+			$postData['thumbnail_url'] = file_upload('thumbnail_url', $newsletter_id.'t');
+		}
+
+		if (isset($_FILES['file_url']['name'])) {
+			$postData['file_url'] = file_upload('file_url', $newsletter_id.'f', 'assets/doc/');
 		}
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
         $this->db->insert($customerDBSettingRow->database_name.'.newsletter', $postData);
@@ -183,7 +188,15 @@ class NewsletterController extends CI_Controller {
         $postData = $this->input->post();
 		$newsletter_id = $postData['newsletter_id'];
 		if (isset($_FILES['thumbnail_url']['name'])) {
-			$postData['thumbnail_url'] = file_upload('thumbnail_url', $newsletter_id);
+			$postData['thumbnail_url'] = file_upload('thumbnail_url', $newsletter_id.'t');
+		} else {
+			unset($postData['thumbnail_url']); // Remove thumbnail_url if no new file is uploaded
+		}
+
+		if (isset($_FILES['file_url']['name'])) {
+			$postData['file_url'] = file_upload('file_url', $newsletter_id.'f', 'assets/doc/');
+		} else {
+			unset($postData['file_url']); // Remove file_url if no new file is uploaded
 		}
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
         $this->db->update($customerDBSettingRow->database_name.'.newsletter', $postData, array('newsletter_id'=>$newsletter_id));

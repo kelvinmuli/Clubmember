@@ -29,7 +29,7 @@
 							<?php
 								$closingAtValue = '';
 								if (isset($petitionSetupRow->closing_at) && !empty($petitionSetupRow->closing_at)) {
-									$closingAtValue = date('Y-m-d\\TH:i', strtotime($petitionSetupRow->closing_at));
+									$closingAtValue = date('d M Y', strtotime($petitionSetupRow->closing_at));
 								}
 							?>
 							<input type="datetime-local" class="form-control" id="closing_at" name="closing_at" value="<?=$closingAtValue?>">

@@ -89,19 +89,7 @@ class PaymentHistoryController extends CI_Controller
 
 		$payments = [];
 		$totalPaid = 0.0;
-		if ($sessionData['user_type_id'] == GlobalModel::MEMBER_TYPE) {
-			$payments = $this->db->select('ph.*, mps.name AS status_name, mps.name AS status_code, mpm.name AS method_name, mc.sign AS currency_sign, mc.name AS currency_name')
-				->from($customerDBSettingRow->database_name . '.payment_history' . ' ph')
-				->join('m_payment_status mps', 'ph.payment_status_id = mps.payment_status_id', 'left')
-				->join('m_payment_method mpm', 'ph.payment_method_id = mpm.payment_method_id', 'left')
-				->join('m_currency mc', 'ph.currency_id = mc.currency_id', 'left')
-				->where('ph.universal_id', $fundraisingId)
-				->where('ph.user_id', $sessionData['user_id'])
-				->order_by('ph.created_at', 'DESC')
-				->get()
-				->result();
-		} else {
-			$payments = $this->db->select('ph.*, mps.name AS status_name, mps.name AS status_code, mpm.name AS method_name, mc.sign AS currency_sign, mc.name AS currency_name')
+		$payments = $this->db->select('ph.*, mps.name AS status_name, mps.name AS status_code, mpm.name AS method_name, mc.sign AS currency_sign, mc.name AS currency_name')
 				->from($customerDBSettingRow->database_name . '.payment_history' . ' ph')
 				->join('m_payment_status mps', 'ph.payment_status_id = mps.payment_status_id', 'left')
 				->join('m_payment_method mpm', 'ph.payment_method_id = mpm.payment_method_id', 'left')
@@ -110,7 +98,6 @@ class PaymentHistoryController extends CI_Controller
 				->order_by('ph.created_at', 'DESC')
 				->get()
 				->result();
-		}
 		
 		foreach ($payments as $row) {
 			$amount = null;

@@ -29,6 +29,11 @@
 								</span>
 							</div>
 						<?php endif; ?>
+								
+						<button class="btn btn-primary btn-pill" onclick="importUsersModal('<?=GlobalModel::MEMBER_TYPE?>', '<?=$customerDBSettingId?>', '<?=$membershipTypeId?>')">
+							<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5v14" /><path d="M5 12h14" /></svg>
+							Import CSV
+						</button>		
 					</div>
               	</div>
             </div>
@@ -79,7 +84,7 @@
 												<td><?=$user->residential_address?></td>
 												<td><?=$user->sub_reference_no?></td>
 												<td><?=get_table('m_user_origin', 'user_origin_id', $user->user_origin_id, 'name')?></td>
-												<td><?=date_format(date_create($user->created_at),"y M d H:i:s")?></td>
+												<td><?=date_format(date_create($user->created_at),"d M y")?></td>
 												<?php if ($approveUserRight || $editUserRight || $removeUserRight): ?>
 													<td>
 														<span class="dropdown">
@@ -88,9 +93,9 @@
 																<?php if ($approveUserRight && $user->active == 0): ?>
 																	<a class="dropdown-item" onclick="subscriptionApprovalModal('<?=$user->user_id?>', '<?=$user->membership_type_id?>', '<?=$customer_db_setting_id?>', 'member')">Approve</a>
 																<?php endif; if ($editUserRight): ?>
-																	<a class="dropdown-item" href="#" onclick="editUserModal('<?=$user->user_id?>')">Edit</a>
+																	<a class="dropdown-item" href="#" onclick="editUserModal('<?=$user->user_id?>', '<?=($user->membership_type_id == 'N/A' ? '0' : $user->membership_type_id)?>', '<?=$customer_db_setting_id?>', 'member')">Edit</a>
 																<?php endif; if ($removeUserRight): ?>
-																	<a class="dropdown-item" href="#" onclick="deleteUserModal('<?=$user->user_id?>')">Delete</a>
+																	<a class="dropdown-item" href="#" onclick="deleteUserModal('<?=$user->user_id?>', '<?=$customer_db_setting_id?>', 'member')">Delete</a>
 																<?php endif; ?>
 															</div>
 														</span>
@@ -123,5 +128,9 @@
 					$('#modal-view-edit-print-user').modal('show');
 				}
 			});
+		}
+
+		function importUsersModal(user_type_id, customer_db_setting_id, membership_type_id) {
+			showModal(base_url + 'import-user-modal/' + user_type_id + '/' + customer_db_setting_id + '/' + (membership_type_id || ''), function () {});
 		}
 	</script>

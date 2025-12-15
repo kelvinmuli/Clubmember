@@ -79,7 +79,7 @@
                 <tr>
                   <td align="center">
                     <!-- Button link -->
-                    <a href="<?=base_url('login')?>" class="btn" target="_blank" style="display:inline-block; text-decoration:none; font-family:Arial, Helvetica, sans-serif; font-size:14px; padding:12px 22px; border-radius:6px; background:#2563eb; color:#ffffff; font-weight:600;"> Read More</a>
+                    <a href="https://nmra.clubmember.app/v1" class="btn" target="_blank" style="display:inline-block; text-decoration:none; font-family:Arial, Helvetica, sans-serif; font-size:14px; padding:12px 22px; border-radius:6px; background:#2563eb; color:#ffffff; font-weight:600;"> Read More</a>
                   </td>
                 </tr>
               </table>
@@ -102,9 +102,10 @@
               <p style="margin:0;">
                 If you have any questions or need help, feel free to reach out.
               </p>
-							<p>Copyright @ 2025</p>
-							<p>Website: https://newmuthaigaresidentsassociation.com</p>
-							<p>Email: committee@newmuthaigaresidentsassociation.com</p>
+							<p>Copyright @ 2025 New Muthaiga Residents Association</p><br>
+                                                
+              <p><b>Website:</b> https://newmuthaigaresidentsassociation.com</p>
+              <p><b>Email:</b> committee@newmuthaigaresidentsassociation.com</p>
             </td>
           </tr>
         </table>

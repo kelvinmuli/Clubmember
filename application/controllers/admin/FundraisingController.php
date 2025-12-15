@@ -304,7 +304,7 @@ class FundraisingController extends CI_Controller
         }
 
         $timestamp = strtotime($value);
-        return $timestamp ? date('Y-m-d', $timestamp) : null;
+        return $timestamp ? date('d M Y', $timestamp) : null;
     }
 
     private function toFloat($value)

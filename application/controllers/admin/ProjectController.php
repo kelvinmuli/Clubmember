@@ -136,8 +136,8 @@ class ProjectController extends CI_Controller {
         $postData['start_at'] = $this->sanitizeDateTime($postData['start_at'] ?? null);
         $postData['due_at'] = $this->sanitizeDateTime($postData['due_at'] ?? null);
         $postData['active'] = isset($postData['active']) && $postData['active'] !== '' ? (int) $postData['active'] : 1;
-        $postData['created_at'] = date('Y-m-d H:i:s');
-        $postData['updated_at'] = date('Y-m-d H:i:s');
+        $postData['created_at'] = date('d M Y');
+        $postData['updated_at'] = date('d M Y');
 
         $thumbnailUrlInput = trim($postData['thumbnail_url'] ?? '');
         unset($postData['thumbnail_url']);
@@ -270,7 +270,7 @@ class ProjectController extends CI_Controller {
         $postData['start_at'] = $this->sanitizeDateTime($postData['start_at'] ?? null);
         $postData['due_at'] = $this->sanitizeDateTime($postData['due_at'] ?? null);
         $postData['active'] = isset($postData['active']) && $postData['active'] !== '' ? (int) $postData['active'] : 1;
-        $postData['updated_at'] = date('Y-m-d H:i:s');
+        $postData['updated_at'] = date('d M Y');
 
         $customerDBSettingRow = $this->db->select('*')
             ->from('customer_db_setting')
@@ -370,7 +370,7 @@ class ProjectController extends CI_Controller {
             return null;
         }
         $timestamp = strtotime($value);
-        return $timestamp ? date('Y-m-d H:i:s', $timestamp) : null;
+        return $timestamp ? date('d M Y', $timestamp) : null;
     }
 
     private function resolveProjectThumbnail($project_id, $thumbnailUrlInput = '', $existingThumbnail = '') {

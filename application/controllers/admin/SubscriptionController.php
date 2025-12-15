@@ -65,6 +65,7 @@ class SubscriptionController extends CI_Controller {
 	public function addSubscriptionApproveModal($payment_status_id='', $user_id='', $membership_type_id='', $customer_db_setting_ids='', $header='subscription/1732351802222')
 	{
 		$this->common->checkSession(array('dialog'=>1));
+
 		$session_data = $this->common->loadSession();
 		$customer_db_setting_id = empty($customer_db_setting_ids) ? $session_data['customer_db_setting_id'] : $customer_db_setting_ids;
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
@@ -73,6 +74,17 @@ class SubscriptionController extends CI_Controller {
 		$currencyData = $this->db->select('*')->from('m_currency')->where('active', 1)->get()->result();
 		$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->get()->result();
 
+		$doubleUserArray = []; $checkDoubleEmailUser = 0;
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+		foreach ($userData as $value) 
+		{
+			if ($userRow->email == $value->email && $userRow->active == $value->active) 
+			{
+				$checkDoubleEmailUser++;
+				$doubleUserArray[] = ['user_id'=>$value->user_id, 'full_legal_name'=>$value->full_legal_name, 'email'=>$value->email, 'phone_number'=>$value->phone_number];
+			}
+		}
+		// <div class="alert alert-danger">Cannot approve membership and add subscription for this user because another user with the same email already exists. Please resolve this issue before proceeding.</div>
 		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 					<div class="modal-content">
 						<div class="modal-header">';
@@ -90,9 +102,18 @@ class SubscriptionController extends CI_Controller {
 							<input id="member_id" name="member_id" type="text" value="'.$session_data['user_id'].'" hidden>
 							<input id="payment_status_id" name="payment_status_id" type="text" value="'.(empty($payment_status_id) ? '1732351802222' : $payment_status_id).'" hidden>
 							<input id="membership_type_id" name="membership_type_id" type="text" value="'.$membership_type_id.'" hidden>
-							<input id="active" name="active" type="number" value="'.(empty($payment_status_id) ? '0' : '1').'" hidden> 
-							<input id="header" name="header" type="text" value="'.$header.'" hidden>
-							<div class="modal-body">
+							<input id="active" name="active" type="number" value="1" hidden> 
+							<input id="header" name="header" type="text" value="'.$header.'" hidden>';
+							if ($checkDoubleEmailUser > 1) {
+								$doubleUser = '';
+								foreach ($doubleUserArray as $key => $duValue) {
+									$doubleUser .= ($key + 1).'. Name: '.$duValue['full_legal_name'].' - Email: '.$duValue['email'].' - Phone: '.$duValue['phone_number']. '<br>';
+								}
+								$modal .= '<div class="modal-body">
+									<div class="alert alert-danger">Kindly note your approving this member with duplicate email addresses before proceeding. Kindly ensure this is the correct user. <br><br>'.$doubleUser.'</div>
+								</div>';
+							}
+							$modal .= '<div class="modal-body">
 								<div class="row">
 									<div class="col-lg-6">
 										<div class="mb-3">
@@ -166,10 +187,10 @@ class SubscriptionController extends CI_Controller {
 										</div>
 									</div>
 									<div class="col-lg-12">
-									    <div class="mb-3">
-									        <label for="payment_at" class="form-label">Notes</label>
-									        <textarea id="remark" name="remark" class="form-control" rows="3"></textarea>
-									    </div>
+										<div class="mb-3">
+											<label for="payment_at" class="form-label">Notes</label>
+											<textarea id="remark" name="remark" class="form-control" rows="3"></textarea>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -506,7 +527,7 @@ class SubscriptionController extends CI_Controller {
 									<div class="col-lg-6">
 										<div class="mb-3">
 											<label for="payment_at" class="form-label">Payment Date</label>
-											<input id="payment_at" name="payment_at" type="date" class="form-control btn-pill" value="'.date('Y-m-d').'" required>
+											<input id="payment_at" name="payment_at" type="date" class="form-control btn-pill" value="'.date('d M Y').'" required>
 										</div>
 									</div>
 									<div class="col-lg-6">

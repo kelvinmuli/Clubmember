@@ -146,7 +146,7 @@
 												<?php if ($viewUserRight || $approveUserRight): ?>
 													<td>
 														<?php if ($data->payment_status_id != '1732371146921'): ?>
-															<button class="btn btn-pill" onclick="paymentInfoModal('<?=$data->user_id?>', '<?=$data->payment_history_id?>')">
+															<button class="btn btn-danger btn-pill" onclick="paymentInfoModal('<?=$data->user_id?>', '<?=$data->payment_history_id?>')">
 																<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg> Pay
 															</button>
 														<?php else: ?>
@@ -630,7 +630,7 @@
 												<td><?=$user->sub_reference_no?></td>
 												<td><?=get_table('m_user_origin', 'user_origin_id', $user->user_origin_id, 'name')?></td>
 												<td><?=get_table('m_active', 'num', $user->active, 'name_two')?></td>
-												<td><?=date_format(date_create($user->created_at),"y M d H:i:s")?></td>
+												<td><?=date_format(date_create($user->created_at),"d M Y")?></td>
 												<?php if ($viewUserRight || $approveUserRight || $editUserRight || $removeUserRight): ?>
 													<?php if ($data->payment_status_id != '1732371146921'): ?>
 														<button class="btn btn-pill" onclick="paymentInfoModal('<?=$data->user_id?>', '<?=$data->payment_history_id?>')">
@@ -771,7 +771,7 @@
 												<td><?=$newsletter->name?></td>
 												<td><span class="only-so-big text-muted"><?=$newsletter->description?></span></td>
 												<td><span class="badge <?=($newsletter->active === 1) ? 'bg-green-lt' : (($newsletter->active === 0) ? 'bg-red-lt' : 'bg-yellow-lt')?>"><?=get_table('m_active', 'num', $newsletter->active, 'name')?></span></td>
-												<td><?=!empty($newsletter->created_at) ? date('d M Y H:i', strtotime($newsletter->created_at)) : 'N/A'?></td>
+												<td><?=!empty($newsletter->created_at) ? date('d M Y', strtotime($newsletter->created_at)) : 'N/A'?></td>
 											</tr>
 										<?php endforeach; endif; ?>
 									</tbody>
@@ -803,7 +803,7 @@
 															<div class="text-end" hidden>
 																<span class="badge <?=$statusClass?>"><?=get_table('m_active', 'num', $newsletter->active, 'name')?></span>
 																<div class="text-secondary small mt-1">
-																	<?=!empty($newsletter->created_at) ? date('d M Y H:i', strtotime($newsletter->created_at)) : 'N/A'?>
+																	<?=!empty($newsletter->created_at) ? date('d M Y', strtotime($newsletter->created_at)) : 'N/A'?>
 																</div>
 															</div>
 														</div>

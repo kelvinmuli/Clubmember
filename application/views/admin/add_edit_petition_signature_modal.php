@@ -3,7 +3,7 @@
 	$modalTitle = $isEdit ? 'Edit ' . ($petitionSignatureRow->full_legal_name ?? 'Petition Signature') : 'Add Petition Signature';
 	$signedAtValue = '';
 	if ($isEdit && !empty($petitionSignatureRow->signed_at)) {
-		$signedAtValue = date('Y-m-d\TH:i', strtotime($petitionSignatureRow->signed_at));
+		$signedAtValue = date('d M Y', strtotime($petitionSignatureRow->signed_at));
 	}
 	$consentValue = $isEdit ? (int) ($petitionSignatureRow->consent ?? 0) : 1;
 	$noOfUnitValue = $isEdit ? (int) ($petitionSignatureRow->no_of_unit ?? 0) : 0;
