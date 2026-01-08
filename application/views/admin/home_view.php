@@ -663,7 +663,7 @@
 				</div>
 				
 			<?php endif; endforeach; endif; if (!empty(get_user_right($user_type_id, '17743087640', 'view', 1))): ?>
-				<div class="col-6">
+				<div class="col-12">
 					<div class="card">
 						<div class="card-table">
 							<div class="card-header">
@@ -733,7 +733,7 @@
 					</div>
 				</div>
 			<?php endif; if (!empty(get_user_right($user_type_id, '17848086429', 'view', 1))): ?>
-				<div class="col-6">
+				<div class="col-12">
 					<div class="card">
 						<div class="card-table">
 							<div class="card-header">
@@ -745,7 +745,7 @@
 								</div>
 							</div>
 
-							<div class="card-body border-bottom py-3" hidden>
+							<div class="card-body border-bottom py-3">
 								<table id="newsletter-datatable" class="table card-table table-vcenter text-wrap datatable" style="width: 100%; min-height: 100px;">
 									<thead>
 										<tr>
@@ -753,6 +753,7 @@
 											<th>Thumbnail</th>
 											<th>Title</th>
 											<th>Description</th>
+											<th>Document</th>
 											<th>Status</th>
 											<th>Created At</th>
 										</tr>
@@ -762,14 +763,22 @@
 											<tr>
 												<td class="w-1"><?=++$nl?>.</td>
 												<td>
-													<?php if (file_exists(base_url($newsletter->thumbnail_url))): ?>
-														<span class="avatar avatar-xs me-2" style="background-image: url('<?=base_url($newsletter->thumbnail_url)?>')"></span>
-													<?php else: ?>
-														<span class="avatar avatar-xs me-2" style="background-image: url('<?=base_url('assets/admin/images/no-image.png')?>')"></span>
-													<?php endif; ?>
+													<?php
+														$thumbnailPath = !empty($newsletter->thumbnail_url) ? FCPATH . ltrim($newsletter->thumbnail_url, '/') : '';
+														$hasThumbnail = !empty($thumbnailPath) && file_exists($thumbnailPath);
+														$thumbnailSrc = $hasThumbnail ? base_url($newsletter->thumbnail_url) : base_url('assets/admin/images/no-image.png');
+													?>
+													<span class="avatar avatar-xs me-2" style="background-image: url('<?=$thumbnailSrc?>')"></span>
 												</td>
 												<td><?=$newsletter->name?></td>
-												<td><span class="only-so-big text-muted"><?=$newsletter->description?></span></td>
+												<td><div class="only-so-big text-muted"><?=$newsletter->description?></div></td>
+												<td>
+													<?php if (!empty($newsletter->file_url) && check_file_exists(base_url($newsletter->file_url))): ?>
+														<a href="<?=base_url($newsletter->file_url)?>" target="_blank">View Document</a>
+													<?php else: ?>
+														No Document Found
+													<?php endif; ?>
+												</td>
 												<td><span class="badge <?=($newsletter->active === 1) ? 'bg-green-lt' : (($newsletter->active === 0) ? 'bg-red-lt' : 'bg-yellow-lt')?>"><?=get_table('m_active', 'num', $newsletter->active, 'name')?></span></td>
 												<td><?=!empty($newsletter->created_at) ? date('d M Y', strtotime($newsletter->created_at)) : 'N/A'?></td>
 											</tr>
@@ -778,7 +787,7 @@
 								</table>
 							</div>
 
-							<div class="card-body border-bottom py-3">
+							<div class="card-body border-bottom py-3" hidden>
 								<div class="row">
 									<?php $nl = 0; if (!empty($newsletterData)): ?>
 										<?php foreach ($newsletterData as $newsletter): ?>		

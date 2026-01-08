@@ -137,7 +137,8 @@ class UserController extends CI_Controller {
 				continue; // skip empty row
 			}
 
-			$userId = $csvUserId !== '' ? $csvUserId : generate_uuid();
+			// $userId = $csvUserId !== '' ? $csvUserId : generate_uuid();
+			$userId = generate_uuid();
 			$passwordValue = $plainPassword !== '' ? $plainPassword : ($email !== '' ? explode('@', $email)[0] : generate_uuid());
 			$birthDate = null;
 			if ($birth !== '') {
@@ -482,6 +483,13 @@ class UserController extends CI_Controller {
 		$email = $postData['email'];
 		$active = $postData['active'];
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('email', $email)->get()->row();
+		if (isset($userRow) && $userRow->email == $email) {
+			$description = 'User with email '.$email.' already exists. ❌';
+			$this->session->set_flashdata('err', $description);
+			$redirect = $header == 'all-user' ? $header.'/'.$user_type_id.'/'.$customer_db_setting_id : ($header == 'member' ? 'member/'.$membership_type_id.'/'.$active : 'profile/'.$userRow->user_id.'/'.$customer_db_setting_id.'/'.$userRow->user_option_id);
+			redirect($redirect, 'refresh');
+		}
 
 		$path = "assets/img/";
 		if (isset($_FILES['url']['name']))
