@@ -22,6 +22,7 @@ class Common
 		$customer_db_setting_id = $session_data['customer_db_setting_id'];
 		$headerData = $session_data;
 
+		$customerDBSettingRow = $this->ci->MaintenanceModel->getTableRow('customer_db_setting', 'customer_db_setting_id', $customer_db_setting_id);
 		$moduleMenu = $this->ci->MaintenanceModel->getTableRow('m_module', 'module_id', array('path'=>$toolBarMenu));
 		$headerData["moduleMenu"] = $moduleMenu;
 		if ($subToolBarMenu != NULL)
@@ -47,8 +48,10 @@ class Common
 		$stateData = $this->ci->MaintenanceModel->getTable('m_state', 'state_id', array('active'=>1));
 		$activeData = $this->ci->MaintenanceModel->getTable('m_active', 'active_id', array('active'=>1));
 		$userRightData = $this->ci->MaintenanceModel->getTable('user_right');
-
-		// print_r(json_encode($headerData['membershipTypeData'])); exit;
+		$subscriptionPaymentHistoryRow = $this->ci->MaintenanceModel->getTableRow($customerDBSettingRow->database_name.'.payment_history', 'user_id', array('user_id'=>$session_data['user_id'], 'module_id'=>'17072386410'));
+		$isSubscriptionPaid = $session_data['user_type_id'] == GlobalModel::MEMBER_TYPE ? $subscriptionPaymentHistoryRow->payment_status_id == '1732371146921' : true;
+		// print_r($session_data['user_id']);
+		// print_r(json_encode($subscriptionPaymentHistoryRow)); exit;
 
 		$headerData['viewUserRight'] = !empty(get_user_right($user_type_id, $moduleMenu->module_id, 'view', 1)); 
 		// $headerData['figureUserRight'] = !empty(get_user_right($user_type_id, $moduleMenu->module_id, 'figure', 1)); 
@@ -78,6 +81,7 @@ class Common
 		$headerData['userTypeId'] = '';
 		$headerData['moduleTypeId'] = '';
 		$headerData['customerDBSettingId'] = $customer_db_setting_id;
+		$headerData['isSubscriptionPaid'] = $isSubscriptionPaid;
         return $headerData;
     }
 
@@ -137,32 +141,41 @@ class Common
         }
         return substr(bin2hex($bytes), 0, $lenght);
     }
-    
-	
-	function sendMail($to,$subject,$message)
-	{
+
+    function sendMail($to, $subject, $message)
+    {
         $this->ci->load->library('phpmailer_lib');
         $mail = $this->ci->phpmailer_lib->load();
 
         // SMTP configuration
-        $mail->isSMTP();
-        $mail->Host     = 'ssl://smtp.googlemail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'zidii.info@gmail.com';
-        $mail->Password = 'imhejvzsffysxguc';
-        $mail->SMTPSecure = 'ssl';
-        $mail->Port     = 465;
+        // $mail->isSMTP();
+        // $mail->Host     = 'ssl://smtp.googlemail.com';
+        // $mail->SMTPAuth = true;
+        // $mail->Username = 'zidii.info@gmail.com';
+        // $mail->Password = 'imhejvzsffysxguc';
+        // $mail->SMTPSecure = 'ssl';
+        // $mail->Port     = 465;
 
-        $mail->setFrom('zidii.info@gmail.com', 'Zidii Club Manager');
-        $mail->addReplyTo('zidii.info@gmail.com', 'Zidii Club Manager');
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.postmarkapp.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = '86121b38-2a07-4f6a-b28d-4f48f85c5b02';
+        $mail->Password   = '86121b38-2a07-4f6a-b28d-4f48f85c5b02'; // Consider moving this to a config/env file
+        $mail->SMTPSecure = 'tls';
+        $mail->Port       = 587;
+
+        $mail->setFrom('updates@clubmember.app', 'ClubMember.app - Association Edition');
+        $mail->addReplyTo('updates@clubmember.app', 'ClubMember.app - Association Edition');
 
         // Add a recipient
         $mail->addAddress($to);
 
         // Add cc or bcc 
-        // $mail->addCC('cc@example.com');
-        $mail->addBCC('mulikelvin17@gmail.com');
-		$mail->addBCC('ivickinya@gmail.com');
+        $mail->addCC('clubmember@zilojo.com');
+        $mail->addCC('zidii@zilojo.com');
+        $mail->addBCC('updates@clubmember.app');
+        $mail->addBCC('kelvin.muli@zilojo.com');
+        $mail->addBCC('ivickinya@gmail.com');
 
         // Email subject
         $mail->Subject = $subject;
@@ -174,7 +187,7 @@ class Common
         $mailContent = "<h1>Send HTML Email using SMTP in CodeIgniter</h1>
             <p>This is a test email sending using SMTP mail server with PHPMailer.</p>";
         $mail->Body = $message;
-		$mail->send();
+        $mail->send();
         // Send email
         // if(!$mail->send()){
         //     echo 'Message could not be sent.';
@@ -182,8 +195,55 @@ class Common
         // }else{
         //     echo 'Message has been sent';
         // }
-		// exit;
+        // exit;
     }
+    
+	
+	// function sendMail($to,$subject,$message)
+	// {
+    //     $this->ci->load->library('phpmailer_lib');
+    //     $mail = $this->ci->phpmailer_lib->load();
+
+    //     // SMTP configuration
+    //     $mail->isSMTP();
+    //     $mail->Host     = 'ssl://smtp.googlemail.com';
+    //     $mail->SMTPAuth = true;
+    //     $mail->Username = 'zidii.info@gmail.com';
+    //     $mail->Password = 'imhejvzsffysxguc';
+    //     $mail->SMTPSecure = 'ssl';
+    //     $mail->Port     = 465;
+
+    //     $mail->setFrom('zidii.info@gmail.com', 'Zidii Club Manager');
+    //     $mail->addReplyTo('zidii.info@gmail.com', 'Zidii Club Manager');
+
+    //     // Add a recipient
+    //     $mail->addAddress($to);
+
+    //     // Add cc or bcc 
+    //     // $mail->addCC('cc@example.com');
+    //     $mail->addBCC('mulikelvin17@gmail.com');
+	// 	$mail->addBCC('ivickinya@gmail.com');
+
+    //     // Email subject
+    //     $mail->Subject = $subject;
+
+    //     // Set email format to HTML
+    //     $mail->isHTML(true);
+
+    //     // Email body content
+    //     $mailContent = "<h1>Send HTML Email using SMTP in CodeIgniter</h1>
+    //         <p>This is a test email sending using SMTP mail server with PHPMailer.</p>";
+    //     $mail->Body = $message;
+	// 	$mail->send();
+    //     // Send email
+    //     // if(!$mail->send()){
+    //     //     echo 'Message could not be sent.';
+    //     //     echo 'Mailer Error: ' . $mail->ErrorInfo;
+    //     // }else{
+    //     //     echo 'Message has been sent';
+    //     // }
+	// 	// exit;
+    // }
 
 	// ---------------------------------------------------------------------------------------------------------
 	//     $mail->isSMTP();

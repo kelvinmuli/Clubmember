@@ -172,7 +172,7 @@
 				<div class="collapse navbar-collapse" id="sidebar-menu">
 					<ul class="navbar-nav pt-lg-3">
 						<?php if (isset($moduleData)): foreach($moduleData as $module): if ($module->state == 1 && $module->sub == 0): if (empty(get_user_right($user_type_id, $module->module_id, 'view', 1))) { continue; } ?>
-							<li class="nav-item <?=($module->path == $moduleMenu->path ? 'active' : '').' '.($module->withsub == 1 ? 'dropdown' : '')?>">
+							<li class="nav-item <?=($module->path == $moduleMenu->path ? 'active' : '').' '.($module->withsub == 1 ? 'dropdown' : '')?>" <?=$isSubscriptionPaid ? '' : (in_array($module->module_id, array('61134678909', '17072386410')) ? '' : 'hidden')?>>
 								<a class="nav-link <?=($module->withsub == 1 ? ($module->path == $moduleMenu->path ? 'dropdown-toggle show' : 'dropdown-toggle') : '')?>" href="<?=$module->withsub == 1 ? '#navbar-extra' : base_url($module->path)?>" <?=($module->withsub == 1 ? 'data-bs-toggle="dropdown"  data-bs-auto-close="false" role="button" aria-expanded="false"' : '')?>>
 									<span class="nav-link-icon d-md-none d-lg-inline-block"><?=$module->icon?></span>
 									<span class="nav-link-title"><?=$module->name?></span> 

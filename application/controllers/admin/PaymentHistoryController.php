@@ -145,4 +145,27 @@ class PaymentHistoryController extends CI_Controller
 		redirect('fundraising', 'refresh');
 	}
 
+	public function checkMpesaPaymentStatus($checkoutRequestId='', $user_id='', $payment_history_id='', $phone_no='', $amount='')
+	{
+		$this->common->checkSession();
+		$sessionData = $this->common->loadSession();
+		$customerDbSettingId = $sessionData['customer_db_setting_id'];
+		$customerDBSettingRow = $this->db->select('*')
+			->from('customer_db_setting')
+			->where('customer_db_setting_id', $customerDbSettingId)
+			->get()
+			->row();
+
+		// Call the method to check MPESA payment status
+		$paymentHistoryRow = $this->db->from($customerDBSettingRow->database_name.'.payment_history')
+			->where('payment_history_id', $payment_history_id)
+			->get()
+			->row();
+
+		// Return the result as JSON
+		// header('Content-Type: application/json');
+		// print_r(json_encode($paymentHistoryRow));
+		echo $paymentHistoryRow->payment_status_id == '1732371146921' ? 'success' : 'pending';
+	}
+
 }

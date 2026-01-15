@@ -7,8 +7,8 @@
 
 		<?php if (!empty($newsletterRow)): ?>
 			<div class="modal-body">
-				<div class="row g-4 align-items-start">
-					<div class="col-md-4 text-center">
+				<div class="row g-4">
+					<div class="col-md-12">						
 						<?php
 							$thumbnailSrc = base_url('assets/admin/images/no-image.png');
 							if (!empty($newsletterRow->thumbnail_url) && check_file_exists($newsletterRow->thumbnail_url)) {
@@ -20,21 +20,22 @@
 								$fileSrc = base_url($newsletterRow->file_url);
 							}
 						?>
+						<label class="form-label">Title</label>
+						<p class="fw-medium"><?=$newsletterRow->name ?? 'N/A'?></p>
 						<img src="<?=$thumbnailSrc?>" alt="Newsletter thumbnail" class="img-fluid rounded border">
-						<?php if (!empty($newsletterRow->file_url)): ?>
-							<div class="mt-3">
-								<a class="btn btn-sm btn-outline-primary" href="<?=$fileSrc?>" target="_blank" rel="noopener">Download File</a>
-							</div>
-						<?php endif; ?>
-					</div>
-					<div class="col-md-8">
+						<label class="form-label">Summary</label>
+						<p class="fw-medium"><?=$newsletterRow->summary ?? 'N/A'?></p>
+						<label class="form-label">Description</label>
+						<p class="fw-medium"><?=$newsletterRow->description ?? 'N/A'?></p>
+						<label class="form-label">File</label>
+						<p class="fw-medium">
+							<?php if (!empty($newsletterRow->file_url) && check_file_exists($newsletterRow->file_url)): ?>
+								<a href="<?=base_url($newsletterRow->file_url)?>" target="_blank" rel="noopener"><?=basename($newsletterRow->file_url)?></a>
+							<?php else: ?>
+								No Attached File
+							<?php endif; ?>
+						</p>
 						<dl class="row mb-0">
-							<dt class="col-sm-4 text-secondary">Title</dt>
-							<dd class="col-sm-8 fw-medium"><?=$newsletterRow->name ?? 'N/A'?></dd>
-
-							<dt class="col-sm-4 text-secondary">Description</dt>
-							<dd class="col-sm-8"><?=$newsletterRow->description ?? 'No description provided.'?></dd>
-
 							<dt class="col-sm-4 text-secondary">Status</dt>
 							<dd class="col-sm-8">
 								<?php

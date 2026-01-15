@@ -116,28 +116,4 @@ $modulePath = isset($moduleMenu) && !empty($moduleMenu->path) ? $moduleMenu->pat
 	$(function () {
 		loadDatatable('agm-minutes-datatable', <?=json_encode($pageTitle)?>);
 	});
-
-	addAGMMinutesModal = function() {
-		showModal(base_url + 'add-agm-minutes-modal', function (response) {
-			// Callback function after modal is shown
-			loadDescription('add_edit_description');
-		});
-	};
-
-	viewAgmMinutesModal = function(agmMinutesId) {
-		showModal(base_url + 'view-agm-minutes-modal/' + agmMinutesId, function () {});
-	};
-
-	editAgmMinutesModal = function(agmMinutesId) {
-		showModal(base_url + 'edit-agm-minutes-modal/' + agmMinutesId, function (response) {
-			// Callback function after modal is shown
-			loadDescription('add_edit_description');
-		});
-	};
-
-	removeAgmMinutesModal = function(agmMinutesId) {
-		showModal(base_url + 'remove-agm-minutes-modal/' + agmMinutesId, function (response) {
-			// Callback function after modal is shown
-		});
-	};
 </script>

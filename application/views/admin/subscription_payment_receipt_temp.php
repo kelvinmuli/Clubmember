@@ -107,14 +107,14 @@
                   </tr>
                   <tr>
                     <td bgcolor="#ffffff" align="center" style="padding: 0;"><!--[if (gte mso 9)|(IE)]><table align="center" border="0" cellspacing="0" cellpadding="0" width="350">
-<tr>
-<td align="center" valign="top" width="350">
-<![endif]-->
+											<tr>
+											<td align="center" valign="top" width="350">
+											<![endif]-->
                       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 500px;border-bottom: 1px solid #e4e4e4;">
                         <tbody>
                           <tr>
                             <td bgcolor="#ffffff" align="left" style="padding: 20px 0 0 0; color: #666666; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400;-webkit-font-smoothing:antialiased;"><br />
-                                                <p class="headingMobile" style="margin: 0;color: #171717;font-size: 16px;font-weight: 200;line-height: 130%;margin-bottom:5px;">Hello <?=$full_legal_name?>,</p>
+                              <p class="headingMobile" style="margin: 0;color: #171717;font-size: 16px;font-weight: 200;line-height: 130%;margin-bottom:5px;">Hello <?=$userRow->full_legal_name?>,</p>
                             </td>
                           </tr>
 
@@ -126,20 +126,19 @@
                       <td bgcolor="#ffffff" align="left" style="padding:0; color: #666666; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400;-webkit-font-smoothing:antialiased;">
 
                           <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">
-                            A new <?=$membershipTypeName?> Subscription has been added to your account for the <?=$club_name?>.
+                            Thank you for your payment. We are pleased to confirm that <?=$customerRow->full_legal_name?> has successfully received your <?=$membershipFeeTypeRow->name?> subscription payment. Below are the details of your transaction:
                           </p><br>
 
                           
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Amount Due:</b>   <?=$amount?></p>
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Due Date:</b> <?=$due_at ?? date('d M Y', strtotime($due_at)); ?></p>
-                          <br>
-													<p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Notes:</b> <?=$notes ?? ''?></p>
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Receipt ID:</b> #<?=$paymentHistoryRow->universal_id?></p>
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Payment Date:</b> <?=$paymentHistoryRow->created_at ?? date('d M Y', strtotime($paymentHistoryRow->created_at)); ?></p>
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Transaction Code:</b> <?=$paymentHistoryRow->transaction_code ?? ''?></p><br>
+                          
+
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Amount Paid:</b>   <?=$paymentHistoryRow->bill_amount?></p>
+                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Total :</b>   <?=$paymentHistoryRow->paid_amount?></p>
+													
 													<br>
-                          <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">To complete your payment:<br>
-														Visit the url: <a href="https://nmra.clubmember.app/v1/login/1705386384290" target="_blank">https://nmra.clubmember.app/v1/login/1705386384290</a><br>
-														Login to your ClubMember.app account with the password you just set up.<br>
-														Head to the Subscriptions section.<br>
-														Follow the prompts to pay securely.<br><br>
 
 														Your support helps keep the association running smoothly, thank you!
                           </p><br>

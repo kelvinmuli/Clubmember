@@ -238,12 +238,13 @@ class NewsletterController extends CI_Controller {
 				->get()
 				->result();
 
+			$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
 			foreach ($userEmails as $user) {
 				$data['userRow'] = $user;
 				$data['newsletterRow'] = $newsletterRow;
-				$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+				$data['customerRow'] = $customerRow;
 				$htmlContent = $this->load->view('admin/newsletter_email_temp', $data, true);
-				$this->common->sendMail($user->email, $newsletterRow->name, $htmlContent);
+				$this->common->sendMail($user->email, $customerRow->full_legal_name.', ' .$newsletterRow->name, $htmlContent);
 			}
 
 			$this->session->set_flashdata('success', 'Newsletter sent successfully to all active users.');

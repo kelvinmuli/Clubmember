@@ -112,6 +112,13 @@
 										<?php endif; ?>
 									</div>
 								</div>
+								<div class="col-auto ms-auto">
+									<div class="btn-list">
+										<a class="btn btn-primary" href="<?= base_url('subscription/1732371146921') ?>">
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All Subscriptions
+										</a>
+									</div>
+								</div>
 							</div>
 							<div class="card-body border-bottom py-3">
 								<table id="subscription-datatable" class="table card-table table-vcenter text-wrap datatable" style="width: 100%;">
@@ -155,7 +162,7 @@
 																<div class="dropdown-menu dropdown-menu-end">
 																	<a class="dropdown-item" onclick="viewSubscriptionModal('<?=$data->subscription_id?>', '<?=$data->payment_history_id?>')">View Subscription</a>
 																	<?php if ($data->active == 0): ?>
-																		<a href="#" class="dropdown-item" onclick="approveSubscriptionModal('<?=$data->subscription_id?>', '<?=$data->payment_history_id?>')">
+																		<a class="dropdown-item" onclick="approveSubscriptionModal('<?=$data->subscription_id?>', '<?=$data->payment_history_id?>')">
 																			<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg> Approve/View
 																		</a>
 																	<?php endif; if ($data->payment_status_id == '1732371146921'): ?>
@@ -178,7 +185,7 @@
 				</div>
 			<?php endif; ?>
 
-				<div class="col-12">
+				<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 					<div class="row row-cards">
 						<?php if (in_array($user_type_id, array(GlobalModel::ADMIN_TYPE, GlobalModel::CLUB_ADMIN_TYPE))): ?>
 							<div class="col-sm-6 col-lg-4">
@@ -241,9 +248,7 @@
 									$statusLabel = isset($statusCard['label']) ? $statusCard['label'] : 'Status';
 									$statusCount = isset($statusCard['count']) ? (int) $statusCard['count'] : 0;
 									$statusTextClass = !empty($statusCard['text_class']) ? $statusCard['text_class'] : 'text-primary';
-									$statusDescription = isset($statusCard['description']) && $statusCard['description'] !== ''
-										? $statusCard['description']
-										: 'Incidents labeled ' . $statusLabel;
+									$statusDescription = isset($statusCard['description']) && $statusCard['description'] !== '' ? $statusCard['description'] : 'Incidents labeled ' . $statusLabel;
 								?>
 								<div class="col-sm-6 col-lg-3">
 									<div class="card card-sm">
@@ -291,7 +296,14 @@
 							<div class="col-sm-4 col-lg-4">
 								<div class="card h-100">
 									<div class="card-header">
-										<h3 class="card-title mb-0">Security Incidents by Status</h3>
+										<h3 class="card-title mb-0">Security Incidents by Status</h3>		
+										<div class="col-auto ms-auto">
+											<div class="btn-list">
+												<a class="btn btn-primary" href="<?= base_url('security-incident') ?>">
+													<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All
+												</a>
+											</div>
+										</div>
 									</div>
 									<div class="card-body">
 										<div id="security-incident-status-chart" style="min-height: 320px;"></div>
@@ -384,13 +396,20 @@
 				
 
 			<?php if (!empty($activeProjects)): ?>
-				<div class="col-12">
+				<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 					<div class="card">
 						<div class="card-header">
 							<div class="row w-full">
 								<div class="col">
 									<h3 class="card-title mb-0">Active Projects</h3>
 									<p class="text-secondary m-0">Showing latest active projects</p>
+								</div>
+							</div>
+							<div class="col-auto ms-auto">
+								<div class="btn-list">
+									<a class="btn btn-primary" href="<?=base_url('project') ?>">
+										<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All Projects
+									</a>
 								</div>
 							</div>
 						</div>
@@ -414,7 +433,7 @@
 													<div class="mt-2">
 														<span class="badge <?= (isset($project->active) && (int)$project->active === 1) ? 'bg-green-lt' : 'bg-red-lt' ?>"><?= (isset($project->active) && (int)$project->active === 1) ? 'Active' : 'Inactive' ?></span>
 														<small class="text-muted ms-2">Created <?= !empty($project->created_at) ? date('d M Y', strtotime($project->created_at)) : 'N/A' ?></small>
-														<a href="javascript:void(0);" class="btn float-end" onclick="viewProjectModal('<?= $project->project_id ?>')">View</a>
+														<a class="btn float-end" onclick="viewProjectModal('<?= $project->project_id ?>')">View</a>
 													</div>
 												</div>
 											</div>
@@ -428,13 +447,20 @@
 			<?php endif; ?>
 
 			<?php if (!empty($activePetitions)): ?>
-				<div class="col-12">
+				<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 					<div class="card">
 						<div class="card-header">
 							<div class="row w-full">
 								<div class="col">
 									<h3 class="card-title mb-0">Recent Petitions</h3>
 									<p class="text-secondary m-0">Latest active petitions</p>
+								</div>
+							</div>
+							<div class="col-auto ms-auto">
+								<div class="btn-list">
+									<a class="btn btn-primary" href="<?=base_url('petition-setup') ?>">
+										<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All Security Incident
+									</a>
 								</div>
 							</div>
 						</div>
@@ -456,15 +482,15 @@
 														<span class="dropdown">
 															<button class="btn dropdown-toggle float-end" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
 															<div class="dropdown-menu dropdown-menu-end">
-																<a href="javascript:void(0);" class="dropdown-item" onclick="viewPetition('<?=$petition->petition_setup_id?>')">
+																<a class="dropdown-item" onclick="viewPetition('<?=$petition->petition_setup_id?>')">
 																	<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View Petition
 																</a>
 																<?php if (in_array($user_type_id, array(GlobalModel::ADMIN_TYPE, GlobalModel::CLUB_ADMIN_TYPE))): ?>
-																	<a href="javascript:void(0);" class="dropdown-item" onclick="viewPetitionSignatures('<?=$petition->petition_setup_id?>')">
+																	<a class="dropdown-item" onclick="viewPetitionSignatures('<?=$petition->petition_setup_id?>')">
 																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View Signatures
 																	</a>
 																<?php endif; ?>
-																<a href="javascript:void(0);" class="dropdown-item" onclick="addPetitionSignatureModal('<?=$petition->petition_setup_id?>')">
+																<a class="dropdown-item" onclick="addPetitionSignatureModal('<?=$petition->petition_setup_id?>')">
 																	<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> Add Signature
 																</a>
 															</div>
@@ -482,13 +508,20 @@
 			<?php endif; ?>
 
 			<?php if (!empty($noticeBoardItems)): ?>
-				<div class="col-12">
+				<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 					<div class="card">
 						<div class="card-header">
 							<div class="row w-full">
 								<div class="col">
 									<h3 class="card-title mb-0">Notice Board</h3>
 									<p class="text-secondary m-0">Latest notices</p>
+								</div>
+							</div>
+							<div class="col-auto ms-auto">
+								<div class="btn-list">
+									<a class="btn btn-primary" href="<?=base_url('notice-board') ?>">
+										<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All Notice Board
+									</a>
 								</div>
 							</div>
 						</div>
@@ -511,7 +544,7 @@
 													<div class="text-muted small only-so-big"><?=$notice->description ?? ''?></div>
 													<div class="mt-2">
 														<small class="text-muted">Posted <?= !empty($notice->created_at) ? date('d M Y', strtotime($notice->created_at)) : 'N/A' ?></small>
-														<a href="javascript:void(0);" class="btn float-end" onclick="viewNoticeBoardModal('<?= $notice->notice_board_id ?? $notice->id ?? '' ?>')">View</a>
+														<a class="btn float-end" onclick="viewNoticeBoardModal('<?= $notice->notice_board_id ?? $notice->id ?? '' ?>')">View</a>
 													</div>
 												</div>
 											</div>
@@ -522,9 +555,7 @@
 						</div>
 					</div>
 				</div>
-			<?php endif; ?>
-
-				
+			<?php endif; ?>	
 			
 			<div class="col-12" hidden>
 				<div class="card">
@@ -539,6 +570,13 @@
 										<h3 class="card-title mb-0">Club</h3>
 										<p class="text-secondary m-0">Listing</p>
 									<?php endif; ?>
+								</div>
+							</div>
+							<div class="col-auto ms-auto">
+								<div class="btn-list">
+									<a class="btn btn-primary" href="<?=base_url('member/1755813965588/1') ?>">
+										<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All Customers
+									</a>
 								</div>
 							</div>
 						</div>
@@ -580,7 +618,7 @@
 			</div>
 
 			<?php $c = 0; if (isset($membershipTypeData)): foreach ($membershipTypeData as $membership): if (in_array($user_type_id, array(GlobalModel::ADMIN_TYPE))): ?>
-				<div class="col-12">
+				<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 					<div class="card">
 						<div class="card-header">
 							<div class="row w-full">
@@ -592,6 +630,13 @@
 										<h3 class="card-title mb-0">Pending Member - <?=$membership->name?></h3>
 										<p class="text-secondary m-0">Listing</p>
 									<?php endif; ?>
+								</div>
+							</div>
+							<div class="col-auto ms-auto">
+								<div class="btn-list">
+									<a class="btn btn-primary" href="<?=base_url('member/'.$membership->membership_type_id.'/1') ?>">
+										<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All <?=$membership->name?>
+									</a>
 								</div>
 							</div>
 						</div>
@@ -663,7 +708,7 @@
 				</div>
 				
 			<?php endif; endforeach; endif; if (!empty(get_user_right($user_type_id, '17743087640', 'view', 1))): ?>
-				<div class="col-12">
+				<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 					<div class="card">
 						<div class="card-table">
 							<div class="card-header">
@@ -671,6 +716,13 @@
 									<div class="col">
 										<h3 class="card-title mb-0">Newly Added AGM Minutes</h3>
 										<p class="text-secondary m-0">Listing Newly Added AGM Minutes.</p>
+									</div>
+								</div>
+								<div class="col-auto ms-auto">
+									<div class="btn-list">
+										<a class="btn btn-primary" href="<?=base_url('agm-minutes')?>">
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All AGM Minutes
+										</a>
 									</div>
 								</div>
 							</div>
@@ -685,7 +737,7 @@
 											<th>Document</th>
 											<th>Status</th>
 											<th>Created At</th>
-											<?php if ($editUserRight || $removeUserRight): ?>
+											<?php if ($inputUserRight || $editUserRight || $removeUserRight): ?>
 												<th>Actions</th>
 											<?php endif; ?>
 										</tr>
@@ -705,23 +757,27 @@
 												</td>
 												<td><?=($minute->active) ? 'Active' : 'Inactive'?></td>
 												<td><?=date('d M Y', strtotime($minute->created_at))?></td>
-												<?php if ($editUserRight || $removeUserRight): ?>
+												<?php if ($inputUserRight || $editUserRight || $removeUserRight): ?>
 													<td>
-														<span class="dropdown">
-															<button class="btn dropdown-toggle" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
-															<div class="dropdown-menu dropdown-menu-end">
-																<a href="#" class="dropdown-item" onclick="viewAgmMinutesModal('<?=$minute->agm_minutes_id?>')">
-																	<!-- Download SVG icon from http://tabler.io/icons/icon/view -->
-																	<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View
-																</a>
-																<?php if ($editUserRight): ?>
-																	<a href="javascript:void(0);" class="dropdown-item" onclick="editAgmMinutesModal('<?=$minute->agm_minutes_id?>')">
-																		<!-- Download SVG icon from http://tabler.io/icons/icon/edit -->
-																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 7h-3a2 2 0 0 0 -2 2v3m0 4v3a2 2 0 0 0 2 2h3m4 -12l6.5 6.5a2.121 2.121 0 0 1 0 3l-6.5 6.5a2.121 2.121 0 0 1 -3 0l-6.5 -6.5a2.121 2.121 0 0 1 0 -3l6.5 -6.5a2.121 2.121 0 0 1 3 0z" /></svg> Edit
+														<?php if ($user_type_id === GlobalModel::MEMBER_TYPE): ?>
+															<button class="btn btn-pill" onclick="viewAgmMinutesModal('<?=$minute->agm_minutes_id?>')">
+																<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View
+															</button>
+														<?php else: ?>
+															<span class="dropdown">
+																<button class="btn dropdown-toggle" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
+																<div class="dropdown-menu dropdown-menu-end">
+																	<a class="dropdown-item" onclick="viewAgmMinutesModal('<?=$minute->agm_minutes_id?>')">
+																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View
 																	</a>
-																<?php endif; ?>
-															</div>
-														</span>
+																	<?php if ($editUserRight): ?>
+																		<a class="dropdown-item" onclick="editAgmMinutesModal('<?=$minute->agm_minutes_id?>')">
+																			<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 7h-3a2 2 0 0 0 -2 2v3m0 4v3a2 2 0 0 0 2 2h3m4 -12l6.5 6.5a2.121 2.121 0 0 1 0 3l-6.5 6.5a2.121 2.121 0 0 1 -3 0l-6.5 -6.5a2.121 2.121 0 0 1 0 -3l6.5 -6.5a2.121 2.121 0 0 1 3 0z" /></svg> Edit
+																		</a>
+																	<?php endif; ?>
+																</div>
+															</span>
+														<?php endif; ?>
 													</td>
 												<?php endif; ?>
 											</tr>
@@ -733,7 +789,7 @@
 					</div>
 				</div>
 			<?php endif; if (!empty(get_user_right($user_type_id, '17848086429', 'view', 1))): ?>
-				<div class="col-12">
+				<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 					<div class="card">
 						<div class="card-table">
 							<div class="card-header">
@@ -741,6 +797,13 @@
 									<div class="col">
 										<h3 class="card-title mb-0">Newly Added Newsletter</h3>
 										<p class="text-secondary m-0">Listing all Newly Added Newsletter.</p>
+									</div>
+								</div>
+								<div class="col-auto ms-auto">
+									<div class="btn-list">
+										<a class="btn btn-primary" href="<?=base_url('newsletter')?>">
+											<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All Newsletter
+										</a>
 									</div>
 								</div>
 							</div>
@@ -756,6 +819,9 @@
 											<th>Document</th>
 											<th>Status</th>
 											<th>Created At</th>
+											<?php if ($inputUserRight || $editUserRight || $removeUserRight): ?>
+												<th>Actions</th>
+											<?php endif; ?>
 										</tr>
 									</thead>
 									<tbody class="table-tbody">
@@ -781,6 +847,37 @@
 												</td>
 												<td><span class="badge <?=($newsletter->active === 1) ? 'bg-green-lt' : (($newsletter->active === 0) ? 'bg-red-lt' : 'bg-yellow-lt')?>"><?=get_table('m_active', 'num', $newsletter->active, 'name')?></span></td>
 												<td><?=!empty($newsletter->created_at) ? date('d M Y', strtotime($newsletter->created_at)) : 'N/A'?></td>
+												<td>
+													<?php if ($inputUserRight || $editUserRight || $removeUserRight): ?>
+														<?php if ($user_type_id === GlobalModel::MEMBER_TYPE): ?>
+															<a class="btn btn-pill" onclick="viewNewsletterModal('<?=$newsletter->newsletter_id?>')">
+																<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View
+															</a>
+														<?php else: ?>
+															<span class="dropdown">
+																<button class="btn dropdown-toggle" data-bs-boundary="viewport" data-bs-toggle="dropdown">Actions</button>
+																<div class="dropdown-menu dropdown-menu-end">
+																	<a class="dropdown-item" onclick="viewNewsletterModal('<?=$newsletter->newsletter_id?>')">
+																		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View
+																	</a>
+																	<?php if ($editUserRight): ?>
+																		<a class="dropdown-item" onclick="editNewsletterModal('<?=$newsletter->newsletter_id?>')">
+																			<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg> Edit
+																		</a>
+																	<?php endif; if ($removeUserRight): ?>
+																		<a class="dropdown-item" onclick="removeNewsletterModal('<?=$newsletter->newsletter_id?>')">
+																			<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="4" y1="7" x2="20" y2="7" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg> Delete
+																		</a>
+																	<?php endif; if (in_array($user_type_id, [GlobalModel::ADMIN_TYPE, GlobalModel::CLUB_ADMIN_TYPE])): ?>
+																		<a href="<?=base_url('send-newsletter/'.$newsletter->newsletter_id)?>" class="dropdown-item">
+																			<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4h16v16H4z" /><path d="M4 4l8 8m0 0l8 -8m-8 8v8" /></svg> Send Newsletter
+																		</a>
+																	<?php endif; ?>
+																</div>
+															</span>
+														<?php endif; ?>
+													<?php endif; ?>
+												</td>
 											</tr>
 										<?php endforeach; endif; ?>
 									</tbody>
@@ -837,12 +934,12 @@
 	<script>
 		$(document).ready(function() {
 			overviewCard();
-			loadDataTable('subscription-datatable');
-			loadDataTable('customer-datatable');
-			loadDataTable('agm-minutes-datatable');
-			loadDataTable('newsletter-datatable');
+			// loadDataTable('subscription-datatable');
+			// loadDataTable('customer-datatable');
+			// loadDataTable('agm-minutes-datatable');
+			// loadDataTable('newsletter-datatable');
 			<?php if (isset($membershipTypeData)): foreach ($membershipTypeData as $membership): ?>
-				loadDataTable('user-<?=$membership->membership_type_id?>-datatable');
+				// loadDataTable('user-<?=$membership->membership_type_id?>-datatable');
 			<?php endforeach; endif; ?>
 		});
 
@@ -911,7 +1008,6 @@
 			buildKpiAreaChart('chart-active-users', paidSubscriptionsMonthly, '#f76707');
 
 			const palette = ['#206bc4', '#f76707', '#4263eb', '#12b886', '#d6336c', '#7048e8', '#f59f00', '#0ca678'];
-
 			const typeChartElement = document.getElementById('security-incident-type-chart');
 			if (typeChartElement) {
 				const typeChart = new ApexCharts(typeChartElement, {

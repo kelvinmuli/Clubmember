@@ -6,6 +6,9 @@
 		<!--  BEGIN FOOTER  -->
 		<footer class="footer footer-transparent d-print-none">
 			<div class="container-fluid">
+				<?php if ($user_type_id == GlobalModel::MEMBER_TYPE && !$isSubscriptionPaid) { ?>
+					<p class="text-center">Welcome to your NMRA Member's Dashboard where you will have access to a wealth of information including neighbourhood security incident tracker, projects been worked on by the association, including live updates and progress, newsletters, petitions, fundraising for projects and more. Simply pay your annual subscription by clicking on the pay button and paying via mpesa and this will all be unlocked.</p>
+				<?php } ?>
 				<div class="row text-center align-items-center flex-row-reverse">
 					<div class="col-lg-auto ms-lg-auto">
 						<ul class="list-inline list-inline-dots mb-0">
@@ -80,7 +83,7 @@
 				});
 			}
 
-			function editUserModal(user_id, membership_type_id='', customer_db_setting_id='', header='all-user') {
+			function editUserModal(user_id, membership_type_id = '', customer_db_setting_id = '', header = 'all-user') {
 				$.ajax({
 					url: base_url + "edit-user-modal/" + user_id + "/" + membership_type_id + "/" + customer_db_setting_id + "/" + header,
 					success: function(response) {
@@ -100,7 +103,7 @@
 				});
 			}
 
-			function deleteUserModal(user_id, customer_db_setting_id, header='all-user') {
+			function deleteUserModal(user_id, customer_db_setting_id, header = 'all-user') {
 				$.ajax({
 					url: base_url + "delete-user-modal/" + user_id + "/" + customer_db_setting_id + "/" + header,
 					success: function(response) {
@@ -120,8 +123,20 @@
 				});
 			}
 
-			viewProjectModal = function (projectId) {
-				showModal(base_url + 'view-project-modal/' + projectId, function () {});
+			viewProjectModal = function(projectId) {
+				showModal(base_url + 'view-project-modal/' + projectId, function() {});
+			};
+
+			addProjectUpdateModal = function(projectId) {
+				showModal(base_url + 'add-project-update-modal/' + projectId, function() {});
+			};
+
+			editProjectUpdateModal = function(projectUpdateId) {
+				showModal(base_url + 'edit-project-update-modal/' + projectUpdateId, function() {});
+			};
+
+			deleteProjectUpdateModal = function(projectUpdateId) {
+				showModal(base_url + 'delete-project-update-modal/' + projectUpdateId, function() {});
 			};
 
 			function addSubscriptionModal(payment_status_id = '1732351802222') {
@@ -143,15 +158,15 @@
 				});
 			}
 
-			viewPetition = function (petitionSetupId) {
-				showModal(base_url + 'view-petition-modal/' + petitionSetupId, function () {});
+			viewPetition = function(petitionSetupId) {
+				showModal(base_url + 'view-petition-modal/' + petitionSetupId, function() {});
 			};
 
-			addPetitionSignatureModal = function (petitionSetupId) {
+			addPetitionSignatureModal = function(petitionSetupId) {
 				showModal(base_url + 'add-petition-signature-modal/' + petitionSetupId, window.initPetitionSignatureModal);
 			};
 
-			viewPetitionSignatures = function (petitionSetupId) {
+			viewPetitionSignatures = function(petitionSetupId) {
 				window.location.href = base_url + 'petition-signatures/' + petitionSetupId;
 			};
 
@@ -159,6 +174,50 @@
 				showModal(base_url + 'view-notice-board-modal' + (noticeId ? '/' + noticeId : ''), function() {
 					// optional init after modal shown
 				});
+			};
+
+			addAGMMinutesModal = function() {
+				showModal(base_url + 'add-agm-minutes-modal', function (response) {
+					loadDescription('add_edit_description');
+				});
+			};
+
+			viewAgmMinutesModal = function(agmMinutesId) {
+				showModal(base_url + 'view-agm-minutes-modal/' + agmMinutesId, function () {});
+			};
+
+			editAgmMinutesModal = function(agmMinutesId) {
+				showModal(base_url + 'edit-agm-minutes-modal/' + agmMinutesId, function (response) {
+					// Callback function after modal is shown
+					loadDescription('add_edit_description');
+				});
+			};
+
+			removeAgmMinutesModal = function(agmMinutesId) {
+				showModal(base_url + 'remove-agm-minutes-modal/' + agmMinutesId, function (response) {
+					// Callback function after modal is shown
+				});
+			};
+
+			addNewsletterModal = function() {
+				showModal(base_url + 'add-newsletter-modal', function () {
+					loadDescription('add_edit_description');
+				});
+			};
+
+			viewNewsletterModal = function(newsletterId) {
+				showModal(base_url + 'view-newsletter-modal/' + newsletterId, function () {
+				});
+			};
+
+			editNewsletterModal = function(newsletterId) {
+				showModal(base_url + 'edit-newsletter-modal/' + newsletterId, function () {
+					loadDescription('add_edit_description');
+				});
+			};
+
+			removeNewsletterModal = function(newsletterId) {
+				showModal(base_url + 'remove-newsletter-modal/' + newsletterId, function () {});
 			};
 
 			function paymentInfoModal(user_id, payment_history_id = '') {
@@ -171,7 +230,7 @@
 				});
 			}
 
-			function payModal(user_id, payment_history_id = '', phone_no = '', $data='') {
+			function payModal(user_id, payment_history_id = '', phone_no = '', $data = '') {
 				$.ajax({
 					url: base_url + "pay-modal/" + user_id + "/" + payment_history_id + "/" + phone_no + '/' + $data,
 					success: function(response) {
@@ -180,6 +239,105 @@
 					}
 				});
 			}
+
+			function payViaMpesaModal(user_id, payment_history_id = '', phone_no = '', amount = '', universal_id = '') {
+				var btn = document.getElementById('pay_via_mpesa_button');
+				var originalHtml = btn ? btn.innerHTML : null;
+				if (btn) {
+					btn.disabled = true;
+					btn.innerHTML = 'Processing...';
+				}
+
+				var modalUrl = base_url + "pay-via-mpesa-modal/" + user_id + "/" + payment_history_id + "/" + encodeURIComponent(phone_no) + (amount ? "/" + encodeURIComponent(amount) : "") + (universal_id ? "/" + encodeURIComponent(universal_id) : "");
+				$.ajax({
+					url: modalUrl,
+					success: function(response) {
+						document.getElementById('modal-view-add-edit-remove-print').innerHTML = response;
+						$('#modal-view-add-edit-remove-print').modal('show');
+
+						var requestUrl = base_url + "pay-via-mpesa-request/" + user_id + "/" + payment_history_id + "/" + encodeURIComponent(phone_no) + (amount ? "/" + encodeURIComponent(amount) : "");
+						$.ajax({
+							url: requestUrl,
+							dataType: 'json',
+							complete: function() {
+								var b = document.getElementById('pay_via_mpesa_button');
+								if (b) {
+									b.disabled = false;
+									if (originalHtml !== null) b.innerHTML = originalHtml;
+								}
+							},
+							success: function(res) {
+								if (res && res.checkoutRequestId) {
+									var idEl = document.getElementById('mpesa-merchant-request-id');
+									if (idEl) idEl.textContent = 'Request sent to ' + phone_no; //res.checkoutRequestId;
+								}
+								var statusEl = document.getElementById('mpesa-request-status');
+								if (statusEl) {
+									var msg = (res && res.info) ? res.info : 'Request sent.';
+									statusEl.textContent = statusEl.textContent.replace('Please wait...', msg);
+								}
+
+								//Auto refresh payment status every 10 seconds
+								setInterval(function() {
+									$.ajax({
+										url: base_url + "check-mpesa-payment-status/" + res.checkoutRequestId + "/" + user_id + "/" + payment_history_id + "/" + encodeURIComponent(phone_no) + (amount ? "/" + encodeURIComponent(amount) : ""),
+										success: function(statusRes) {
+											console.log('Mpesa payment status:', statusRes);
+											if (statusRes == 'success') {
+												var idEl = document.getElementById('mpesa-merchant-request-id');
+												if (idEl)
+													idEl.textContent = 'Paid ' + statusRes;
+
+												var statusEl = document.getElementById('mpesa-request-status');
+												if (statusEl)
+													statusEl.textContent = 'Paid ' + statusRes;
+
+												//redirect to subscription page after 3 seconds
+												window.location.href = base_url + 'subscription/1732371146921';
+											}
+										}
+									});
+								}, 10000);
+
+								// var paymentStatusInterval = setInterval(function() {
+								// 	$.ajax({
+								// 		url: base_url + "check-mpesa-payment-status/" + res.checkoutRequestId + "/" + user_id + "/" + payment_history_id + "/" + encodeURIComponent(phone_no) + (amount ? "/" + encodeURIComponent(amount) : ""),
+								// 		success: function(statusRes) {
+								// 			if (statusRes == 'success') {
+								// 				var idEl = document.getElementById('mpesa-merchant-request-id');
+								// 				if (idEl) 
+								// 					idEl.textContent = 'Paid ' + statusRes;
+
+								// 				var statusEl = document.getElementById('mpesa-request-status');
+								// 				if (statusEl)
+								// 					statusEl.textContent = 'Paid ' + statusRes;
+
+								// 				//redirect to subscription page after 3 seconds
+								// 				window.location.href = base_url + 'subscription/1732371146921';
+								// 				clearInterval(paymentStatusInterval);
+								// 			}
+								// 		}
+								// 	});
+								// }, 10000);
+							},
+							error: function() {
+								var statusEl = document.getElementById('mpesa-request-status');
+								if (statusEl) {
+									statusEl.textContent = 'Failed to send M-PESA request. Please try again.';
+								}
+							}
+						});
+					},
+					error: function() {
+						if (btn) {
+							btn.disabled = false;
+							if (originalHtml !== null) btn.innerHTML = originalHtml;
+						}
+					}
+				});
+			}
+
+
 
 			function printReceipt(title, contentId) {
 				var content = document.getElementById(contentId);
@@ -445,10 +603,10 @@
 				if (payment_history_id) {
 					modalUrl += '/' + payment_history_id;
 				}
-				showModal(modalUrl, function () {});
+				showModal(modalUrl, function() {});
 			};
 
-			paymentReceiptModal = function (userId, paymentHistoryId) {
+			paymentReceiptModal = function(userId, paymentHistoryId) {
 				$.ajax({
 					url: base_url + 'payment-receipt-modal/' + userId + '/' + paymentHistoryId,
 					success: function(response) {

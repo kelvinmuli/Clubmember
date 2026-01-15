@@ -22,11 +22,11 @@
 				<input type="hidden" name="customer_id" value="<?=$customerDBSettingRow->customer_id?>">
 				<input type="hidden" name="module_id" value="17602075390">
 				<input type="hidden" name="currency_id" value="1543602048">
-				<input type="hidden" name="payment_history_id" value="<?=generate_uuid()?>">
+				<input type="hidden" id="payment_history_id" name="payment_history_id" value="<?=generate_uuid()?>">
 				<?php if ($user_type_id == GlobalModel::MEMBER_TYPE): ?>
                 	<input type="hidden" name="user_id" value="<?=$user_id?>">
 				<?php else: ?>
-               		<select class="form-select mb-3" id="user_id" name="user_id" required>
+               		<select class="form-select mb-3" id="user_id" name="user_id">
 						<option value="" disabled selected>Select Member</option>
 						<?php if (isset($memberData)): foreach ($memberData as $member): ?>
 							<option value="<?=$member->user_id ?? ''?>"><?=$member->full_legal_name ?? ''?> (<?=$member->email ?? ''?>)</option>
@@ -36,7 +36,7 @@
 
                 <div class="row g-3 mt-1">
                     <div class="col-md-12">
-                        <label class="form-label" for="fundraising_bill_amount">Amount</label>
+                        <label class="form-label" for="fundraising_bill_amount">Amounts</label>
                         <input class="form-control" id="fundraising_bill_amount" name="bill_amount" type="number" step="0.01" min="0" placeholder="<?=number_format($billAmount, 2, '.', '')?>">
                     </div>
                 </div>
@@ -67,7 +67,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 				<?php if (in_array($user_type_id, array(GlobalModel::MEMBER_TYPE))): ?>
-                	<button type="submit" class="btn btn-primary" onclick="payModal('<?=$userRow->user_id?>', (document.getElementById('payment_history_id').value), '<?=$userRow->phone_number?>', '<?=$fundraisingId?>-' + (document.getElementById('fundraising_bill_amount').value) + '-17602075390')">Make payment now</button>
+                	<button type="submit" class="btn btn-primary" onclick="payModal('<?=$userRow->user_id?>', (document.getElementById('payment_history_id').value), '<?=$userRow->phone_number?>', '<?=$fundraisingId?>-' + (document.getElementById('fundraising_bill_amount').value) + '-17602075390')" hidden>Make payment now</button>
+					<button id="pay_via_mpesa_button" type="button" class="btn btn-primary" onclick="payViaMpesaModal('<?=$user_id?>', (document.getElementById('payment_history_id').value), '<?=$userRow->phone_number?>', document.getElementById('fundraising_bill_amount').value, '<?=$fundraisingId?>')">Pay Via M-Pesa</button>
 				<?php else: ?>
                		<button type="submit" class="btn btn-primary">Add Payment</button>
 				<?php endif; ?>

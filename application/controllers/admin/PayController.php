@@ -93,11 +93,135 @@ class PayController extends CI_Controller {
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							<button type="submit" class="btn btn-primary" onclick="payModal(\''.$user_id.'\', \''.$payment_history_id.'\', document.getElementById(\'phone_no\').value)">Make payment now</button>
+							<button id="pay_via_mpesa_button" type="button" class="btn btn-primary" onclick="payViaMpesaModal(\''.$user_id.'\', \''.$payment_history_id.'\', document.getElementById(\'phone_no\').value, document.getElementById(\'amount\').value)">Pay Via M-Pesa</button>
+							<button type="submit" class="btn btn-primary" onclick="payModal(\''.$user_id.'\', \''.$payment_history_id.'\', document.getElementById(\'phone_no\').value)" hidden>Pay Via Ipay</button>
 						</div>
 					</div>
 				</div>';
 		print_r($modal);
+	}
+
+	public function payViaMpesaModal($user_id, $payment_history_id='', $phone_no = '', $amount='1', $universal_id='')
+	{
+		$this->common->checkSession(array('dialog'=>1));
+		$session_data = $this->common->loadSession();
+
+		$customer_db_setting_id = $session_data['customer_db_setting_id'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		if (empty($paymentHistoryRow)) {
+			$this->db->insert($customerDBSettingRow->database_name.'.payment_history', array(
+				'payment_history_id' => $payment_history_id,
+				'user_id' => $user_id,
+				'customer_id' => $customerDBSettingRow->customer_id,
+				'universal_id' => $universal_id,
+				'module_id' => '17602075390',
+				'currency_id' => '1543602048',
+				'bill_amount' => $amount,
+				'payment_method_id' => '1700743964240',
+				'payment_status_id' => '1732351802222',
+			));
+			$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		}
+		
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+		$phoneToUse = !empty($phone_no) ? $phone_no : (empty($userRow->phone_number) ? $userRow->mobile_number : $userRow->phone_number);
+		$amountToUse = !empty($amount) ? $amount : ($paymentHistoryRow->bill_amount ?? '1');
+
+		$modal='<div class="modal-dialog modal-lg" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Pay Via M-PESA - <span id="mpesa-merchant-request-id">...</span></h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+
+						<div class="modal-body">
+							<section class="panel-form-wrapper">
+								<div class="panel-sing-in">
+									<div class="row">
+										<div class="clear">
+											<label id="mpesa-request-status">Hello '.$userRow->full_legal_name.', we are sending a payment request of Ksh '.$amountToUse.' to your phone number '.$this->normalizeMsisdn($phoneToUse).'. Please wait...</label>
+											<h4 class="Titillium-Regular  capital  left " style="color: #43ac6a;">Thank You.</h4><br>     
+										</div> 
+									</div>
+								</div>
+							</section>
+							<p>Please do not close this screen after completing your payment. You will be redirected automatically once the transaction is successful.</p>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+							<a href="'.base_url('subscription/1732371146921').'" type="button" class="btn btn-primary" hidden>Done Paying</a>
+						</div>
+					</div>
+				</div>';
+		print_r($modal);
+	}
+
+	public function payViaMpesaRequest($user_id, $payment_history_id='', $phone_no = '', $amount='1')
+	{
+		$this->common->checkSession(array('dialog'=>1));
+		$session_data = $this->common->loadSession();
+
+		$customer_db_setting_id = $session_data['customer_db_setting_id'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+
+		$phoneToUse = !empty($phone_no) ? $phone_no : (empty($userRow->phone_number) ? $userRow->mobile_number : $userRow->phone_number);
+		$amountToUse = !empty($amount) ? $amount : ($paymentHistoryRow->bill_amount ?? '1');
+
+		$url = base_url('payments/saf/auth.php');
+		$payload = json_encode(array(
+			'accessType' => 'express',
+			'phoneNumber' => $this->normalizeMsisdn($phoneToUse),
+			'billAmount' => (string) $amountToUse,
+		));
+
+		$curl = curl_init();
+		curl_setopt_array($curl, array(
+			CURLOPT_URL => $url,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_ENCODING => '',
+			CURLOPT_MAXREDIRS => 10,
+			CURLOPT_CONNECTTIMEOUT => 15,
+			CURLOPT_TIMEOUT => 60,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+			CURLOPT_CUSTOMREQUEST => 'POST',
+			CURLOPT_POSTFIELDS => $payload,
+			CURLOPT_HTTPHEADER => array(
+				'Content-Type: application/json'
+			),
+		));
+
+		$response = curl_exec($curl);
+		if ($response === false) {
+			$err = curl_error($curl);
+			curl_close($curl);
+			header('Content-Type: application/json');
+			print_r(json_encode(array('code' => 500, 'state' => 'failed', 'error' => 'curl_failed', 'info' => $err)));
+			return;
+		}
+		curl_close($curl);
+
+		$responseObj = json_decode($response, true);
+		$merchantRequestID = $responseObj['other']['MerchantRequestID'] ?? null;
+		$checkoutRequestID = $responseObj['other']['CheckoutRequestID'] ?? null;
+
+		if (!empty($checkoutRequestID)) {
+			$this->db->update($customerDBSettingRow->database_name.'.payment_history', array('transaction_code'=>$checkoutRequestID), array('payment_history_id'=>$payment_history_id));
+		}
+
+		header('Content-Type: application/json');
+		print_r(json_encode(array(
+			'code' => $responseObj['code'] ?? 200,
+			'state' => $responseObj['state'] ?? 'success',
+			'error' => $responseObj['error'] ?? '',
+			'info' => $responseObj['info'] ?? '',
+			'merchantRequestId' => $merchantRequestID,
+			'checkoutRequestId' => $checkoutRequestID,
+			'raw' => $responseObj,
+		)));
 	}
 
 	public function payModal($user_id, $payment_history_id='1760556915749', $phone_no = '', $data='')
@@ -240,11 +364,114 @@ class PayController extends CI_Controller {
 		}
 		
 		$payment_history = $this->db->update($customerDBSettingRow->database_name.'.payment_history', array('payment_status_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$obj->txncd, 'paid_amount'=>$obj->mc), array('payment_history_id'=>$paymentHistoryRow->payment_history_id));
-		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'paymentHistoryRow -> '.json_encode($paymentHistoryRow)));
-		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>($moduleRow->name ?? 'Module').' -> '.$module));
-		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'payment_history -> '.$payment_history));
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'paymentHistoryRow -> '.json_encode($paymentHistoryRow)));
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>($moduleRow->name ?? 'Module').' -> '.$module));
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'payment_history -> '.$payment_history));
 		// $subscriptionData = $this->db->select('*')->from('club_subscription')->where('subscription_id', $obj->p4)->get()->row();
 		// $memberData = $this->db->select('*')->from('users')->where('user_id', $subscriptionData->member_userid)->get()->row();
 		// $this->send_mail($memberData->email,$memberData->name,$subscriptionData->member,$subscriptionData->subscription_id,$subscriptionData->amount,$subscriptionData->membership_fee_type,$subscriptionData->payment_method,$subscriptionData->txncd);
+	}
+
+	public function nmraConfirmationUrl()
+	{
+		$postedString = file_get_contents("php://input");
+		if (empty($postedString)) {
+			$postedString = json_encode($_REQUEST);
+		}
+		// $stringRequest = json_encode($_REQUEST);
+		// $obj = json_decode('{"Body":{"stkCallback":{"MerchantRequestID":"2c96-4e0b-a891-89b62294fe843355901","CheckoutRequestID":"ws_CO_11012026023640670726542690","ResultCode":0,"ResultDesc":"The service request is processed successfully.","CallbackMetadata":{"Item":[{"Name":"Amount","Value":1},{"Name":"MpesaReceiptNumber","Value":"UABBX3K0J5"},{"Name":"TransactionDate","Value":20260111023659},{"Name":"PhoneNumber","Value":254726542690}]}}}}');
+		$paymentMethodId = '1700743964240'; // Default to M-PESA
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log'=>$postedString));
+		$obj = json_decode($postedString);
+		$checkoutRequestID = $obj->Body->stkCallback->CheckoutRequestID;
+		$amount = $obj->Body->stkCallback->CallbackMetadata->Item[0]->Value;
+		$mpesaReceiptNumber = $obj->Body->stkCallback->CallbackMetadata->Item[1]->Value;
+		// print_r($mpesaReceiptNumber);
+		// exit;
+		// $customerDBSettingIdPaymentHistoryId = explode('C', $obj->p4);
+		// $customerDbSettingId = $customerDBSettingIdPaymentHistoryId[0];
+		// $paymentHistoryId = $customerDBSettingIdPaymentHistoryId[1];
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>json_encode($customerDBSettingIdPaymentHistoryId)));
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$customerDbSettingId));
+		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$paymentHistoryId));
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('customer_db_setting_id', '1705386384290')->get()->row();	
+		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->like('transaction_code', $checkoutRequestID)->get()->row();
+		$moduleRow = $this->db->select('*')->from('m_module')->where('module_id', $paymentHistoryRow->module_id)->get()->row();
+		$module = 0;
+		if ($paymentHistoryRow->module_id == '17072386410') {// Subscription module
+			$module = $this->db->update($customerDBSettingRow->database_name.'.subscription', array('payment_at'=>date('d M Y')), array('subscription_id'=>$paymentHistoryRow->universal_id));
+		} elseif ($paymentHistoryRow->module_id == '17602075390') {// Fundraising module
+			$module = 1;//$this->db->update($customerDBSettingRow->database_name.'.fundraising', array('payment_at'=>date('d M Y')), array('fundraising_id'=>$paymentHistoryRow->universal_id));
+		} elseif ($paymentHistoryRow->module_id == '17872306643') {// Booking module
+			$module = $this->db->update($customerDBSettingRow->database_name.'.booking', array('payment_at'=>date('d M Y')), array('booking_id'=>$paymentHistoryRow->universal_id));
+		}
+		
+		$this->db->update($customerDBSettingRow->database_name.'.payment_history', array('payment_status_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$mpesaReceiptNumber, 'paid_amount'=>$amount), array('payment_history_id'=>$paymentHistoryRow->payment_history_id));
+		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $paymentHistoryRow->payment_history_id)->get()->row();
+		$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $paymentHistoryRow->universal_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $paymentHistoryRow->user_id)->get()->row();
+		$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+		$membershipFeeTypeRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('membership_fee_type_id', $subscriptionRow->membership_fee_type_id)->get()->row();
+		
+		$data['membershipFeeTypeRow'] = $membershipFeeTypeRow;
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
+		$data['paymentHistoryRow'] = $paymentHistoryRow;
+		$data['subscriptionRow'] = $subscriptionRow;
+		$data['customerRow'] = $customerRow;
+		$data['userRow'] = $userRow;
+		$emailContent = $this->load->view('admin/subscription_payment_receipt_temp', $data, true);
+		$this->common->sendMail($userRow->email, $customerRow->full_legal_name.' - Subscription Payment Receipt', $emailContent);
+	}
+
+	public function nmraValidationUrl()
+	{
+		$postedString = file_get_contents("php://input");
+		if (empty($postedString)) {
+			$postedString = json_encode($_REQUEST);
+		}
+		// $obj = json_decode($stringRequest);
+		$paymentMethodId = '1700743964240'; // Default to M-PESA
+		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log'=>$postedString));
+	}
+
+	private function normalizeMsisdn($phoneNumber)
+	{
+		if ($phoneNumber === null) {
+			return '';
+		}
+
+		$phoneNumber = trim((string)$phoneNumber);
+		if ($phoneNumber === '') {
+			return '';
+		}
+
+		// Keep digits only (strip spaces, +, etc.)
+		$digits = preg_replace('/\D+/', '', $phoneNumber);
+		if ($digits === null) {
+			$digits = '';
+		}
+
+		// Convert common KE formats to 2547XXXXXXXX
+		if (strpos($digits, '0') === 0 && strlen($digits) === 10) {
+			// 07XXXXXXXX -> 2547XXXXXXXX
+			return '254'.substr($digits, 1);
+		}
+
+		if (strpos($digits, '7') === 0 && strlen($digits) === 9) {
+			// 7XXXXXXXX -> 2547XXXXXXXX
+			return '254'.$digits;
+		}
+
+		if (strpos($digits, '2540') === 0 && strlen($digits) === 13) {
+			// 25407XXXXXXXX -> 2547XXXXXXXX
+			return '254'.substr($digits, 4);
+		}
+
+		return $digits;
+	}
+
+	public function tillExpress()
+	{
+		
 	}
 }

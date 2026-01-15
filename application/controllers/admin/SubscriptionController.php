@@ -215,6 +215,8 @@ class SubscriptionController extends CI_Controller {
 	{
 		$this->common->checkSession();
 		$session_data = $this->common->loadSession();
+		$headerData = $this->common->loadHeaderData('subscription');
+		$isSubscriptionPaid = $headerData['isSubscriptionPaid'];
 
 		$postData = $this->input->post();
 		$customer_db_setting_id = $postData['customer_db_setting_id'];
@@ -237,7 +239,9 @@ class SubscriptionController extends CI_Controller {
 				$clubMemberData['userRow'] = $userRow;
 				$clubMemberData['customerRow'] = $customerRow;
 				$htmlApprovalNotification = $this->load->view('admin/club_member_temp', $clubMemberData, true);
-				$this->common->sendMail($userRow->email, 'Action Required - Your New Muthaiga Residents Association ClubMember.app Account Activation', $htmlApprovalNotification);
+				if (!$isSubscriptionPaid) {
+					$this->common->sendMail($userRow->email, 'Action Required - Your New Muthaiga Residents Association ClubMember.app Account Activation', $htmlApprovalNotification);
+				}		
 
 				$membershipTypeName = get_table('m_membership_type', 'membership_type_id', $userRow->membership_type_id, 'name');
 				$subscriptionPaymentData = array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$postData['amount'], 'due_at'=>$postData['due_at'], 'notes'=>$postData['remark'], 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id));
@@ -598,7 +602,7 @@ class SubscriptionController extends CI_Controller {
 		// Send Email
 		$this->load->library('email');
 		$this->email->set_newline("\r\n");
-		$this->email->from('no-reply@example.com', 'Club Member');
+		$this->email->from('updates@clubmember.app', 'New Muthaiga Residents Association - Club Member');
 		$this->email->to($userRow->email);
 		$this->email->subject('Payment Reminder');
 		$this->email->message('This is a reminder to make your payment for the subscription.');

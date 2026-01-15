@@ -24,11 +24,16 @@
 									Current Thumbnail: <a href="<?=base_url($newsletterRow->thumbnail_url)?>" target="_blank" rel="noopener"><?=basename($newsletterRow->thumbnail_url)?></a>
 								</p>
 							<?php endif; ?>
+						</div>
 					</div>
 				</div>
 				<div class="mb-3">
 					<label for="description" class="form-label">Description</label>
 					<textarea class="form-control" id="add_edit_description" name="description" rows="3" required><?=isset($newsletterRow->description) ? $newsletterRow->description : ''?></textarea>
+				</div>
+				<div class="mb-3">
+					<label for="summary" class="form-label">Summary</label>
+					<textarea class="form-control" id="summary" name="summary" rows="3" required><?=isset($newsletterRow->summary) ? $newsletterRow->summary : ''?></textarea>
 				</div>
 				<div class="col-md-6">
 					<div class="mb-3">

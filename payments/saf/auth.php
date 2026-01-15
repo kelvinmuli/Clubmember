@@ -15,18 +15,27 @@
       header('Content-Type: application/json');
       $fileGetContents = file_get_contents("php://input");
       $jsonPostedString = json_decode($fileGetContents, true);
-      $accessType = $jsonPostedString == null ? $_REQUEST['accessType'] : $jsonPostedString['accessType'];
-      $username = $jsonPostedString == null ? $_REQUEST['username'] : $jsonPostedString['username'];
-      $phoneNumber = $jsonPostedString == null ? $_REQUEST['phoneNumber'] : $jsonPostedString['phoneNumber'];
-      $jsonOrArray = $jsonPostedString['jsonOrArray'] == null ? true : $jsonPostedString['jsonOrArray'];      
-      $message = $jsonPostedString == null ? $_REQUEST['message'] : $jsonPostedString['message'];
-      $billAmount = $jsonPostedString == null ? $_REQUEST['billAmount'] : $jsonPostedString['billAmount'];
-      $accountNumber = $jsonPostedString['accountNumber'] == null ? $_REQUEST['accountNumber'] : $jsonPostedString['accountNumber'];
+
+      $getParam = function ($key, $default = null) use ($jsonPostedString) {
+         if (is_array($jsonPostedString) && array_key_exists($key, $jsonPostedString)) {
+            return $jsonPostedString[$key];
+         }
+         return $_REQUEST[$key] ?? $default;
+      };
+
+      $accessType = $getParam('accessType');
+      $username = $getParam('username');
+      $phoneNumber = $getParam('phoneNumber');
+      $jsonOrArray = $getParam('jsonOrArray', true);
+      $message = $getParam('message');
+      $billAmount = $getParam('billAmount');
+      $accountNumber = $getParam('accountNumber');
+      $checkoutRequestId = $getParam('checkoutRequestId');
 
       include_once('MoneyApi.php');
       $moneyApi = new MoneyApi();
-      $paybill = $jsonPostedString == null ? $_REQUEST['paybill'] : $jsonPostedString['paybill'];
-      $transactionId = $jsonPostedString['transactionId'];
+      $paybill = $getParam('paybill');
+      $transactionId = $getParam('transactionId');
       switch ($accessType) 
       {
          case 'token':
@@ -45,20 +54,76 @@
          case 'express':
             $mpesaExpressed = $moneyApi->mpesaExpress($accountNumber, $phoneNumber, $billAmount);
             $jsonDecodeString = json_decode($mpesaExpressed, true);
-            $responseCode = $jsonDecodeString['ResponseCode'];
+            $responseCode = $jsonDecodeString['ResponseCode'] ?? null;
             if ($responseCode == null)
             {
-               $responseCode = $jsonDecodeString['errorCode'];
+               $responseCode = $jsonDecodeString['errorCode'] ?? null;
                $code = $responseCode == 0 ? 200 : 401;
                $state = $responseCode == 0 ? 'success' : 'failed';
-               $info = $jsonDecodeString['errorMessage'];
+               $info = $jsonDecodeString['errorMessage'] ?? null;
             }
             else
             {
                $code = $responseCode == 0 ? 200 : 401;
                $state = $responseCode == 0 ? 'success' : 'failed';
-               $info = $jsonDecodeString['CustomerMessage'];
+               $info = $jsonDecodeString['CustomerMessage'] ?? null;
             }
+            print_r(json_encode(array('code' => $code, 'state' => $state, 'error'=> '', 'info' => $info, 'other' => $jsonDecodeString)));
+            break;
+
+         case 'express_till':
+            $mpesaExpressed = $moneyApi->mpesaTillExpress($accountNumber, $phoneNumber, $billAmount);
+            $jsonDecodeString = json_decode($mpesaExpressed, true);
+            $responseCode = $jsonDecodeString['ResponseCode'] ?? null;
+            if ($responseCode == null)
+            {
+               $responseCode = $jsonDecodeString['errorCode'] ?? null;
+               $code = $responseCode == 0 ? 200 : 401;
+               $state = $responseCode == 0 ? 'success' : 'failed';
+               $info = $jsonDecodeString['errorMessage'] ?? null;
+            }
+            else
+            {
+               $code = $responseCode == 0 ? 200 : 401;
+               $state = $responseCode == 0 ? 'success' : 'failed';
+               $info = $jsonDecodeString['CustomerMessage'] ?? null;
+            }
+            print_r(json_encode(array('code' => $code, 'state' => $state, 'error'=> '', 'info' => $info, 'other' => $jsonDecodeString)));
+            break;
+
+         case 'express_paybill':
+            $mpesaExpressed = $moneyApi->mpesaPaybillExpress($accountNumber, $phoneNumber, $billAmount);
+            $jsonDecodeString = json_decode($mpesaExpressed, true);
+            $responseCode = $jsonDecodeString['ResponseCode'] ?? null;
+            if ($responseCode == null)
+            {
+               $responseCode = $jsonDecodeString['errorCode'] ?? null;
+               $code = $responseCode == 0 ? 200 : 401;
+               $state = $responseCode == 0 ? 'success' : 'failed';
+               $info = $jsonDecodeString['errorMessage'] ?? null;
+            }
+            else
+            {
+               $code = $responseCode == 0 ? 200 : 401;
+               $state = $responseCode == 0 ? 'success' : 'failed';
+               $info = $jsonDecodeString['CustomerMessage'] ?? null;
+            }
+            print_r(json_encode(array('code' => $code, 'state' => $state, 'error'=> '', 'info' => $info, 'other' => $jsonDecodeString)));
+            break;
+
+         case 'express_query':
+            if ($checkoutRequestId == null || $checkoutRequestId === '') {
+               $code = 400;
+               $state = 'failed';
+               print_r(json_encode(array('code' => $code, 'state' => $state, 'error'=> 'missing checkoutRequestId', 'info' => '')));
+               break;
+            }
+            $queryResponse = $moneyApi->mpesaStkQuery($checkoutRequestId);
+            $jsonDecodeString = json_decode($queryResponse, true);
+            $responseCode = $jsonDecodeString['ResponseCode'] ?? null;
+            $code = $responseCode === '0' ? 200 : 401;
+            $state = $responseCode === '0' ? 'success' : 'failed';
+            $info = $jsonDecodeString['ResultDesc'] ?? ($jsonDecodeString['errorMessage'] ?? null);
             print_r(json_encode(array('code' => $code, 'state' => $state, 'error'=> '', 'info' => $info, 'other' => $jsonDecodeString)));
             break;
 
@@ -72,7 +137,7 @@
 
          case 'b2c_global':
             $callBackUrl = 'https://mlezie.com/backend/payments/saf/confirmation.php';
-            $callBack = $jsonPostedString['callBackUrl'] == null ? $callBackUrl : $jsonPostedString['callBackUrl'];
+            $callBack = $getParam('callBackUrl', $callBackUrl);
             print_r($moneyApi->mpesaB2cGlobal($callBack, $phoneNumber, $billAmount));
             break;
 

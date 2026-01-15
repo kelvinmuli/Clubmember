@@ -56,19 +56,19 @@
             </td>
           </tr>
 
+					<!-- Optional image -->
+          <tr>
+            <td style="padding:0 20px 20px 20px;">
+              <img src="<?=base_url($newsletterRow->thumbnail_url)?>" alt="<?=$newsletterRow->name?>" width="100%" style="border-radius:6px; max-width:660px;">
+            </td>
+          </tr>
+
           <!-- Short description -->
           <tr>
             <td style="padding:0 20px 20px 20px;">
               <p class="description" style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:24px; color:#374151;">
-                <?=$newsletterRow->description?>
+                <?=$newsletterRow->summary?>
               </p>
-            </td>
-          </tr>
-
-          <!-- Optional image -->
-          <tr>
-            <td style="padding:0 20px 20px 20px;">
-              <img src="<?=base_url($newsletterRow->thumbnail_url)?>" alt="<?=$newsletterRow->name?>" width="100%" style="border-radius:6px; max-width:660px;">
             </td>
           </tr>
 
@@ -102,7 +102,7 @@
               <p style="margin:0;">
                 If you have any questions or need help, feel free to reach out.
               </p>
-							<p>Copyright @ 2025 New Muthaiga Residents Association</p><br>
+							<p>Copyright @ 2026 New Muthaiga Residents Association</p><br>
                                                 
               <p><b>Website:</b> https://newmuthaigaresidentsassociation.com</p>
               <p><b>Email:</b> committee@newmuthaigaresidentsassociation.com</p>

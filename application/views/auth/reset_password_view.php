@@ -45,8 +45,10 @@
               <div class="text-center mb-4">
                 <!-- BEGIN NAVBAR LOGO -->
                 <a href="/" class="logo">
-                  <img src="<?=base_url()?>assets/website/img/Cb-logo-1.jpg" alt="New Muthaiga Logo" width="30%">
-                </a>
+									<?php if (isset($customerRow) && $customerRow->customer_id != '17765689954') { ?>
+										<img src="<?=base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="30%">
+									<?php } ?>
+								</a>
               </div>
               <div class="card card-md">
                 <div class="card-body">

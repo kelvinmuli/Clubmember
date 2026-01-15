@@ -172,8 +172,15 @@ $route['pay-modal/(:any)'] = 'admin/PayController/payModal/$1';
 $route['pay-modal/(:any)/(:any)'] = 'admin/PayController/payModal/$1/$2';
 $route['pay-modal/(:any)/(:any)/(:any)'] = 'admin/PayController/payModal/$1/$2/$3';
 $route['pay-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/PayController/payModal/$1/$2/$3/$4';
+$route['pay-via-mpesa-modal/(:any)/(:any)/(:any)'] = 'admin/PayController/payViaMpesaModal/$1/$2/$3';
+$route['pay-via-mpesa-modal/(:any)/(:any)/(:any)/(:any)'] = 'admin/PayController/payViaMpesaModal/$1/$2/$3/$4';
+$route['pay-via-mpesa-modal/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/PayController/payViaMpesaModal/$1/$2/$3/$4/$5';
+$route['pay-via-mpesa-request/(:any)/(:any)/(:any)'] = 'admin/PayController/payViaMpesaRequest/$1/$2/$3';
+$route['pay-via-mpesa-request/(:any)/(:any)/(:any)/(:any)'] = 'admin/PayController/payViaMpesaRequest/$1/$2/$3/$4';
 $route['pay'] = 'admin/SubscriptionController/pay';
 $route['callback'] = 'admin/PayController/insertIpay';
+$route['nmra-confirmation-url'] = 'admin/PayController/nmraConfirmationUrl';
+$route['nmra-validation-url'] = 'admin/PayController/nmraValidationUrl';
 
 
 $route['logout'] = 'front/Signup/logout';
@@ -216,6 +223,11 @@ $route['add-project'] = 'admin/ProjectController/addProject';
 $route['view-project-modal/(:any)'] = 'admin/ProjectController/viewProjectModal/$1';
 $route['edit-project-modal/(:any)'] = 'admin/ProjectController/editProjectModal/$1';
 $route['edit-project'] = 'admin/ProjectController/editProject';
+$route['add-project-update-modal/(:any)'] = 'admin/ProjectController/addProjectUpdateModal/$1';
+$route['add-project-update'] = 'admin/ProjectController/addProjectUpdate';
+$route['edit-project-update-modal/(:any)'] = 'admin/ProjectController/editProjectUpdateModal/$1';
+$route['edit-project-update'] = 'admin/ProjectController/editProjectUpdate';
+$route['delete-project-update-modal/(:any)'] = 'admin/ProjectController/deleteProjectUpdateModal/$1';
 $route['remove-project-modal/(:any)'] = 'admin/ProjectController/removeProjectModal/$1';
 $route['remove-project'] = 'admin/ProjectController/removeProject';
 
@@ -254,6 +266,10 @@ $route['payment-receipt-modal/(:any)/(:any)'] = 'admin/PaymentHistoryController/
 $route['add-fundraising-payment-history-modal/(:any)'] = 'admin/PaymentHistoryController/addFundraisingPaymentHistoryModal/$1';
 $route['view-fundraising-payment-history-modal/(:any)'] = 'admin/PaymentHistoryController/viewFundraisingPaymentHistoryModal/$1';
 $route['add-fundraising-payment-history'] = 'admin/PaymentHistoryController/addFundraisingPaymentHistory';
+$route['check-mpesa-payment-status/(:any)/(:any)/(:any)'] = 'admin/PaymentHistoryController/checkMpesaPaymentStatus/$1/$2/$3';
+$route['check-mpesa-payment-status/(:any)/(:any)/(:any)/(:any)'] = 'admin/PaymentHistoryController/checkMpesaPaymentStatus/$1/$2/$3/$4';
+$route['check-mpesa-payment-status/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/PaymentHistoryController/checkMpesaPaymentStatus/$1/$2/$3/$4/$5';
+$route['check-mpesa-payment-status/(:any)/(:any)/(:any)/(:any)/(:any)/(:any)'] = 'admin/PaymentHistoryController/checkMpesaPaymentStatus/$1/$2/$3/$4/$5/$6';	
 
 
 /*

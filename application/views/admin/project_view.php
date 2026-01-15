@@ -141,7 +141,7 @@ $basePageUrl = base_url($modulePath);
 													<div><span class="badge <?=$activeClass?>"><?=$activeBadge?></span></div>
 												</div>
 											</div>
-											<p class="text-muted only-so-big mt-2 mb-3"><?=$projectDescription?></p>
+											<p class="text-muted only-so-big-without-modal mt-2 mb-3"><?=$projectDescription?></p>
 											<?php if (!empty($dependence)): ?>
 												<div class="mb-3">
 													<span class="badge bg-blue-lt">Dependencies</span>

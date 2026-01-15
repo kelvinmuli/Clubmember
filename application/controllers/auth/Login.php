@@ -165,7 +165,27 @@ class Login extends CI_Controller {
 
 	public function resetPassword($user_id='N/A', $customer_db_setting_id='1755387775468')
 	{
-		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$checkHost = false;
+		$customerDBSettingRow = [];
+		$host = $_SERVER['HTTP_HOST'];
+		$customerDBSettingData = $this->db->select('*')->from('customer_db_setting')->get()->result();
+		foreach ($customerDBSettingData as $customerDBSetting) 
+		{
+			if (strpos($host, $customerDBSetting->host.'.') === 0) 
+			{
+				$checkHost = true;
+				$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customerDBSetting->customer_db_setting_id)->get()->row();
+			}
+		}
+		
+		if (!$checkHost)
+		{
+			$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $host)->or_where('host', $host)->get()->row();
+		}
+		
+		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id ?? $customer_db_setting_id)->get()->row();
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
+		// $customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$data['userRow'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
 		$data['customer_db_setting_id'] = $customer_db_setting_id;
 		$this->load->view('auth/reset_password_view', $data);

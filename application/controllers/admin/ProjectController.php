@@ -5,9 +5,6 @@ class ProjectController extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->helper(array('url', 'form', 'common'));
-        $this->load->library(array('session', 'common'));
-        $this->load->database();
     }
 
     public function projectView() 
@@ -37,7 +34,7 @@ class ProjectController extends CI_Controller {
 
             $projectQuery = $this->db->select('*')
                 ->from($tenantTable)
-                ->order_by('created_at', 'DESC')
+                ->order_by('updated_at', 'DESC')
                 ->limit($perPage, $offset)
                 ->get();
 
@@ -167,9 +164,11 @@ class ProjectController extends CI_Controller {
         $session_data = $this->common->loadSession();
         $customer_db_setting_id = $session_data['customer_db_setting_id'];
 
+        $data['user_type_id'] = $session_data['user_type_id'];
         $data = [
             'projectRow' => null,
             'project_id' => $project_id,
+            'projectUpdateData' => [],
             'projectLeadName' => '',
             'projectStatusName' => '',
             'projectCategoryName' => '',
@@ -178,6 +177,7 @@ class ProjectController extends CI_Controller {
             'thumbnailSrc' => '',
         ];
 
+        
         $customerDBSettingRow = $this->db->select('*')
             ->from('customer_db_setting')
             ->where('customer_db_setting_id', $customer_db_setting_id)
@@ -219,9 +219,177 @@ class ProjectController extends CI_Controller {
                     $data['thumbnailSrc'] = filter_var($thumbnailUrl, FILTER_VALIDATE_URL) ? $thumbnailUrl : base_url($thumbnailUrl);
                 }
             }
+
+            $data['projectUpdateData'] = $this->db->from($tenantDatabase.'.project_update')
+                    ->where('project_id', $project_id)
+                    ->order_by('created_at', 'DESC')
+                    ->get()
+                    ->result();
         }
 
         return $this->load->view('admin/view_project_modal', $data);
+    }
+
+    public function addProjectUpdateModal($project_id = null)
+    {
+        $this->common->checkSession();
+        $this->common->loadSession();
+
+        $data = [
+            'project_id' => $project_id,
+            'project_update_id' => generate_uuid(),
+            'projectUpdateRow' => null,
+        ];
+
+        return $this->load->view('admin/add_edit_project_update_modal', $data);
+    }
+
+    public function addProjectUpdate()
+    {
+        $this->common->checkSession();
+        $session_data = $this->common->loadSession();
+        $customer_db_setting_id = $session_data['customer_db_setting_id'];
+
+        $postData = $this->input->post();
+        $project_update_id = $postData['project_update_id'] ?? generate_uuid();
+        $project_id = $postData['project_id'] ?? '';
+
+        if (empty($project_id)) {
+            $this->session->set_flashdata('warning', 'Project update save failed.');
+            redirect('projects', 'refresh');
+        }
+
+        $payload = [
+            'project_update_id' => $project_update_id,
+            'project_id' => $project_id,
+            'name' => trim((string)($postData['name'] ?? '')),
+            'description' => (string)($postData['description'] ?? ''),
+            'project_update_at' => $this->sanitizeDateTimeFull($postData['project_update_at'] ?? null) ?? date('Y-m-d H:i:s'),
+        ];
+
+        if (isset($_FILES['file_url']['name']) && !empty($_FILES['file_url']['name'])) {
+            $payload['file_url'] = file_upload('file_url', $project_update_id . 'u', 'assets/uploads/projects/');
+        }
+
+        $customerDBSettingRow = $this->db->select('*')
+            ->from('customer_db_setting')
+            ->where('customer_db_setting_id', $customer_db_setting_id)
+            ->get()
+            ->row();
+
+        if ($customerDBSettingRow) {
+            $this->db->insert($customerDBSettingRow->database_name . '.project_update', $payload);
+            $this->session->set_flashdata('success', 'Project update saved successfully.');
+        } else {
+            $this->session->set_flashdata('warning', 'Project update save failed.');
+        }
+
+        redirect('projects', 'refresh');
+    }
+
+    public function editProjectUpdateModal($project_update_id = null)
+    {
+        $this->common->checkSession();
+        $session_data = $this->common->loadSession();
+        $customer_db_setting_id = $session_data['customer_db_setting_id'];
+
+        $customerDBSettingRow = $this->db->select('*')
+            ->from('customer_db_setting')
+            ->where('customer_db_setting_id', $customer_db_setting_id)
+            ->get()
+            ->row();
+
+        $projectUpdateRow = null;
+        if ($customerDBSettingRow && $project_update_id) {
+            $projectUpdateRow = $this->db->from($customerDBSettingRow->database_name . '.project_update')
+                ->where('project_update_id', $project_update_id)
+                ->get()
+                ->row();
+        }
+
+        $data = [
+            'project_id' => $projectUpdateRow->project_id ?? null,
+            'project_update_id' => $project_update_id,
+            'projectUpdateRow' => $projectUpdateRow,
+        ];
+
+        return $this->load->view('admin/add_edit_project_update_modal', $data);
+    }
+
+    public function editProjectUpdate()
+    {
+        $this->common->checkSession();
+        $session_data = $this->common->loadSession();
+        $customer_db_setting_id = $session_data['customer_db_setting_id'];
+
+        $postData = $this->input->post();
+        $project_update_id = $postData['project_update_id'] ?? '';
+
+        if (empty($project_update_id)) {
+            $this->session->set_flashdata('warning', 'Project update edit failed.');
+            redirect('projects', 'refresh');
+        }
+
+        $payload = [
+            'project_id' => $postData['project_id'] ?? null,
+            'name' => trim((string)($postData['name'] ?? '')),
+            'description' => (string)($postData['description'] ?? ''),
+            'project_update_at' => $this->sanitizeDateTimeFull($postData['project_update_at'] ?? null) ?? date('Y-m-d H:i:s'),
+        ];
+
+        if (isset($_FILES['file_url']['name']) && !empty($_FILES['file_url']['name'])) {
+            $payload['file_url'] = file_upload('file_url', $project_update_id . 'u', 'assets/uploads/projects/');
+        } else {
+            unset($payload['file_url']);
+        }
+
+        $customerDBSettingRow = $this->db->select('*')
+            ->from('customer_db_setting')
+            ->where('customer_db_setting_id', $customer_db_setting_id)
+            ->get()
+            ->row();
+
+        if ($customerDBSettingRow) {
+            $this->db->update(
+                $customerDBSettingRow->database_name . '.project_update',
+                $payload,
+                array('project_update_id' => $project_update_id)
+            );
+            $this->session->set_flashdata('success', 'Project update updated successfully.');
+        } else {
+            $this->session->set_flashdata('warning', 'Project update edit failed.');
+        }
+
+        redirect('projects', 'refresh');
+    }
+
+    public function deleteProjectUpdateModal($project_update_id = null)
+    {
+        $this->common->checkSession();
+        $session_data = $this->common->loadSession();
+        $customer_db_setting_id = $session_data['customer_db_setting_id'];
+
+        $customerDBSettingRow = $this->db->select('*')
+            ->from('customer_db_setting')
+            ->where('customer_db_setting_id', $customer_db_setting_id)
+            ->get()
+            ->row();
+
+        $projectUpdateRow = null;
+        if ($customerDBSettingRow && $project_update_id) {
+            $projectUpdateRow = $this->db->from($customerDBSettingRow->database_name . '.project_update')
+                ->where('project_update_id', $project_update_id)
+                ->get()
+                ->row();
+        }
+
+        $data['table'] = ($customerDBSettingRow ? ($customerDBSettingRow->database_name . '.project_update') : 'project_update');
+        $data['table_id'] = 'project_update_id';
+        $data['unique_id'] = $project_update_id;
+        $data['name'] = isset($projectUpdateRow->name) ? $projectUpdateRow->name : 'project update';
+        $data['route'] = 'projects';
+
+        return $this->load->view('admin/remove_global_modal', $data);
     }
 
     public function editProjectModal($project_id = null) 
@@ -304,7 +472,8 @@ class ProjectController extends CI_Controller {
         redirect('projects', 'refresh');
     }
 
-    public function removeProjectModal($project_id = null) {
+    public function removeProjectModal($project_id = null) 
+	{
         $this->common->checkSession();
         $session_data = $this->common->loadSession();
         $customer_db_setting_id = $session_data['customer_db_setting_id'];
@@ -329,7 +498,8 @@ class ProjectController extends CI_Controller {
         return $this->load->view('admin/remove_project_modal', $data);
     }
 
-    public function removeProject() {
+    public function removeProject() 
+	{
         $this->common->checkSession();
         $session_data = $this->common->loadSession();
         $customer_db_setting_id = $session_data['customer_db_setting_id'];
@@ -372,6 +542,14 @@ class ProjectController extends CI_Controller {
         $timestamp = strtotime($value);
         return $timestamp ? date('d M Y', $timestamp) : null;
     }
+
+	private function sanitizeDateTimeFull($value) {
+		if (empty($value)) {
+			return null;
+		}
+		$timestamp = strtotime($value);
+		return $timestamp ? date('Y-m-d H:i:s', $timestamp) : null;
+	}
 
     private function resolveProjectThumbnail($project_id, $thumbnailUrlInput = '', $existingThumbnail = '') {
         if (isset($_FILES['project_thumbnail_file']) && is_array($_FILES['project_thumbnail_file']) && !empty($_FILES['project_thumbnail_file']['name']) && $_FILES['project_thumbnail_file']['error'] === UPLOAD_ERR_OK) {
