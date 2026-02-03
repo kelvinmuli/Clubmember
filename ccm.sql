@@ -2636,6 +2636,54 @@ ALTER TABLE `user_right`
 --
 ALTER TABLE `user_rights`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `audit_log`
+--
+
+CREATE TABLE `audit_log` (
+  `id` int(11) NOT NULL,
+  `audit_log_id` varchar(255) NOT NULL,
+  `occurred_at` datetime NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `customer_db_setting_id` varchar(255) DEFAULT NULL,
+  `actor_user_id` varchar(255) DEFAULT NULL,
+  `actor_user_type_id` varchar(255) DEFAULT NULL,
+  `actor_email` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(64) DEFAULT NULL,
+  `user_agent` varchar(1024) DEFAULT NULL,
+  `module` varchar(100) NOT NULL,
+  `action` varchar(120) NOT NULL,
+  `entity_type` varchar(100) DEFAULT NULL,
+  `entity_id` varchar(255) DEFAULT NULL,
+  `status` varchar(20) NOT NULL,
+  `message` longtext DEFAULT NULL,
+  `before_json` longtext DEFAULT NULL,
+  `after_json` longtext DEFAULT NULL,
+  `metadata_json` longtext DEFAULT NULL,
+  `request_id` varchar(255) DEFAULT NULL,
+  `correlation_id` varchar(255) DEFAULT NULL,
+  `integrity_hash` varchar(128) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `audit_log`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `audit_log_id` (`audit_log_id`),
+  ADD KEY `idx_occurred_at` (`occurred_at`),
+  ADD KEY `idx_customer_db_setting_id` (`customer_db_setting_id`),
+  ADD KEY `idx_actor_user_id` (`actor_user_id`),
+  ADD KEY `idx_module_action` (`module`,`action`),
+  ADD KEY `idx_entity` (`entity_type`,`entity_id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_correlation_id` (`correlation_id`),
+  ADD KEY `idx_request_id` (`request_id`);
+
+ALTER TABLE `audit_log`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

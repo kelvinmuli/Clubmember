@@ -67,10 +67,15 @@ $route['reset-now'] = 'auth/Login/resetNowPassword';
 $route['adminlogout'] = 'auth/Login/Logout';
 $route['admindologin'] = 'auth/Login/VerifyLogin';
 // $route['front-login'] = 'auth/Login/verifyLoginFront';
+
+/*
+* admin/AuthController
+*/
 $route['forgot-password'] = 'admin/AuthController/forgotPassword';
 $route['forgot-password/(:any)'] = 'admin/AuthController/forgotPassword/$1';
 $route['forgot-password/(:any)/(:any)'] = 'auth/Login/resetPassword/$1/$2';
 $route['forgot-password-now'] = 'admin/AuthController/resetPasswordNow';
+$route['send-reset-password/(:any)/(:any)'] = 'admin/AuthController/sendResetPassword/$1/$2';
 
 /*
 * admin/UserController
@@ -145,7 +150,7 @@ $route['edit-customer-modal'] = 'admin/CustomerController/editCustomerModal';
 $route['edit-customer-modal/(:any)'] = 'admin/CustomerController/editCustomerModal/$1';
 $route['edit-customer'] = 'admin/CustomerController/editCustomer';
 $route['remove-customer'] = 'admin/CustomerController/removeCustomer';
-$route['remove-customer-modal'] = 'admin/CustomerController/removeCustomerModal';
+$route['remove-customer-modal/(:any)'] = 'admin/CustomerController/removeCustomerModal/$1';
 
 /*
 * admin/SubscriptionController
@@ -164,8 +169,12 @@ $route['add-membership-fee-type'] = 'admin/SubscriptionController/addMembershipF
 $route['add-membership-fee-type-modal'] = 'admin/SubscriptionController/addMembershipFeeTypeModal';
 $route['get-membership-fee-type/(:any)'] = 'admin/SubscriptionController/getMembershipFeeType/$1';
 $route['approve-subscription-modal/(:any)/(:any)'] = 'admin/SubscriptionController/approveSubscriptionModal/$1/$2';
+$route['edit-subscription-approve-modal/(:any)/(:any)'] = 'admin/SubscriptionController/editSubscriptionApproveModal/$1/$2';
+$route['remove-subscription-approve-modal/(:any)/(:any)'] = 'admin/SubscriptionController/removeSubscriptionApproveModal/$1/$2';
 $route['approve-subscription'] = 'admin/SubscriptionController/approveSubscription';
 $route['send-payment-reminder/(:any)/(:any)'] = 'admin/SubscriptionController/sendPaymentReminder/$1/$2';
+$route['send-subscription-paid/(:any)/(:any)'] = 'admin/SubscriptionController/sendSubscriptionPaid/$1/$2';
+$route['send-subscription-unpaid/(:any)/(:any)'] = 'admin/SubscriptionController/sendSubscriptionUnPaid/$1/$2';
 $route['payment-info-modal/(:any)'] = 'admin/PayController/paymentInfoModal/$1';
 $route['payment-info-modal/(:any)/(:any)'] = 'admin/PayController/paymentInfoModal/$1/$2';
 $route['pay-modal/(:any)'] = 'admin/PayController/payModal/$1';
@@ -185,6 +194,14 @@ $route['nmra-validation-url'] = 'admin/PayController/nmraValidationUrl';
 
 $route['logout'] = 'front/Signup/logout';
 
+/*
+* admin/AuditLogController
+*/
+$route['audit-log'] = 'admin/AuditLogController/auditLogView';
+$route['audit-log/details/(:any)'] = 'admin/AuditLogController/details/$1';
+$route['audit-log/export/csv'] = 'admin/AuditLogController/exportCsv';
+$route['audit-log/export/json'] = 'admin/AuditLogController/exportJson';
+
 
 /*
 * admin/AGMMinutesController
@@ -197,6 +214,17 @@ $route['edit-agm-minutes-modal/(:any)'] = 'admin/AgmMinutesController/editAgmMin
 $route['edit-agm-minutes'] = 'admin/AgmMinutesController/editAgmMinutes';
 $route['remove-agm-minutes-modal/(:any)'] = 'admin/AgmMinutesController/removeAgmMinutesModal/$1';
 $route['remove-agm-minutes'] = 'admin/AgmMinutesController/removeAgmMinutes';
+
+/*
+* admin/AuditedAccountController
+*/
+$route['audited-account'] = 'admin/AuditedAccountController/auditedAccountView';
+$route['add-audited-account-modal'] = 'admin/AuditedAccountController/addAuditedAccountModal';
+$route['add-audited-account'] = 'admin/AuditedAccountController/addAuditedAccount';
+$route['view-audited-account-modal/(:any)'] = 'admin/AuditedAccountController/viewAuditedAccountModal/$1';
+$route['edit-audited-account-modal/(:any)'] = 'admin/AuditedAccountController/editAuditedAccountModal/$1';
+$route['edit-audited-account'] = 'admin/AuditedAccountController/editAuditedAccount';
+$route['remove-audited-account-modal/(:any)'] = 'admin/AuditedAccountController/removeAuditedAccountModal/$1';
 
 /*
 * admin/NewsletterController

@@ -78,7 +78,7 @@ class Common
 		$headerData['activeData'] = $activeData;
 		$headerData['activeDataArray'] = $activeDataArray;
 		$headerData['paymentStatusId'] = '';
-		$headerData['userTypeId'] = '';
+		$headerData['userTypeId'] = $user_type_id;
 		$headerData['moduleTypeId'] = '';
 		$headerData['customerDBSettingId'] = $customer_db_setting_id;
 		$headerData['isSubscriptionPaid'] = $isSubscriptionPaid;

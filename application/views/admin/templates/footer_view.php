@@ -158,6 +158,33 @@
 				});
 			}
 
+			function sendSubscriptionUnPaid(user_id, subscription_id) {
+				$.ajax({
+					url: base_url + "send-subscription-unpaid/" + user_id + '/' + subscription_id,
+					success: function(response) {
+						alert('Unpaid Subscription invoice sent successfully.');
+					}
+				});
+			}
+
+			function sendSubscriptionPaid(subscription_id, payment_history_id) {
+				$.ajax({
+					url: base_url + "send-subscription-paid/" + subscription_id + '/' + payment_history_id,
+					success: function(response) {
+						alert('Subscription invoice sent successfully.');
+					}
+				});
+			}
+
+			function sendResetPassword(user_id, customer_db_setting_id) {
+				$.ajax({
+					url: base_url + "send-reset-password/" + user_id + "/" + customer_db_setting_id,
+					success: function(response) {
+						alert('Password reset email sent successfully.');
+					}
+				});
+			}
+
 			viewPetition = function(petitionSetupId) {
 				showModal(base_url + 'view-petition-modal/' + petitionSetupId, function() {});
 			};
@@ -197,6 +224,26 @@
 				showModal(base_url + 'remove-agm-minutes-modal/' + agmMinutesId, function (response) {
 					// Callback function after modal is shown
 				});
+			};
+
+			addAuditedAccountModal = function() {
+				showModal(base_url + 'add-audited-account-modal', function () {
+					loadDescription('add_edit_description');
+				});
+			};
+
+			viewAuditedAccountModal = function(auditedAccountId) {
+				showModal(base_url + 'view-audited-account-modal/' + auditedAccountId, function () {});
+			};
+
+			editAuditedAccountModal = function(auditedAccountId) {
+				showModal(base_url + 'edit-audited-account-modal/' + auditedAccountId, function () {
+					loadDescription('add_edit_description');
+				});
+			};
+
+			removeAuditedAccountModal = function(auditedAccountId) {
+				showModal(base_url + 'remove-audited-account-modal/' + auditedAccountId, function () {});
 			};
 
 			addNewsletterModal = function() {
@@ -293,7 +340,8 @@
 													statusEl.textContent = 'Paid ' + statusRes;
 
 												//redirect to subscription page after 3 seconds
-												window.location.href = base_url + 'subscription/1732371146921';
+												// window.location.href = base_url + 'subscription/1732371146921';
+												window.location.href = base_url + 'dashboard';
 											}
 										}
 									});

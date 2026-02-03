@@ -34,7 +34,6 @@ class HomeController extends CI_Controller {
 		$this->common->checkSession();
 		$session_data = $this->common->loadSession();
 		$headerData = $this->common->loadHeaderData('dashboard');
-		
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		// print_r($customerDBSettingRow); exit;
 		if ($session_data['customer_db_setting_id'] == GlobalModel::DEFAULT_CORE_DB_SETTING)
@@ -61,39 +60,48 @@ class HomeController extends CI_Controller {
 			}
 		}
 
-		$userTableName = ($session_data['customer_db_setting_id'] == GlobalModel::DEFAULT_CORE_DB_SETTING)
-			? 'user'
-			: $customerDBSettingRow->database_name . '.user';
 
+		$userTableName = ($session_data['customer_db_setting_id'] == GlobalModel::DEFAULT_CORE_DB_SETTING) ? 'user' : $customerDBSettingRow->database_name . '.user';
 		$approvedMembersMonthly = $this->buildApprovedMembersMonthlySeries($userTableName);
-
 		if ($session_data['user_type_id'] == GlobalModel::CLUB_ADMIN_TYPE)
 		{
-			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('s.active', 1)->get()->result();
+			$subscriptionData = $this->db->select('*')
+				->from($customerDBSettingRow->database_name.'.subscription s')
+				->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')
+				->where('s.active', 1)
+				->limit(3)
+				->order_by('s.created_at', 'DESC')
+				->order_by('ph.created_at', 'DESC')
+				->get()
+				->result();
 		}
 		elseif ($session_data['user_type_id'] == GlobalModel::MEMBER_TYPE)
 		{
-			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('s.user_id', $session_data['user_id'])->where('s.active', 1)->get()->result();
+			$subscriptionData = $this->db->select('*')
+				->from($customerDBSettingRow->database_name.'.subscription s')
+				->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')
+				->where('s.user_id', $session_data['user_id'])
+				->where('s.active', 1)
+				->limit(3)
+				->order_by('s.created_at', 'DESC')
+				->order_by('ph.created_at', 'DESC')
+				->get()
+				->result();
 		}
 
-		$hasTenantDatabase = !empty($customerDBSettingRow) && !empty($customerDBSettingRow->database_name);
-		$subscriptionTable = $hasTenantDatabase
-			? $customerDBSettingRow->database_name . '.subscription'
-			: null;
-		$paymentHistoryTable = $hasTenantDatabase
-			? $customerDBSettingRow->database_name . '.payment_history'
-			: null;
 		$paidStatusId = $this->getPaidPaymentStatusId();
-		$paidSubscriptionsMonthly = $this->buildPaidSubscriptionsMonthlySeries($subscriptionTable, $paymentHistoryTable, $paidStatusId);
+		$unpaidSubscriptionsMonthly = $this->buildPaidSubscriptionsMonthlySeries($customerDBSettingRow->database_name.'.subscription', $customerDBSettingRow->database_name.'.payment_history', $paidStatusId);
+		$paidSubscriptionsMonthly = $this->buildUnpaidSubscriptionsMonthlySeries($customerDBSettingRow->database_name.'.subscription', $customerDBSettingRow->database_name.'.payment_history', $paidStatusId);
+
 		$incidentStatusData = $this->db->from('m_incident_status')->where('active', 1)->get()->result();
 		$data['incidentStatusData'] = $incidentStatusData;
+
 		$data['agmMinutesData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.agm_minutes')->where('active', 1)->limit(3)->order_by('created_at', 'DESC')->get()->result();
+		$data['auditedAccountData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.audited_account')->where('active', 1)->limit(3)->order_by('created_at', 'DESC')->get()->result();
 		$data['newsletterData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.newsletter')->where('active', 1)->limit(3)->order_by('created_at', 'DESC')->get()->result();
 		$data['subscriptionData'] = $subscriptionData ?? [];
-		// Fetch up to 3 active projects for dashboard display
-		$data['activeProjects'] = [];
-		if (!empty($customerDBSettingRow)) {
-			$data['activeProjects'] = $this->db->select('*')
+
+		$data['activeProjects'] = $this->db->select('*')
 				->from($customerDBSettingRow->database_name . '.project')
 				->where('active', 1)
 				->order_by('created_at', 'DESC')
@@ -118,7 +126,6 @@ class HomeController extends CI_Controller {
 				->limit(3)
 				->get()
 				->result();
-		}
 		$incidentData = $this->db->select('*')->from($customerDBSettingRow->database_name . '.security_incident')->order_by('incident_at', 'DESC')->order_by('created_at', 'DESC')->get()->result();
         $incidentTypeData = $this->db->from('m_incident_type')->where('active', 1)->get()->result();
 		$incidentStatusIndex = $this->buildIncidentStatusIndex($incidentStatusData);
@@ -150,12 +157,15 @@ class HomeController extends CI_Controller {
 		$data['approvedMembersThisYear'] = isset($approvedMembersMonthly['total_year']) ? (int) $approvedMembersMonthly['total_year'] : count($memberDataThisYear);
 		$data['approvedMembersMonthly'] = $approvedMembersMonthly;
 		$data['paidSubscriptionsMonthly'] = $paidSubscriptionsMonthly;
+		$data['unpaidSubscriptionsMonthly'] = $unpaidSubscriptionsMonthly;
+		$data['unpaidSubscriptionsThisYear'] = isset($unpaidSubscriptionsMonthly['total_year']) ? (int) $unpaidSubscriptionsMonthly['total_year'] : 0;
 		$data['paidSubscriptionsThisYear'] = isset($paidSubscriptionsMonthly['total_year']) ? (int) $paidSubscriptionsMonthly['total_year'] : 0;
+		$data['unpaidSubscriptionsTotal'] = isset($unpaidSubscriptionsMonthly['total']) ? (int) $unpaidSubscriptionsMonthly['total'] : 0;
+		$data['paidSubscriptionsTotal'] = isset($paidSubscriptionsMonthly['total']) ? (int) $paidSubscriptionsMonthly['total'] : 0;
 		$data['totalSubscription'] = count($subscriptionData ?? []);
 		$data['totalActiveUsers'] = $data['totalApprovedMembers'];
 		$data['totalInactiveUsers'] = count($userInactiveData ?? []);
-		// print_r(json_encode($data['subscriptionData']));
-		// exit;
+
 
 		$this->load->view('admin/templates/header_view', $headerData);
 		$this->load->view('admin/home_view', $data);
@@ -167,6 +177,10 @@ class HomeController extends CI_Controller {
 		$this->common->checkSession();
 		$session_data = $this->common->loadSession();
 		$user_type_id = $session_data['user_type_id'];
+
+		$currentYear = (int) date('Y');
+		$startDate = sprintf('%d-01-01 00:00:00', $currentYear);
+		$endDate = sprintf('%d-12-31 23:59:59', $currentYear);
 
 		$paymentStatusData = $this->db->select('*')->from('m_payment_status')->where('active', 1)->get()->result();
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
@@ -223,12 +237,29 @@ class HomeController extends CI_Controller {
 			$subscriptionData = []; $subscriptionPaymentHistoryData = [];
 			if ($session_data['user_type_id'] == GlobalModel::CLUB_ADMIN_TYPE)
 			{
-				$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('ph.payment_status_id', $paymentStatus->payment_status_id)->where('s.active', 1)->get()->result();
+				$subscriptionData = $this->db->select('*')
+					->from($customerDBSettingRow->database_name.'.subscription s')
+					->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')
+					->where('ph.payment_status_id', $paymentStatus->payment_status_id)
+					->where('s.active', 1)
+					->where('ph.created_at >=', $startDate)
+					->where('ph.created_at <=', $endDate)
+					->get()
+					->result();
 				$allSubscription += count($subscriptionData);
 			}
 			elseif ($session_data['user_type_id'] == GlobalModel::MEMBER_TYPE)
 			{
-				$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('ph.payment_status_id', $paymentStatus->payment_status_id)->where('s.user_id', $session_data['user_id'])->where('s.active', 1)->get()->result();
+				$subscriptionData = $this->db->select('*')
+					->from($customerDBSettingRow->database_name.'.subscription s')
+					->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')
+					->where('ph.payment_status_id', $paymentStatus->payment_status_id)
+					->where('s.user_id', $session_data['user_id'])
+					->where('s.active', 1)
+					->where('ph.created_at >=', $startDate)
+					->where('ph.created_at <=', $endDate)
+					->get()
+					->result();
 				$allSubscription += count($subscriptionData);
 			}
 			// foreach ($subscriptionData as $value) {
@@ -456,7 +487,99 @@ class HomeController extends CI_Controller {
 		}
 
 		$result['total_year'] = $totalYear;
+		$result['total'] = $totalYear;
 
+		return $result;
+	}
+
+	private function buildUnpaidSubscriptionsMonthlySeries($subscriptionTable, $paymentHistoryTable, $paidStatusId)
+	{
+		$currentYear = (int) date('Y');
+		$startDate = sprintf('%d-01-01 00:00:00', $currentYear);
+		$endDate = sprintf('%d-12-31 23:59:59', $currentYear);
+
+		$categories = [];
+		$seriesData = [];
+		for ($month = 1; $month <= 12; $month++) {
+			$monthKey = sprintf('%d-%02d-01', $currentYear, $month);
+			$categories[] = date('M', strtotime($monthKey));
+			$seriesData[] = 0;
+		}
+
+		$result = [
+			'categories' => $categories,
+			'series' => [
+				[
+					'name' => 'Unpaid Subscriptions',
+					'data' => $seriesData,
+				],
+			],
+			'total_year' => 0,
+		];
+
+		if (empty($subscriptionTable) || empty($paymentHistoryTable) || empty($paidStatusId)) {
+			return $result;
+		}
+
+		$records = $this->db->select('s.subscription_id, ph.payment_history_id, ph.created_at')
+			->from($paymentHistoryTable . ' ph')
+			->join($subscriptionTable . ' s', 's.subscription_id = ph.universal_id', 'inner')
+			->where('s.active', 1)
+			->where('ph.payment_status_id IS NOT NULL', null, false)
+			->where('ph.payment_status_id !=', $paidStatusId)
+			->where('ph.created_at >=', $startDate)
+			->where('ph.created_at <=', $endDate)
+			->get()
+			->result();
+
+			$allRecords = $this->db->select('s.subscription_id, ph.payment_history_id, ph.created_at')
+				->from($paymentHistoryTable . ' ph')
+				->join($subscriptionTable . ' s', 's.subscription_id = ph.universal_id', 'inner')
+				->where('s.active', 1)
+				->where('ph.payment_status_id IS NOT NULL', null, false)
+				->where('ph.payment_status_id !=', $paidStatusId)
+				->get()
+				->result();
+
+		$monthBuckets = [];
+		foreach ($records as $row)
+		{
+			$effectiveDate = $this->sanitizeDateTime($row->created_at);
+			if ($effectiveDate === null) {
+				continue;
+			}
+
+			$timestamp = strtotime($effectiveDate);
+			if ($timestamp === false) {
+				continue;
+			}
+
+			$monthKey = date('Y-m', $timestamp);
+			$subscriptionId = isset($row->subscription_id) ? (string) $row->subscription_id : '';
+			if ($subscriptionId === '' && isset($row->payment_history_id)) {
+				$subscriptionId = (string) $row->payment_history_id;
+			}
+			if ($subscriptionId === '') {
+				continue;
+			}
+
+			if (!isset($monthBuckets[$monthKey])) {
+				$monthBuckets[$monthKey] = [];
+			}
+
+			$monthBuckets[$monthKey][$subscriptionId] = true;
+		}
+
+		$totalYear = 0;
+		foreach ($categories as $index => $label) {
+			$monthKey = sprintf('%d-%02d', $currentYear, $index + 1);
+			$count = isset($monthBuckets[$monthKey]) ? count($monthBuckets[$monthKey]) : 0;
+			$result['series'][0]['data'][$index] = $count;
+			$totalYear += $count;
+		}
+
+		$result['total_year'] = $totalYear;
+		$result['total'] = count($allRecords);
 		return $result;
 	}
 

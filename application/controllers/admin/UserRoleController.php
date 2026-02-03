@@ -49,13 +49,43 @@ class UserRoleController extends CI_Controller {
         $userRightData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user_right')->where('user_type_id', $postDataExplode[0])->where('module_id', $postDataExplode[1])->get()->row();
         if ($userRightData) 
 		{
+			$before = (array) $userRightData;
 			$this->db->update($customerDBSettingRow->database_name.'.user_right', array($sqlDataExplode[0]=>$sqlDataExplode[1]), array('user_right_id'=>$userRightData->user_right_id));
 			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User role updated successful'));
+			$afterRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user_right')->where('user_right_id', $userRightData->user_right_id)->get()->row();
+			$this->auditlogger->logAdminAction(
+				'admin',
+				'user_role_update',
+				'user_right',
+				(string) ($userRightData->user_right_id ?? ''),
+				$before,
+				$afterRow ? (array) $afterRow : null,
+				[
+					'customer_db_setting_id' => $session_data['customer_db_setting_id'] ?? null,
+					'user_type_id' => $postDataExplode[0] ?? null,
+					'module_id' => $postDataExplode[1] ?? null,
+					'field' => $sqlDataExplode[0] ?? null
+				],
+				'success',
+				'User role updated'
+			);
         } 
 		else 
 		{
-			$this->db->insert($customerDBSettingRow->database_name.'.user_right', array('user_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));  
+			$newUserRightId = generate_uuid();
+			$this->db->insert($customerDBSettingRow->database_name.'.user_right', array('user_right_id'=>$newUserRightId, 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));  
 			$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$postDataExplode[0].' : '.$postDataExplode[1].' : User role added successful'));
+			$this->auditlogger->logAdminAction(
+				'admin',
+				'user_role_add',
+				'user_right',
+				(string) $newUserRightId,
+				null,
+				['user_right_id' => $newUserRightId, 'user_type_id' => $postDataExplode[0] ?? null, 'module_id' => $postDataExplode[1] ?? null],
+				['customer_db_setting_id' => $session_data['customer_db_setting_id'] ?? null],
+				'success',
+				'User role added'
+			);
         }
 		print_r($postDataExplode[0]);
     }
@@ -67,7 +97,21 @@ class UserRoleController extends CI_Controller {
 
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		$postDataExplode = explode('-', $postData);
-		$result = $this->db->insert($customerDBSettingRow->database_name.'.user_right', array('user_right_id'=>generate_uuid(), 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));
+		$newUserRightId = generate_uuid();
+		$result = $this->db->insert($customerDBSettingRow->database_name.'.user_right', array('user_right_id'=>$newUserRightId, 'user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));
+		if ($result) {
+			$this->auditlogger->logAdminAction(
+				'admin',
+				'user_role_add',
+				'user_right',
+				(string) $newUserRightId,
+				null,
+				['user_right_id' => $newUserRightId, 'user_type_id' => $postDataExplode[0] ?? null, 'module_id' => $postDataExplode[1] ?? null],
+				['customer_db_setting_id' => $session_data['customer_db_setting_id'] ?? null],
+				'success',
+				'User role added'
+			);
+		}
 		print_r($result);
 	}
 
@@ -78,7 +122,25 @@ class UserRoleController extends CI_Controller {
 
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
 		$postDataExplode = explode('-', $postData);
+		$beforeRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user_right')->where('user_type_id', $postDataExplode[0])->where('module_id', $postDataExplode[1])->get()->row();
 		$result = $this->db->delete($customerDBSettingRow->database_name.'.user_right', array('user_type_id'=>$postDataExplode[0], 'module_id'=>$postDataExplode[1]));
+		if ($result) {
+			$this->auditlogger->logAdminAction(
+				'admin',
+				'user_role_delete',
+				'user_right',
+				(string) ($beforeRow->user_right_id ?? ''),
+				$beforeRow ? (array) $beforeRow : null,
+				null,
+				[
+					'customer_db_setting_id' => $session_data['customer_db_setting_id'] ?? null,
+					'user_type_id' => $postDataExplode[0] ?? null,
+					'module_id' => $postDataExplode[1] ?? null,
+				],
+				'success',
+				'User role deleted'
+			);
+		}
 		print_r($result);
 	}
 	

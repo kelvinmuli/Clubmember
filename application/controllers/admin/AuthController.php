@@ -58,11 +58,19 @@ class AuthController extends CI_Controller {
 			redirect('forgot-password/'.$customer_db_setting_id, 'reload');
 		}
 
+		$this->sendResetPassword($userRow->user_id, $customer_db_setting_id);
+		$this->session->set_flashdata('message', 'We have e-mailed your password reset link!');
+		redirect($customer_db_setting_id == '1705386384290' ? 'nmra' : 'login', 'reload');
+	}
+
+	public function sendResetPassword($user_id, $customer_db_setting_id)
+	{
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
 		$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
 		$htmlPasswordReset = $this->load->view('admin/password_reset_temp', array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
 		$this->common->sendMail($userRow->email, 'Password Reset', $htmlPasswordReset);
-		$this->session->set_flashdata('message', 'We have e-mailed your password reset link!');
-		redirect($customer_db_setting_id == '1705386384290' ? 'nmra' : 'login', 'reload');
+		return 'success';
 	}
 
 }

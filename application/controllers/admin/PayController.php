@@ -80,13 +80,13 @@ class PayController extends CI_Controller {
 								<div class="col-lg-6">
 									<div class="mb-3">
 										<label for="category_name">Email Address</label>
-										<input type="email" class="form-control" name="email" id="email" value="'.$userRow->email.'">
+										<input type="email" class="form-control" name="email" id="email" value="'.$userRow->email.'" readonly>
 									</div>
 								</div>
 								<div class="col-lg-6">
 									<div class="mb-3">
 										<label for="category_name">Amount to Pay (Ksh)</label>
-										<input class="form-control" name="amount" id="amount" value="'.$paymentHistoryRow->bill_amount.'">
+										<input class="form-control" name="amount" id="amount" value="'.$paymentHistoryRow->bill_amount.'" readonly>
 									</div>
 								</div>
 							</div>
@@ -166,6 +166,7 @@ class PayController extends CI_Controller {
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
 		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+		$beforePaymentHistoryRow = $paymentHistoryRow;
 
 		$phoneToUse = !empty($phone_no) ? $phone_no : (empty($userRow->phone_number) ? $userRow->mobile_number : $userRow->phone_number);
 		$amountToUse = !empty($amount) ? $amount : ($paymentHistoryRow->bill_amount ?? '1');
@@ -198,6 +199,27 @@ class PayController extends CI_Controller {
 		if ($response === false) {
 			$err = curl_error($curl);
 			curl_close($curl);
+			if (isset($this->auditlogger)) {
+				$this->auditlogger->logUserAction(
+					'payment',
+					'mpesa_stk_push_request',
+					'payment_history',
+					(string) $payment_history_id,
+					$beforePaymentHistoryRow,
+					null,
+					array(
+						'customer_db_setting_id' => $customer_db_setting_id,
+						'user_id' => $user_id,
+						'phone' => $this->normalizeMsisdn($phoneToUse),
+						'amount' => (string) $amountToUse,
+						'correlation_id' => $payment_history_id,
+						'error' => 'curl_failed',
+						'info' => $err,
+					),
+					'fail',
+					'M-Pesa request failed'
+				);
+			}
 			header('Content-Type: application/json');
 			print_r(json_encode(array('code' => 500, 'state' => 'failed', 'error' => 'curl_failed', 'info' => $err)));
 			return;
@@ -210,6 +232,35 @@ class PayController extends CI_Controller {
 
 		if (!empty($checkoutRequestID)) {
 			$this->db->update($customerDBSettingRow->database_name.'.payment_history', array('transaction_code'=>$checkoutRequestID), array('payment_history_id'=>$payment_history_id));
+		}
+		$afterPaymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		if (isset($this->auditlogger)) {
+			$state = (string) ($responseObj['state'] ?? 'success');
+			$code = (string) ($responseObj['code'] ?? '200');
+			$ok = ($state === 'success');
+			$this->auditlogger->logUserAction(
+				'payment',
+				'mpesa_stk_push_request',
+				'payment_history',
+				(string) $payment_history_id,
+				$beforePaymentHistoryRow,
+				$afterPaymentHistoryRow,
+				array(
+					'customer_db_setting_id' => $customer_db_setting_id,
+					'user_id' => $user_id,
+					'phone' => $this->normalizeMsisdn($phoneToUse),
+					'amount' => (string) $amountToUse,
+					'merchantRequestId' => $merchantRequestID,
+					'checkoutRequestId' => $checkoutRequestID,
+					'code' => $code,
+					'state' => $state,
+					'error' => $responseObj['error'] ?? '',
+					'info' => $responseObj['info'] ?? '',
+					'correlation_id' => !empty($checkoutRequestID) ? $checkoutRequestID : $payment_history_id,
+				),
+				$ok ? 'success' : 'fail',
+				'M-Pesa STK push request'
+			);
 		}
 
 		header('Content-Type: application/json');
@@ -353,6 +404,7 @@ class PayController extends CI_Controller {
 		$this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$paymentHistoryId));
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('customer_db_setting_id', $customerDbSettingId)->get()->row();	
 		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->like('payment_history_id', $paymentHistoryId)->get()->row();
+		$beforePaymentHistoryRow = $paymentHistoryRow;
 		$moduleRow = $this->db->select('*')->from('m_module')->where('module_id', $paymentHistoryRow->module_id)->get()->row();
 		$module = 0;
 		if ($paymentHistoryRow->module_id == '17072386410') {// Subscription module
@@ -364,6 +416,29 @@ class PayController extends CI_Controller {
 		}
 		
 		$payment_history = $this->db->update($customerDBSettingRow->database_name.'.payment_history', array('payment_status_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$obj->txncd, 'paid_amount'=>$obj->mc), array('payment_history_id'=>$paymentHistoryRow->payment_history_id));
+		$afterPaymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $paymentHistoryRow->payment_history_id)->get()->row();
+		if (isset($this->auditlogger)) {
+			$this->auditlogger->logSystemEventWithState(
+				'payment',
+				'ipay_callback',
+				'payment_history',
+				(string) ($paymentHistoryRow->payment_history_id ?? $paymentHistoryId),
+				$beforePaymentHistoryRow,
+				$afterPaymentHistoryRow,
+				array(
+					'customer_db_setting_id' => $customerDBSettingRow->customer_db_setting_id ?? null,
+					'module_id' => $paymentHistoryRow->module_id ?? null,
+					'module' => $moduleRow->name ?? null,
+					'txncd' => $obj->txncd ?? null,
+					'amount' => $obj->mc ?? null,
+					'channel' => $obj->channel ?? null,
+					'callback_status' => $obj->status ?? null,
+					'correlation_id' => $paymentHistoryRow->payment_history_id ?? $paymentHistoryId,
+				),
+				$payment_history ? 'success' : 'fail',
+				'iPay callback processed'
+			);
+		}
 		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'paymentHistoryRow -> '.json_encode($paymentHistoryRow)));
 		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>($moduleRow->name ?? 'Module').' -> '.$module));
 		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>'payment_history -> '.$payment_history));
@@ -396,31 +471,57 @@ class PayController extends CI_Controller {
 		// $this->db->insert("payment_log", array('payment_log_id'=>generate_uuid(), 'log' =>$paymentHistoryId));
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->like('customer_db_setting_id', '1705386384290')->get()->row();	
 		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->like('transaction_code', $checkoutRequestID)->get()->row();
+		$beforePaymentHistoryRow = $paymentHistoryRow;
 		$moduleRow = $this->db->select('*')->from('m_module')->where('module_id', $paymentHistoryRow->module_id)->get()->row();
 		$module = 0;
-		if ($paymentHistoryRow->module_id == '17072386410') {// Subscription module
-			$module = $this->db->update($customerDBSettingRow->database_name.'.subscription', array('payment_at'=>date('d M Y')), array('subscription_id'=>$paymentHistoryRow->universal_id));
-		} elseif ($paymentHistoryRow->module_id == '17602075390') {// Fundraising module
-			$module = 1;//$this->db->update($customerDBSettingRow->database_name.'.fundraising', array('payment_at'=>date('d M Y')), array('fundraising_id'=>$paymentHistoryRow->universal_id));
-		} elseif ($paymentHistoryRow->module_id == '17872306643') {// Booking module
-			$module = $this->db->update($customerDBSettingRow->database_name.'.booking', array('payment_at'=>date('d M Y')), array('booking_id'=>$paymentHistoryRow->universal_id));
+		if (!empty($mpesaReceiptNumber)) 
+		{
+			if ($paymentHistoryRow->module_id == '17072386410') {// Subscription module
+				$module = $this->db->update($customerDBSettingRow->database_name.'.subscription', array('payment_at'=>date('d M Y')), array('subscription_id'=>$paymentHistoryRow->universal_id));
+			} elseif ($paymentHistoryRow->module_id == '17602075390') {// Fundraising module
+				$module = 1;//$this->db->update($customerDBSettingRow->database_name.'.fundraising', array('payment_at'=>date('d M Y')), array('fundraising_id'=>$paymentHistoryRow->universal_id));
+			} elseif ($paymentHistoryRow->module_id == '17872306643') {// Booking module
+				$module = $this->db->update($customerDBSettingRow->database_name.'.booking', array('payment_at'=>date('d M Y')), array('booking_id'=>$paymentHistoryRow->universal_id));
+			}
+			
+			$ok = $this->db->update($customerDBSettingRow->database_name.'.payment_history', array('payment_status_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$mpesaReceiptNumber, 'paid_amount'=>$amount), array('payment_history_id'=>$paymentHistoryRow->payment_history_id));
+			$afterPaymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $paymentHistoryRow->payment_history_id)->get()->row();
+			if (isset($this->auditlogger)) {
+				$this->auditlogger->logSystemEventWithState(
+					'payment',
+					'mpesa_callback',
+					'payment_history',
+					(string) ($paymentHistoryRow->payment_history_id ?? ''),
+					$beforePaymentHistoryRow,
+					$afterPaymentHistoryRow,
+					array(
+						'customer_db_setting_id' => $customerDBSettingRow->customer_db_setting_id ?? null,
+						'checkoutRequestId' => $checkoutRequestID,
+						'mpesaReceiptNumber' => $mpesaReceiptNumber,
+						'amount' => $amount,
+						'module_id' => $paymentHistoryRow->module_id ?? null,
+						'module' => $moduleRow->name ?? null,
+						'correlation_id' => $checkoutRequestID,
+					),
+					$ok ? 'success' : 'fail',
+					'M-Pesa callback processed'
+				);
+			}
+			$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $paymentHistoryRow->payment_history_id)->get()->row();
+			$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $paymentHistoryRow->universal_id)->get()->row();
+			$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $paymentHistoryRow->user_id)->get()->row();
+			$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+			$membershipFeeTypeRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('membership_fee_type_id', $subscriptionRow->membership_fee_type_id)->get()->row();
+			
+			$data['membershipFeeTypeRow'] = $membershipFeeTypeRow;
+			$data['customerDBSettingRow'] = $customerDBSettingRow;
+			$data['paymentHistoryRow'] = $paymentHistoryRow;
+			$data['subscriptionRow'] = $subscriptionRow;
+			$data['customerRow'] = $customerRow;
+			$data['userRow'] = $userRow;
+			$emailContent = $this->load->view('admin/subscription_payment_receipt_temp', $data, true);
+			$this->common->sendMail($userRow->email, $customerRow->full_legal_name.' - Subscription Payment Receipt', $emailContent);
 		}
-		
-		$this->db->update($customerDBSettingRow->database_name.'.payment_history', array('payment_status_id'=>'1732371146921', 'payment_method_id'=>$paymentMethodId, 'transaction_code'=>$mpesaReceiptNumber, 'paid_amount'=>$amount), array('payment_history_id'=>$paymentHistoryRow->payment_history_id));
-		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $paymentHistoryRow->payment_history_id)->get()->row();
-		$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $paymentHistoryRow->universal_id)->get()->row();
-		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $paymentHistoryRow->user_id)->get()->row();
-		$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
-		$membershipFeeTypeRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('membership_fee_type_id', $subscriptionRow->membership_fee_type_id)->get()->row();
-		
-		$data['membershipFeeTypeRow'] = $membershipFeeTypeRow;
-		$data['customerDBSettingRow'] = $customerDBSettingRow;
-		$data['paymentHistoryRow'] = $paymentHistoryRow;
-		$data['subscriptionRow'] = $subscriptionRow;
-		$data['customerRow'] = $customerRow;
-		$data['userRow'] = $userRow;
-		$emailContent = $this->load->view('admin/subscription_payment_receipt_temp', $data, true);
-		$this->common->sendMail($userRow->email, $customerRow->full_legal_name.' - Subscription Payment Receipt', $emailContent);
 	}
 
 	public function nmraValidationUrl()

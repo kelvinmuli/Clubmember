@@ -15,7 +15,7 @@
 
 				<div class="row">
 					<div class="col-6">
-					<p class="h3">Customer</p>
+					<p class="h3">Organisation</p>
 					<address>
 						<?php $customer = get_table('customer', 'customer_id', $customerDBSettingRow->customer_id); ?>
 						<?= $customer->full_legal_name ?><br />
@@ -23,7 +23,7 @@
 					</address>
 					</div>
 					<div class="col-6 text-end">
-					<p class="h3">Client</p>
+					<p class="h3">Member</p>
 					<address>
 						<?php $user = get_table($customerDBSettingRow->database_name.'.user', 'user_id', $paymentHistoryRow->user_id); ?>
 						<?= $user->full_legal_name ?><br />
@@ -31,7 +31,7 @@
 					</address>
 					</div>
 					<div class="col-12 my-5">
-					<h1>Invoice INV/<?=substr($paymentHistoryRow->user_id, 0, 3)?>/1</h1>
+					<h1>Invoice INV/<?=substr($paymentHistoryRow->user_id, -4)?></h1>
 					</div>
 				</div>
 				<table class="table table-transparent table-responsive">
@@ -46,9 +46,7 @@
 					</thead>
 					<tr>
 					<td class="text-center">1</td>
-					<td>
-						<div class="text-secondary strong">Corporate Subscription</div>
-					</td>
+					<td><div class="text-secondary strong"><?=$membershipFeeTypeRow->name?></div></td>
 					<td class="text-center">1</td>
 					<td class="text-end"><?='KES ' . number_format($paymentHistoryRow->paid_amount, 2)?></td>
 					<td class="text-end"><?='KES ' . number_format($paymentHistoryRow->paid_amount, 2)?></td>

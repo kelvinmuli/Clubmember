@@ -31,6 +31,27 @@
     <style>
       @import url("https://rsms.me/inter/inter.css");
     </style>
+    <style>
+  .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  .logo img {
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+  }
+
+  @media (max-width: 768px) {
+    .logo-container {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+</style>
     <!-- END CUSTOM FONT -->
   </head>
   <body>
@@ -42,14 +63,23 @@
         <div class="row align-items-center g-4">
           <div class="col-lg">
             <div class="container-tight">
-              <div class="text-center mb-4">
-                <!-- BEGIN NAVBAR LOGO -->
+              <!-- <div class="text-center mb-4">
                 <a href="/" class="logo">
-									<?php if (isset($customerRow) && $customerRow->customer_id != '17765689954') { ?>
-										<img src="<?=base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="30%">
-									<?php } ?>
-								</a>
+                  <img src="<?=base_url('assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="70%">
+                </a>
+              </div> -->
+              <div class="text-center mb-4">
+              <div class="logo-container">
+                <a href="/" class="logo">
+                  <img src="<?= base_url('assets/website/img/Cb-logo-1.jpg') ?>" alt="<?= isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app' ?> Logo" alt="Logo 1">
+                </a>
+                <a href="/" class="logo">
+                  <?php if (isset($customerRow) && $customerRow->customer_id != '17765689954') { ?>
+              <img src="<?= base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg') ?>" alt="<?= isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app' ?> Logo" width="30%">
+            <?php } ?>
+                </a>
               </div>
+            </div>
               <div class="card card-md">
                 <div class="card-body">
                   <h2 class="h2 text-center mb-4">Reset Password</h2>
@@ -134,6 +164,11 @@
             </div>
           </div>
           <div class="col-lg d-none d-lg-block">
+						<a href="/" class="logo">
+							<?php if (isset($customerRow) && $customerRow->customer_id != '17765689954') { ?>
+								<!-- <img src="<?=base_url($customerRow->logo ?? 'assets/website/img/Cb-logo-1.jpg')?>" alt="<?=isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app'?> Logo" width="30%"> -->
+							<?php } ?>
+						</a>
             <svg class="img d-block mx-auto" xmlns="http://www.w3.org/2000/svg" height="400" fill="none" viewBox="0 0 800 600">
               <style>
                 :where(.theme-dark, [data-bs-theme="dark"]) .tblr-illustrations-boy-with-key-a {

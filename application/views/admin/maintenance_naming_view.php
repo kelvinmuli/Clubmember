@@ -5,7 +5,6 @@
             <div class="row align-items-center">
 				<div class="col py-3">
 					<ol class="breadcrumb breadcrumb-arrows" aria-label="breadcrumbs">
-						<li class="breadcrumb-item"><a href="<?=base_url()?>">Website</a></li>
 						<li class="breadcrumb-item"><a href="<?=base_url('dashboard')?>">Backend</a></li>
 						<li class="breadcrumb-item"><?=$moduleMenu->name?></li>
 						<li class="breadcrumb-item active" aria-current="page"><?=$subModuleMenu->name?></li>

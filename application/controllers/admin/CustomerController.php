@@ -385,8 +385,9 @@ class CustomerController extends CI_Controller {
 							
 						<form method="POST" action="'.base_url('remove-customer').'">
 							<div class="modal-body">
-								<input name="customer_id" value="'.$customerRow->customer_id.'" hidden>
-								Are you sure you want to delete <strong id="deleteCustomerName"></strong>?
+								<input name="customer_id" value="'.$customer_id.'" hidden>
+								<input name="full_legal_name" value="'.$customerRow->full_legal_name.'" hidden>
+								Are you sure you want to delete '.$customerRow->full_legal_name.'?
 							</div>
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -403,7 +404,10 @@ class CustomerController extends CI_Controller {
 		$postData = $this->input->post();
 		$customer_id = $postData['customer_id'];
 		$full_legal_name = $postData['full_legal_name'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_id', $customer_id)->get()->row();
+		$this->db->query("DROP DATABASE `$customerDBSettingRow->database_name`");
 		$this->db->delete('customer', array('customer_id'=>$customer_id));
+		$this->db->delete('customer_db_setting', array('customer_id'=>$customer_id));
 		$description = $full_legal_name.' deleted successfully. ✔️';
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$customer_id.' : Customer for '.$description));

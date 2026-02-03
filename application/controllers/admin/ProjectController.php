@@ -132,9 +132,6 @@ class ProjectController extends CI_Controller {
         $postData['budget_used'] = $this->sanitizeCurrency($postData['budget_used'] ?? null);
         $postData['start_at'] = $this->sanitizeDateTime($postData['start_at'] ?? null);
         $postData['due_at'] = $this->sanitizeDateTime($postData['due_at'] ?? null);
-        $postData['active'] = isset($postData['active']) && $postData['active'] !== '' ? (int) $postData['active'] : 1;
-        $postData['created_at'] = date('d M Y');
-        $postData['updated_at'] = date('d M Y');
 
         $thumbnailUrlInput = trim($postData['thumbnail_url'] ?? '');
         unset($postData['thumbnail_url']);
@@ -162,9 +159,9 @@ class ProjectController extends CI_Controller {
 	{
         $this->common->checkSession();
         $session_data = $this->common->loadSession();
+		$headerData = $this->common->loadHeaderData('project');
         $customer_db_setting_id = $session_data['customer_db_setting_id'];
 
-        $data['user_type_id'] = $session_data['user_type_id'];
         $data = [
             'projectRow' => null,
             'project_id' => $project_id,
@@ -226,6 +223,10 @@ class ProjectController extends CI_Controller {
                     ->get()
                     ->result();
         }
+		$data['user_type_id'] = $session_data['user_type_id'] ?? '';
+		$data['inputUserRight'] = $headerData['inputUserRight'];
+		$data['editUserRight'] = $headerData['editUserRight'];
+		$data['removeUserRight'] = $headerData['removeUserRight'];
 
         return $this->load->view('admin/view_project_modal', $data);
     }

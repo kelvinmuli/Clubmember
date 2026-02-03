@@ -36,6 +36,18 @@ class GlobalController extends CI_Controller {
 		$unique_id = $postData['unique_id'];
 		if ($unique_id)
 		{
+			if (explode('.', $table)[1] == 'payment_history')
+			{
+				$database_name = explode('.', $table)[0];
+				$paymentHistoryRow = $this->db->select('*')->from($table)->where($table_id, $unique_id)->get()->row();
+				$this->db->delete($database_name.'.subscription', array('subscription_id'=>$paymentHistoryRow->universal_id));
+			}
+			if (explode('.', $table)[1] == 'subscription')
+			{
+				$database_name = explode('.', $table)[0];
+				$subscriptionRow = $this->db->select('*')->from($table)->where($table_id, $unique_id)->get()->row();
+				$this->db->delete($database_name.'.payment_history', array('universal_id'=>$subscriptionRow->subscription_id));
+			}
 			$this->db->delete($table, array($table_id=>$unique_id));
 			$this->session->set_flashdata('success', 'Data removed successfully.');
 		}

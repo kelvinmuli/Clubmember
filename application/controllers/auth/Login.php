@@ -40,6 +40,7 @@ class Login extends CI_Controller {
 		
 		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id ?? '')->get()->row();
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
+		$data['host'] = $host;
 		$this->load->view('auth/login_view', $data);
 	}
 
@@ -72,6 +73,17 @@ class Login extends CI_Controller {
 					$user = json_decode(json_encode($userInnerRow), true);
 					$user['customer_db_setting_id'] = $customerDBSetting->customer_db_setting_id;
 					$this->session->set_userdata(GlobalModel::SESSION, $user);
+					$this->auditlogger->logUserAction(
+						'auth',
+						'login',
+						'user',
+						(string) ($userInnerRow->user_id ?? ''),
+						null,
+						null,
+						['email' => $email, 'customer_db_setting_id' => $customerDBSetting->customer_db_setting_id],
+						'success',
+						'User logged in'
+					);
 					$description = 'Welcome back ' . ($userInnerRow->full_legal_name ?? $email) . '. ✔️';
 					$this->session->set_flashdata('message', $description);
 					$userRightData = $this->db->select('*')->from('user_right')->where('user_type_id', $userInnerRow->user_type_id)->get()->row();
@@ -88,6 +100,17 @@ class Login extends CI_Controller {
 			$user = json_decode(json_encode($userRow), true);
 			$user['customer_db_setting_id'] = '1755387775468';
 			$this->session->set_userdata(GlobalModel::SESSION, $user);
+			$this->auditlogger->logUserAction(
+				'auth',
+				'login',
+				'user',
+				(string) ($userRow->user_id ?? ''),
+				null,
+				null,
+				['email' => $email, 'customer_db_setting_id' => '1755387775468'],
+				'success',
+				'User logged in'
+			);
 			$description = 'Welcome back ' . ($userRow->full_legal_name ?? $email) . '. ✔️';
 			$this->session->set_flashdata('message', $description);
 			$userRightData = $this->db->select('*')->from('user_right')->where('user_type_id', $userRow->user_type_id)->get()->row();
@@ -97,6 +120,11 @@ class Login extends CI_Controller {
 		}
 
 		// If we reached here, login failed — show error on login page
+		$this->auditlogger->logSecurityEvent('auth', 'login_failed', [
+			'email' => $email,
+			'customer_db_setting_id' => null,
+			'reason' => 'invalid_credentials'
+		], 'fail', 'Invalid credentials');
 		$this->session->set_flashdata('err', 'Invalid credentials.');
 		redirect('login', 'reload');
 	}
@@ -180,9 +208,8 @@ class Login extends CI_Controller {
 		
 		if (!$checkHost)
 		{
-			$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $host)->or_where('host', $host)->get()->row();
+			$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $host)->or_where('host', $host)->or_where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		}
-		
 		$data['customerRow'] = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id ?? $customer_db_setting_id)->get()->row();
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
 		// $customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
@@ -216,6 +243,19 @@ class Login extends CI_Controller {
 	{
         // $this->common->checkSession();
 		$session_data = $this->common->loadSession();
+		if (!empty($session_data)) {
+			$this->auditlogger->logUserAction(
+				'auth',
+				'logout',
+				'user',
+				(string) ($session_data['user_id'] ?? ''),
+				null,
+				null,
+				['customer_db_setting_id' => $session_data['customer_db_setting_id'] ?? null],
+				'success',
+				'User logged out'
+			);
+		}
 
 		$user_type = $session_data['user_type'];
 

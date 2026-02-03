@@ -90,7 +90,7 @@ $autoload['drivers'] = array();
 */
 // $autoload['helper'] = array();
 // Common
-$autoload['libraries'] = array('database','session','form_validation','user_agent','common','curl','csvimport');
+$autoload['libraries'] = array('database','session','form_validation','user_agent','common','curl','csvimport','auditLogger');
 $autoload['helper'] = array('html', 'url', 'file', 'form','cookie','common_helper');
 
 /*

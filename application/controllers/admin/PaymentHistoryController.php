@@ -41,13 +41,17 @@ class PaymentHistoryController extends CI_Controller
 
     public function paymentReceiptModal($user_id, $payment_history_id)
     {
-         $this->common->checkSession();
+        $this->common->checkSession();
         $session_data = $this->common->loadSession();
         $customer_db_setting_id = $session_data['customer_db_setting_id'];
 
         $customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+        $paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $paymentHistoryRow->universal_id)->get()->row();
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
-        $data['paymentHistoryRow'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		$data['paymentHistoryRow'] = $paymentHistoryRow;
+		$data['subscriptionRow'] = $subscriptionRow;
+		$data['membershipFeeTypeRow'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('membership_fee_type_id', $subscriptionRow->membership_fee_type_id)->get()->row();
 
         return $this->load->view('admin/subscription_receipt_modal', $data);
     }

@@ -43,6 +43,7 @@ class SubscriptionController extends CI_Controller {
 			$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription s')->join($customerDBSettingRow->database_name.'.payment_history ph', 's.subscription_id=ph.universal_id', 'left')->where('ph.payment_status_id', $payment_status_id)->where('s.user_id', $session_data['user_id'])->where('s.active', 1)->get()->result();
 		}
 		
+		$data['userTypeId'] = $session_data['user_type_id'];
 		$data['paymentStatusId'] = $payment_status_id;
 		$data['customerDBSettingRow'] = $customerDBSettingRow;
 		$data['subscriptionData'] = $subscriptionData ?? [];
@@ -73,6 +74,7 @@ class SubscriptionController extends CI_Controller {
 		$membershipFeeTypeData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('active', 1)->get()->result();
 		$currencyData = $this->db->select('*')->from('m_currency')->where('active', 1)->get()->result();
 		$userData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->get()->result();
+		$paymentMethodData = $this->db->select('*')->from('m_payment_method')->where('active', 1)->get()->result();
 
 		$doubleUserArray = []; $checkDoubleEmailUser = 0;
 		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
@@ -188,7 +190,7 @@ class SubscriptionController extends CI_Controller {
 									</div>
 									<div class="col-lg-12">
 										<div class="mb-3">
-											<label for="payment_at" class="form-label">Notes</label>
+											<label for="remark" class="form-label">Notes</label>
 											<textarea id="remark" name="remark" class="form-control" rows="3"></textarea>
 										</div>
 									</div>
@@ -226,6 +228,7 @@ class SubscriptionController extends CI_Controller {
 		$header = $postData['header'];
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		unset($postData['customer_db_setting_id'], $postData['payment_status_id'], $postData['year'], $postData['membership_type_id'], $postData['header']);
+		$this->db->update($customerDBSettingRow->database_name.'.user', array('membership_fee_type_id'=>$postData['membership_fee_type_id']), array('user_id'=>$user_id));
 		if ($this->db->insert($customerDBSettingRow->database_name.'.subscription', $postData)) 
 		{
 			$this->db->insert($customerDBSettingRow->database_name.'.payment_history', array('payment_history_id'=>generate_uuid(), 'user_id'=>$postData['user_id'], 'customer_id'=>$customerDBSettingRow->customer_id, 'bill_amount'=>$postData['amount'], 'currency_id'=>$postData['currency_id'], 'module_id'=>'17072386410', 'universal_id'=>$postData['subscription_id'], 'payment_status_id'=>$payment_status_id));
@@ -239,16 +242,11 @@ class SubscriptionController extends CI_Controller {
 				$clubMemberData['userRow'] = $userRow;
 				$clubMemberData['customerRow'] = $customerRow;
 				$htmlApprovalNotification = $this->load->view('admin/club_member_temp', $clubMemberData, true);
-				if (!$isSubscriptionPaid) {
-					$this->common->sendMail($userRow->email, 'Action Required - Your New Muthaiga Residents Association ClubMember.app Account Activation', $htmlApprovalNotification);
+				$subscriptionData = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('user_id', $user_id)->get()->result();
+				if (count($subscriptionData) == 1) {
+					$this->common->sendMail($userRow->email, 'New Muthaiga Residents Association - Action Required - Your New Muthaiga Residents Association ClubMember.app Account Activation', $htmlApprovalNotification);
 				}		
-
-				$membershipTypeName = get_table('m_membership_type', 'membership_type_id', $userRow->membership_type_id, 'name');
-				$subscriptionPaymentData = array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$postData['amount'], 'due_at'=>$postData['due_at'], 'notes'=>$postData['remark'], 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id));
-				$subscriptionPaymentData['userRow'] = $userRow;
-				$subscriptionPaymentData['customerRow'] = $customerRow;
-				$htmlSubscriptionPayment = $this->load->view('admin/subscription_payment_temp', $subscriptionPaymentData, true);
-				$this->common->sendMail($userRow->email, 'New Muthaiga Residents Association Subscription Payment Required', $htmlSubscriptionPayment);
+				$this->sendSubscriptionUnPaid($user_id, $postData['subscription_id']);
 			} 
 			else
 			{
@@ -565,6 +563,143 @@ class SubscriptionController extends CI_Controller {
 		print_r($modal);
 	}
 
+	public function editSubscriptionApproveModal($subscription_id, $payment_history_id)
+	{
+		$this->common->checkSession(array('dialog'=>1));
+
+		$session_data = $this->common->loadSession();
+		$customer_db_setting_id = $session_data['customer_db_setting_id'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$paymentMethodData = $this->db->select('*')->from('m_payment_method')->where('active', 1)->get()->result();
+		$paymentStatusData = $this->db->select('*')->from('m_payment_status')->where('active', 1)->get()->result();
+		$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $subscription_id)->get()->row();
+		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+
+		if (empty($customerDBSettingRow) || empty($subscriptionRow) || empty($paymentHistoryRow)) {
+			$modal = '<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Edit Subscription</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+							<div class="alert alert-danger">Unable to load subscription/payment details. Please refresh and try again.</div>
+						</div>
+					</div>
+				</div>';
+			print_r($modal);
+			return;
+		}
+
+		$paymentAtValue = '';
+		if (!empty($subscriptionRow->payment_at) && !in_array($subscriptionRow->payment_at, array('0000-00-00', ''))) {
+			$paymentAtValue = date('Y-m-d', strtotime($subscriptionRow->payment_at));
+		}
+
+		$paidAmountValue = !empty($paymentHistoryRow->bill_amount) ? $paymentHistoryRow->bill_amount : $subscriptionRow->amount;
+		$transactionCodeValue = $paymentHistoryRow->transaction_code ?? '';
+		$remarkValue = $paymentHistoryRow->remark ?? '';
+
+		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Edit Subscription</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+
+						<form action="'.base_url('approve-subscription').'" method="POST" enctype="multipart/form-data">	
+							<input id="subscription_id" name="subscription_id" type="text" value="'.$subscriptionRow->subscription_id.'" hidden>
+							<input id="payment_history_id" name="payment_history_id" type="text" value="'.$paymentHistoryRow->payment_history_id.'" hidden>
+							<input id="customer_db_setting_id" name="customer_db_setting_id" type="text" value="'.$customer_db_setting_id.'" hidden>
+							<div class="modal-body">
+								<div class="row">
+									<div class="col-lg-6">
+										<div class="mb-3">
+											<label for="Amount" class="form-label">Amount</label>
+											<input id="paid_amount" name="paid_amount" type="number" class="form-control btn-pill" value="'.$paidAmountValue.'" required>
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="mb-3">
+											<label for="transaction_code" class="form-label">Transaction Code</label>
+											<input id="transaction_code" name="transaction_code" type="text" class="form-control btn-pill" value="'.$transactionCodeValue.'" required>
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="mb-3">
+											<label for="payment_method_id" class="form-label">Payment Method</label>
+											<select id="payment_method_id" name="payment_method_id" class="form-select btn-pill" required>
+												<option selected disabled>Select Payment Method</option>';
+												if (isset($paymentMethodData)): foreach($paymentMethodData as $data):
+													$selected = ($data->payment_method_id == ($paymentHistoryRow->payment_method_id ?? '')) ? 'selected' : '';
+													$modal .= '<option value="'.$data->payment_method_id.'" '.$selected.'>'.$data->name.'</option>';
+												endforeach; endif;
+											$modal .= '</select>
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="mb-3">
+											<label for="payment_at" class="form-label">Payment Date</label>
+											<input id="payment_at" name="payment_at" type="date" class="form-control btn-pill" value="'.$paymentAtValue.'" required>
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="mb-3">
+											<label for="payment_status_id" class="form-label">Payment Status</label>
+											<select id="payment_status_id" name="payment_status_id" class="form-select btn-pill" required>
+												<option selected disabled>Select Payment Status</option>';
+												if (isset($paymentStatusData)): foreach($paymentStatusData as $data):
+													$selected = ($data->payment_status_id == ($paymentHistoryRow->payment_status_id ?? '')) ? 'selected' : '';
+													$modal .= '<option value="'.$data->payment_status_id.'" '.$selected.'>'.$data->name.'</option>';
+												endforeach; endif;
+											$modal .= '</select>
+										</div>
+									</div>
+									<div class="col-lg-12">
+										<div class="mb-3">
+											<label for="payment_at" class="form-label">Notes</label>
+											<textarea id="remark" name="remark" class="form-control" rows="3">'.$remarkValue.'</textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<a href="#" class="btn btn-link link-secondary " data-bs-dismiss="modal">Cancel</a>
+								<button href="#" type="submit" class="btn btn-primary ms-auto btn-pill">
+									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> Update Approval
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>';
+		print_r($modal);
+	}
+
+	public function removeSubscriptionApproveModal($subscription_id, $payment_history_id)
+	{
+		$this->common->checkSession(array('dialog'=>1));
+		$session_data = $this->common->loadSession();
+		$customer_db_setting_id = $session_data['customer_db_setting_id'];
+
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
+
+		$name = '';
+		if (!empty($customerDBSettingRow) && !empty($subscription_id)) {
+			$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $subscription_id)->get()->row();
+			if (!empty($subscriptionRow) && !empty($subscriptionRow->user_id)) {
+				$name = get_table($customerDBSettingRow->database_name.'.user', 'user_id', $subscriptionRow->user_id, 'full_legal_name');
+			}
+		}
+
+		$data['table'] = !empty($customerDBSettingRow) ? $customerDBSettingRow->database_name.'.payment_history' : 'payment_history';
+		$data['table_id'] = 'payment_history_id';
+		$data['unique_id'] = $payment_history_id;
+		$data['name'] = !empty($name) ? ('Payment approval for '.$name) : 'Payment approval';
+		$data['route'] = 'subscription';
+		return $this->load->view('admin/remove_global_modal', $data);
+	}
+
 	public function approveSubscription()
 	{
 		$this->common->checkSession();
@@ -575,16 +710,86 @@ class SubscriptionController extends CI_Controller {
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
 		$subcription_id = $postData['subscription_id'];
 		$payment_history_id = $postData['payment_history_id'];
-		if ($this->db->update($customerDBSettingRow->database_name.'.payment_history', array('transaction_code'=>$postData['transaction_code'], 'paid_amount'=>$postData['paid_amount'], 'payment_method_id'=>$postData['payment_method_id'], 'payment_status_id'=>$postData['payment_status_id'], 'remark'=>$postData['remark']), array('payment_history_id'=>$payment_history_id))) {
+		$beforePaymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		$beforeSubscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $subcription_id)->get()->row();
+		$ok = $this->db->update($customerDBSettingRow->database_name.'.payment_history', array('transaction_code'=>$postData['transaction_code'], 'paid_amount'=>$postData['paid_amount'], 'payment_method_id'=>$postData['payment_method_id'], 'payment_status_id'=>$postData['payment_status_id'], 'remark'=>$postData['remark']), array('payment_history_id'=>$payment_history_id));
+		if ($ok) {
 			$this->db->update($customerDBSettingRow->database_name.'.subscription', array('payment_at'=>$postData['payment_at']), array('subscription_id'=>$subcription_id));
-			$description = 'Subscription approved successfully.';
+			$description = 'Subscription approved successfully';
 		} else {
 			$description = 'Failed to approve subscription. Please try again.';
 		}
+		$afterPaymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		$afterSubscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $subcription_id)->get()->row();
 		
 		$this->session->set_flashdata('message', $description);
 		$this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$customer_db_setting_id.' : '.$subcription_id.' : '.$payment_history_id.' - '.$description));
+		if (isset($this->auditlogger)) {
+			$this->auditlogger->logAdminAction(
+				'subscription',
+				'approve_payment',
+				'subscription',
+				(string) $subcription_id,
+				array('subscription' => $beforeSubscriptionRow, 'payment_history' => $beforePaymentHistoryRow),
+				array('subscription' => $afterSubscriptionRow, 'payment_history' => $afterPaymentHistoryRow),
+				array(
+					'customer_db_setting_id' => $customer_db_setting_id,
+					'payment_history_id' => $payment_history_id,
+					'correlation_id' => $payment_history_id,
+				),
+				$ok ? 'success' : 'fail',
+				$description
+			);
+		}
 		redirect('subscription', 'refresh');
+	}
+
+	public function sendSubscriptionUnPaid($user_id, $subcription_id)
+	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();	
+		$customer_db_setting_id = $session_data['customer_db_setting_id'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
+		$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $subcription_id)->get()->row();
+		$membershipTypeName = get_table('m_membership_type', 'membership_type_id', $userRow->membership_type_id, 'name');
+		$subscriptionPaymentData = array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$subscriptionRow->amount, 'due_at'=>$subscriptionRow->due_at, 'notes'=>$subscriptionRow->remark, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id));
+		$subscriptionPaymentData['userRow'] = $userRow;
+		$subscriptionPaymentData['customerRow'] = $customerRow;
+		$htmlSubscriptionPayment = $this->load->view('admin/subscription_payment_temp', $subscriptionPaymentData, true);
+		$this->common->sendMail($userRow->email, 'New Muthaiga Residents Association Subscription Payment Required', $htmlSubscriptionPayment);
+		return 'success';
+	}
+
+	public function sendSubscriptionPaid($subscription_id, $payment_history_id)
+	{
+		$this->common->checkSession();
+		$session_data = $this->common->loadSession();
+
+		$postData = $this->input->post();
+		$customer_db_setting_id = $session_data['customer_db_setting_id'];
+		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $customer_db_setting_id)->get()->row();
+		$subscriptionRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.subscription')->where('subscription_id', $subscription_id)->get()->row();
+		$paymentHistoryRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.payment_history')->where('payment_history_id', $payment_history_id)->get()->row();
+		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $paymentHistoryRow->user_id)->get()->row();
+		$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
+		$membershipFeeTypeRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.membership_fee_type')->where('membership_fee_type_id', $subscriptionRow->membership_fee_type_id)->get()->row();
+		
+		$data['membershipFeeTypeRow'] = $membershipFeeTypeRow;
+		$data['customerDBSettingRow'] = $customerDBSettingRow;
+		$data['paymentHistoryRow'] = $paymentHistoryRow;
+		$data['subscriptionRow'] = $subscriptionRow;
+		$data['customerRow'] = $customerRow;
+		$data['userRow'] = $userRow;
+		$emailContent = $this->load->view('admin/subscription_payment_receipt_temp', $data, true);
+		$this->common->sendMail($userRow->email, $customerRow->full_legal_name.' - Subscription Payment Receipt', $emailContent);
+		return 'success';
+		// $description = 'Subscription payment receipt sent to '.$userRow->email;
+		// $this->session->set_flashdata('message', $description);
+		// $this->db->insert('system_log', array('system_log_id'=>generate_uuid(), 'log_type_id'=>'1636952180', 'description'=>$customer_db_setting_id.' : '.$subscription_id.' : '.$payment_history_id.' - '.$description));
+		// redirect('subscription/1732371146921', 'refresh');
 	}
 
 	public function sendPaymentReminder($subscription_id, $payment_history_id)

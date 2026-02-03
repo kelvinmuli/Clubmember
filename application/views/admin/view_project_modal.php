@@ -1,7 +1,7 @@
 <div class="modal-dialog modal-full-width modal-dialog-centered" role="document">
 	<div class="modal-content">
 		<div class="modal-header">
-			<h5 class="modal-title">View Project <?=$user_type_id?></h5>
+			<h5 class="modal-title">View Project</h5>
 			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		</div>
 
@@ -115,7 +115,9 @@
 						<th>Update Description</th>
 						<th>DateTime</th>
 						<th>Attachment</th>
-						<th>Actions</th>
+						<?php if ($inputUserRight || $editUserRight || $removeUserRight): ?>
+							<th>Actions</th>
+						<?php endif; ?>
 					</tr>
 				</thead>
 				<tbody>
@@ -136,8 +138,11 @@
 									<?php endif; ?>
 								</td>
 								<td>
-									<button type="button" class="btn btn-sm btn-primary" onclick="editProjectUpdateModal('<?= $update->project_update_id ?>')">Edit</button>
-									<button type="button" class="btn btn-sm btn-danger" onclick="deleteProjectUpdateModal('<?= $update->project_update_id ?>')">Delete</button>
+									<?php if ($editUserRight): ?>
+									    <button type="button" class="btn btn-sm btn-primary" onclick="editProjectUpdateModal('<?=$update->project_update_id ?>')">Edit</button>
+									<?php endif; if ($removeUserRight): ?>
+									    <button type="button" class="btn btn-sm btn-danger" onclick="deleteProjectUpdateModal('<?=$update->project_update_id ?>')">Delete</button>
+									<?php endif; ?>
 								</td>
 							</tr>
 						<?php endforeach; ?>
@@ -151,7 +156,7 @@
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-			<?php if ($user_type_id == GlobalModel::MEMBER_TYPE): ?>
+			<?php if (in_array($user_type_id, [GlobalModel::ADMIN_TYPE, GlobalModel::CLUB_ADMIN_TYPE])): ?>
 				<button type="button" class="btn btn-primary" onclick="addProjectUpdateModal('<?= $projectRow->project_id ?>')">Add Project Update</button>
 			<?php endif; ?>
 		</div>
