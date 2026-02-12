@@ -101,7 +101,7 @@
 		<div class="container-fluid">
 			<div id="overview-card" class="row row-cards py-3"></div>
 			<div class="row row-deck row-cards">
-				<?php if (in_array($user_type_id, array(GlobalModel::MEMBER_TYPE))): ?>
+				<?php if (!empty(get_user_right($user_type_id, '17072386410', 'view', 1))): ?>
 					<div class="col-12">
 						<div class="card">
 							<div class="card-table">
@@ -415,7 +415,7 @@
 					</div>
 				</div>
 
-				<?php if (!empty($activeProjects)): ?>
+				<?php if (!empty(get_user_right($user_type_id, '17659385748', 'view', 1))): ?>
 					<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 						<div class="card">
 							<div class="card-header">
@@ -435,7 +435,7 @@
 							</div>
 							<div class="card-body">
 								<div class="row g-3">
-									<?php foreach ($activeProjects as $project): ?>
+									<?php if (isset($activeProjects)): foreach ($activeProjects as $project): ?>
 										<?php $thumbnail = trim($project->thumbnail_url ?? ''); $thumbnailSrc = $thumbnail ? (filter_var($thumbnail, FILTER_VALIDATE_URL) ? $thumbnail : base_url($thumbnail)) : ''; ?>
 										<div class="col-12 col-md-4">
 											<div class="card">
@@ -459,14 +459,12 @@
 												</div>
 											</div>
 										</div>
-									<?php endforeach; ?>
+									<?php endforeach; endif; ?>
 								</div>
 							</div>
 						</div>
 					</div>
-				<?php endif; ?>
-
-				<?php if (!empty($activePetitions)): ?>
+				<?php endif; if (!empty(get_user_right($user_type_id, '17050885903', 'view', 1))): ?>
 					<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 						<div class="card">
 							<div class="card-header">
@@ -486,7 +484,7 @@
 							</div>
 							<div class="card-body">
 								<div class="row g-3">
-									<?php foreach ($activePetitions as $petition): ?>
+									<?php if (isset($activePetitions)): foreach ($activePetitions as $petition): ?>
 										<div class="col-12 col-md-4">
 											<div class="card">
 												<div class="card-body d-flex">
@@ -520,14 +518,12 @@
 												</div>
 											</div>
 										</div>
-									<?php endforeach; ?>
+									<?php endforeach; endif; ?>
 								</div>
 							</div>
 						</div>
 					</div>
-				<?php endif; ?>
-
-				<?php if (!empty($noticeBoardItems)): ?>
+				<?php endif; if (!empty(get_user_right($user_type_id, '17804724081', 'view', 1))): ?>
 					<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 						<div class="card">
 							<div class="card-header">
@@ -547,7 +543,7 @@
 							</div>
 							<div class="card-body">
 								<div class="row g-3">
-									<?php foreach ($noticeBoardItems as $notice): ?>
+									<?php if (!empty($noticeBoardItems)): foreach ($noticeBoardItems as $notice): ?>
 										<div class="col-12 col-md-4">
 											<div class="card">
 												<div class="card-body d-flex">
@@ -570,7 +566,7 @@
 												</div>
 											</div>
 										</div>
-									<?php endforeach; ?>
+									<?php endforeach; endif; ?>
 								</div>
 							</div>
 						</div>
@@ -725,8 +721,7 @@
 								</div>
 							</div>
 						</div>
-					</div>
-					
+					</div>	
 				<?php endif; endforeach; endif; if (!empty(get_user_right($user_type_id, '17743087640', 'view', 1))): ?>
 					<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 						<div class="card">
@@ -798,75 +793,74 @@
 						</div>
 					</div>
 				<?php endif; ?>
-
-				<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
-					<div class="card">
-						<div class="card-table">
-							<div class="card-header">
-								<div class="row w-full">
-									<div class="col">
-										<h3 class="card-title mb-0">Newly Added Audited Accounts</h3>
-										<p class="text-secondary m-0">Listing Newly Added Audited Accounts.</p>
+				<!-- <?php if (!empty(get_user_right($user_type_id, '17804724081', 'view', 1))): ?> -->
+					<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
+						<div class="card">
+							<div class="card-table">
+								<div class="card-header">
+									<div class="row w-full">
+										<div class="col">
+											<h3 class="card-title mb-0">Newly Added Audited Accounts</h3>
+											<p class="text-secondary m-0">Listing Newly Added Audited Accounts.</p>
+										</div>
+									</div>
+									<div class="col-auto ms-auto">
+										<div class="btn-list">
+											<a class="btn btn-primary" href="<?=base_url('audited-account')?>">
+												<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All Audited Accounts
+											</a>
+										</div>
 									</div>
 								</div>
-								<div class="col-auto ms-auto">
-									<div class="btn-list">
-										<a class="btn btn-primary" href="<?=base_url('audited-account')?>">
-											<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 4v16m8 -8H4" /></svg> View All Audited Accounts
-										</a>
-									</div>
-								</div>
-							</div>
 
-							<div class="card-body border-bottom py-3">
-								<div class="row g-3">
-									<?php if (!empty($auditedAccountData)): ?>
-										<?php foreach($auditedAccountData as $account): ?>
-											<?php
-												$accountName = htmlspecialchars((string)($account->name ?? ''), ENT_QUOTES, 'UTF-8');
-												$stateValue = (int) ($account->state ?? -1);
-												$stateName = (string) get_table('m_state', 'num', $stateValue, 'name');
-												$statusName = (string) get_table('m_active', 'num', (int) ($account->active ?? -1), 'name');
-												$createdAt = !empty($account->created_at) ? date('d M Y', strtotime($account->created_at)) : 'N/A';
-											?>
-											<div class="col-12 col-md-6 col-lg-4">
-												<div class="card h-100">
-													<div class="card-body">
-														<div class="d-flex align-items-start justify-content-between">
-															<div>
-																<div class="text-secondary">Audited Account</div>
-																<div class="h3 mb-1"><?=$accountName?></div>
+								<div class="card-body border-bottom py-3">
+									<div class="row g-3">
+										<?php if (!empty($auditedAccountData)): ?>
+											<?php foreach($auditedAccountData as $account): ?>
+												<?php
+													$accountName = htmlspecialchars((string)($account->name ?? ''), ENT_QUOTES, 'UTF-8');
+													$stateValue = (int) ($account->state ?? -1);
+													$stateName = (string) get_table('m_state', 'num', $stateValue, 'name');
+													$statusName = (string) get_table('m_active', 'num', (int) ($account->active ?? -1), 'name');
+													$createdAt = !empty($account->created_at) ? date('d M Y', strtotime($account->created_at)) : 'N/A';
+												?>
+												<div class="col-12 col-md-6 col-lg-4">
+													<div class="card h-100">
+														<div class="card-body">
+															<div class="d-flex align-items-start justify-content-between">
+																<div>
+																	<div class="text-secondary">Audited Account</div>
+																	<div class="h3 mb-1"><?=$accountName?></div>
+																</div>
+																<span class="badge bg-azure-lt"><?=htmlspecialchars($stateName, ENT_QUOTES, 'UTF-8')?></span>
 															</div>
-															<span class="badge bg-azure-lt"><?=htmlspecialchars($stateName, ENT_QUOTES, 'UTF-8')?></span>
-														</div>
 
-														<div class="mt-3">
-															<span class="badge bg-blue-lt"><?=htmlspecialchars($statusName, ENT_QUOTES, 'UTF-8')?></span>
-															<div class="text-secondary mt-2">Created</div>
-															<div class="fw-semibold"><?=htmlspecialchars((string)$createdAt, ENT_QUOTES, 'UTF-8')?></div>
-														</div>
+															<div class="mt-3">
+																<span class="badge bg-blue-lt"><?=htmlspecialchars($statusName, ENT_QUOTES, 'UTF-8')?></span>
+																<div class="text-secondary mt-2">Created</div>
+																<div class="fw-semibold"><?=htmlspecialchars((string)$createdAt, ENT_QUOTES, 'UTF-8')?></div>
+															</div>
 
-														<div class="mt-3 d-flex gap-2 flex-wrap justify-content-end">
-															<button class="btn btn-pill" onclick="viewAuditedAccountModal('<?=$account->audited_account_id?>')">
-																<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View
-															</button>
+															<div class="mt-3 d-flex gap-2 flex-wrap justify-content-end">
+																<button class="btn btn-pill" onclick="viewAuditedAccountModal('<?=$account->audited_account_id?>')">
+																	<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="12" cy="12" r="2" /><path d="M22 12c-2.667 4.667 -6 7 -10 7s-7.333 -2.333 -10 -7c2.667 -4.667 6 -7 10 -7s7.333 2.333 10 7z" /></svg> View
+																</button>
+															</div>
 														</div>
 													</div>
 												</div>
+											<?php endforeach; ?>
+										<?php else: ?>
+											<div class="col-12">
+												<span class="badge bg-red-lt">No Audited Accounts Found.</span>
 											</div>
-										<?php endforeach; ?>
-									<?php else: ?>
-										<div class="col-12">
-											<span class="badge bg-red-lt">No Audited Accounts Found.</span>
-										</div>
-									<?php endif; ?>
+										<?php endif; ?>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-
-				<?php if (!empty(get_user_right($user_type_id, '17848086429', 'view', 1))): ?>
+				<?php endif; if (!empty(get_user_right($user_type_id, '17848086429', 'view', 1))): ?>
 					<div class="col-12" <?=$isSubscriptionPaid ? '' : 'hidden'?>>
 						<div class="card">
 							<div class="card-table">

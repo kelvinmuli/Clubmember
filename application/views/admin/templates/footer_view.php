@@ -387,13 +387,40 @@
 
 
 
-			function printReceipt(title, contentId) {
+			function resolveReceiptContent(contentId, iframeId) {
 				var content = document.getElementById(contentId);
-				if (!content) {
+				if (content) {
+					return { content: content, doc: document, iframe: null };
+				}
+				if (!iframeId) {
+					return null;
+				}
+				var iframe = document.getElementById(iframeId);
+				if (!iframe) {
+					return null;
+				}
+				var frameDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+				if (!frameDoc) {
+					return null;
+				}
+				var frameContent = frameDoc.getElementById(contentId) || frameDoc.body;
+				if (!frameContent) {
+					return null;
+				}
+				return { content: frameContent, doc: frameDoc, iframe: iframe };
+			}
+
+			function printReceipt(title, contentId, iframeId) {
+				var resolved = resolveReceiptContent(contentId, iframeId);
+				if (!resolved) {
 					console.warn('printReceipt: content not found for id', contentId);
 					window.print();
 					return;
 				}
+
+				var content = resolved.content;
+				var sourceDoc = resolved.doc;
+				var iframeEl = resolved.iframe;
 
 				var printWindow = window.open('', 'print-' + Date.now(), 'height=600,width=800');
 				if (!printWindow) {
@@ -402,10 +429,10 @@
 				}
 
 				var clonedContent = content.cloneNode(true);
-				var styles = Array.prototype.slice.call(document.querySelectorAll('link[rel="stylesheet"], style'));
+				var styles = Array.prototype.slice.call(sourceDoc.querySelectorAll('link[rel="stylesheet"], style'));
 
 				printWindow.document.open();
-				printWindow.document.write('<!DOCTYPE html><html><head><title>' + (title || document.title) + '</title>');
+				printWindow.document.write('<!DOCTYPE html><html><head><title>' + (title || sourceDoc.title || document.title) + '</title>');
 				styles.forEach(function(node) {
 					printWindow.document.write(node.outerHTML);
 				});
@@ -427,6 +454,208 @@
 				} else {
 					printWindow.onload = finalizePrint;
 				}
+			}
+
+			function downloadReceiptPdf(buttonEl, contentId, title, iframeId) {
+				var resolved = resolveReceiptContent(contentId, iframeId);
+				if (!resolved) {
+					console.warn('downloadReceiptPdf: content not found for id', contentId);
+					return;
+				}
+
+				var content = resolved.content;
+				var sourceDoc = resolved.doc;
+
+				var originalButtonHtml = null;
+				if (buttonEl) {
+					originalButtonHtml = buttonEl.innerHTML;
+					buttonEl.disabled = true;
+					buttonEl.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Preparing PDF';
+				}
+
+				var restoreButton = function() {
+					if (!buttonEl) {
+						return;
+					}
+					buttonEl.disabled = false;
+					if (originalButtonHtml !== null) {
+						buttonEl.innerHTML = originalButtonHtml;
+					}
+				};
+
+				var ensureHtml2Canvas = (function() {
+					var loader = null;
+					return function() {
+						if (window.html2canvas) {
+							return Promise.resolve();
+						}
+						if (loader) {
+							return loader;
+						}
+						loader = new Promise(function(resolve, reject) {
+							var script = document.createElement('script');
+							script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+							script.onload = resolve;
+							script.onerror = reject;
+							document.head.appendChild(script);
+						});
+						return loader;
+					};
+				})();
+
+				var submitPdfForm = function(payload) {
+					var form = document.createElement('form');
+					form.method = 'POST';
+					form.action = base_url + 'payment-receipt-pdf';
+					form.target = '_blank';
+					form.style.display = 'none';
+
+					var appendField = function(name, value, isTextarea) {
+						var field = isTextarea ? document.createElement('textarea') : document.createElement('input');
+						if (!isTextarea) {
+							field.type = 'hidden';
+						}
+						field.name = name;
+						field.value = value || '';
+						form.appendChild(field);
+					};
+
+					if (payload.imageData) {
+						appendField('imageData', payload.imageData);
+					}
+					if (payload.html) {
+						appendField('html', payload.html, true);
+					}
+					appendField('title', payload.title || 'Subscription Receipt');
+
+					document.body.appendChild(form);
+					form.submit();
+					form.remove();
+					restoreButton();
+				};
+
+				var sendPdfRequest = function(payload) {
+					$.ajax({
+						url: base_url + 'payment-receipt-pdf',
+						type: 'POST',
+						data: payload,
+						xhrFields: {
+							responseType: 'blob'
+						},
+						success: function(data, status, xhr) {
+							var filename = 'subscription_receipt.pdf';
+							var disposition = xhr.getResponseHeader('Content-Disposition') || '';
+							var match = /filename="?([^";]+)"?/i.exec(disposition);
+							if (match && match[1]) {
+								filename = match[1];
+							}
+							var blob = new Blob([data], { type: 'application/pdf' });
+							var link = document.createElement('a');
+							link.href = window.URL.createObjectURL(blob);
+							link.download = filename;
+							document.body.appendChild(link);
+							link.click();
+							link.remove();
+							setTimeout(function() {
+								window.URL.revokeObjectURL(link.href);
+							}, 1000);
+						},
+						error: function() {
+							console.error('downloadReceiptPdf: request failed, falling back to form submit');
+							submitPdfForm(payload);
+						},
+						complete: function() {
+							restoreButton();
+						}
+					});
+				};
+
+				if (iframeEl) {
+					var iframeHtml = null;
+					if (sourceDoc && sourceDoc.documentElement) {
+						iframeHtml = '<!DOCTYPE html>' + sourceDoc.documentElement.outerHTML;
+					}
+
+					if (iframeHtml) {
+						sendPdfRequest({
+							html: iframeHtml,
+							title: title || 'Subscription Receipt'
+						});
+						return;
+					}
+
+					if (iframeEl.src) {
+						var controller = null;
+						var timeoutId = null;
+						if (window.AbortController) {
+							controller = new AbortController();
+							timeoutId = setTimeout(function() {
+								controller.abort();
+							}, 8000);
+						}
+
+						fetch(iframeEl.src, {
+							credentials: 'same-origin',
+							signal: controller ? controller.signal : undefined
+						})
+							.then(function(response) {
+								return response.text();
+							})
+							.then(function(html) {
+								if (timeoutId) {
+									clearTimeout(timeoutId);
+								}
+								sendPdfRequest({
+									html: html,
+									title: title || 'Subscription Receipt'
+								});
+							})
+							.catch(function() {
+								if (timeoutId) {
+									clearTimeout(timeoutId);
+								}
+								console.error('downloadReceiptPdf: failed to fetch iframe html');
+								restoreButton();
+							});
+						return;
+					}
+				}
+
+				ensureHtml2Canvas()
+					.then(function() {
+						return window.html2canvas(content, {
+							scale: 2,
+							useCORS: true,
+							backgroundColor: '#ffffff'
+						});
+					})
+					.then(function(canvas) {
+						var imageData = canvas.toDataURL('image/png');
+						sendPdfRequest({
+							imageData: imageData,
+							title: title || 'Subscription Receipt'
+						});
+					})
+					.catch(function() {
+						var clonedContent = content.cloneNode(true);
+						var styles = Array.prototype.slice.call(sourceDoc.querySelectorAll('link[rel="stylesheet"], style'));
+						var html = '<!DOCTYPE html><html><head>';
+						styles.forEach(function(node) {
+							html += node.outerHTML;
+						});
+						var contentHtml = clonedContent.outerHTML;
+						if (clonedContent.tagName && clonedContent.tagName.toLowerCase() === 'body') {
+							contentHtml = clonedContent.innerHTML;
+						}
+						html += '</head><body>' + contentHtml + '</body></html>';
+						sendPdfRequest({
+							html: html,
+							title: title || 'Subscription Receipt'
+						});
+					})
+					.catch(function() {
+						restoreButton();
+					});
 			}
 
 

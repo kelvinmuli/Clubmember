@@ -44,6 +44,7 @@ class DatabaseController extends CI_Controller {
 		$newDatabaseName = GlobalModel::EXTENSION_DB.'ccm_'.$postData['database_name'];
 		$postData['customer_db_setting_id'] = generate_uuid();
 		$postData['database_name'] = $newDatabaseName;
+		$postData['host'] = explode('.', $postData['sub_domain'])[0];
 		$this->db->insert('customer_db_setting', $postData);
 
 		$this->db->query("CREATE DATABASE `$newDatabaseName` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");

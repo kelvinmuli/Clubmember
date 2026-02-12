@@ -359,13 +359,39 @@
 
 
 
-			function printReceipt(title, contentId) {
+			function resolveReceiptContent(contentId, iframeId) {
 				var content = document.getElementById(contentId);
-				if (!content) {
+				if (content) {
+					return { content: content, doc: document };
+				}
+				if (!iframeId) {
+					return null;
+				}
+				var iframe = document.getElementById(iframeId);
+				if (!iframe) {
+					return null;
+				}
+				var frameDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+				if (!frameDoc) {
+					return null;
+				}
+				var frameContent = frameDoc.getElementById(contentId) || frameDoc.body;
+				if (!frameContent) {
+					return null;
+				}
+				return { content: frameContent, doc: frameDoc };
+			}
+
+			function printReceipt(title, contentId, iframeId) {
+				var resolved = resolveReceiptContent(contentId, iframeId);
+				if (!resolved) {
 					console.warn('printReceipt: content not found for id', contentId);
 					window.print();
 					return;
 				}
+
+				var content = resolved.content;
+				var sourceDoc = resolved.doc;
 
 				var printWindow = window.open('', 'print-' + Date.now(), 'height=600,width=800');
 				if (!printWindow) {
@@ -374,10 +400,10 @@
 				}
 
 				var clonedContent = content.cloneNode(true);
-				var styles = Array.prototype.slice.call(document.querySelectorAll('link[rel="stylesheet"], style'));
+				var styles = Array.prototype.slice.call(sourceDoc.querySelectorAll('link[rel="stylesheet"], style'));
 
 				printWindow.document.open();
-				printWindow.document.write('<!DOCTYPE html><html><head><title>' + (title || document.title) + '</title>');
+				printWindow.document.write('<!DOCTYPE html><html><head><title>' + (title || sourceDoc.title || document.title) + '</title>');
 				styles.forEach(function(node) {
 					printWindow.document.write(node.outerHTML);
 				});

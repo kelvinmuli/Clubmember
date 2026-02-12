@@ -70,7 +70,6 @@
                 <img src="<?= base_url('assets/website/img/Cb-logo-1.jpg') ?>" alt="<?= isset($customerRow->full_legal_name) ? $customerRow->full_legal_name : 'ClubMember.app' ?> Logo" width="70%">
               </a>
             </div> -->
-						<h1 class="text-center mb-4">Welcome to <?=$host?></h1>
             <div class="text-center mb-4">
               <div class="logo-container">
                 <a href="/" class="logo">
@@ -83,7 +82,6 @@
                 </a>
               </div>
             </div>
-
 
             <div class="card card-md">
               <div class="card-body">

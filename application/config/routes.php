@@ -198,6 +198,8 @@ $route['logout'] = 'front/Signup/logout';
 * admin/AuditLogController
 */
 $route['audit-log'] = 'admin/AuditLogController/auditLogView';
+$route['subscription-receipt-content/(:any)/(:any)'] = 'admin/PaymentHistoryController/subscriptionReceiptContent/$1/$2';
+$route['subscription-receipt-pdf/(:any)/(:any)'] = 'admin/PaymentHistoryController/subscriptionReceiptPdf/$1/$2';
 $route['audit-log/details/(:any)'] = 'admin/AuditLogController/details/$1';
 $route['audit-log/export/csv'] = 'admin/AuditLogController/exportCsv';
 $route['audit-log/export/json'] = 'admin/AuditLogController/exportJson';
@@ -291,6 +293,7 @@ $route['payment-history'] = 'admin/PaymentHistoryController/paymentHistoryView';
 $route['payment-history/(:any)'] = 'admin/PaymentHistoryController/paymentHistoryView/$1';
 $route['payment-history/(:any)/(:any)'] = 'admin/PaymentHistoryController/paymentHistoryView/$1/$2';
 $route['payment-receipt-modal/(:any)/(:any)'] = 'admin/PaymentHistoryController/paymentReceiptModal/$1/$2';
+$route['payment-receipt-pdf'] = 'admin/PaymentHistoryController/downloadReceiptPdf';
 $route['add-fundraising-payment-history-modal/(:any)'] = 'admin/PaymentHistoryController/addFundraisingPaymentHistoryModal/$1';
 $route['view-fundraising-payment-history-modal/(:any)'] = 'admin/PaymentHistoryController/viewFundraisingPaymentHistoryModal/$1';
 $route['add-fundraising-payment-history'] = 'admin/PaymentHistoryController/addFundraisingPaymentHistory';
