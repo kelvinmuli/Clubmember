@@ -35,7 +35,7 @@ class HomeController extends CI_Controller {
 		$session_data = $this->common->loadSession();
 		$headerData = $this->common->loadHeaderData('dashboard');
 		$customerDBSettingRow = $this->db->select('*')->from('customer_db_setting')->where('customer_db_setting_id', $session_data['customer_db_setting_id'])->get()->row();
-		// print_r($customerDBSettingRow); exit;
+		
 		if ($session_data['customer_db_setting_id'] == GlobalModel::DEFAULT_CORE_DB_SETTING)
 		{
 			$customerData = $this->db->select('*')->from('customer')->where('active', 1)->get()->result();
@@ -98,6 +98,7 @@ class HomeController extends CI_Controller {
 
 		$data['agmMinutesData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.agm_minutes')->where('active', 1)->limit(3)->order_by('created_at', 'DESC')->get()->result();
 		$data['auditedAccountData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.audited_account')->where('active', 1)->limit(3)->order_by('created_at', 'DESC')->get()->result();
+		// print_r($data); exit;
 		$data['newsletterData'] = $this->db->select('*')->from($customerDBSettingRow->database_name.'.newsletter')->where('active', 1)->limit(3)->order_by('created_at', 'DESC')->get()->result();
 		$data['subscriptionData'] = $subscriptionData ?? [];
 

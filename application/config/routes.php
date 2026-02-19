@@ -157,7 +157,6 @@ $route['remove-customer-modal/(:any)'] = 'admin/CustomerController/removeCustome
 */
 $route['subscription'] = 'admin/SubscriptionController';
 $route['subscription/(:any)'] = 'admin/SubscriptionController/subscriptionView/$1';
-$route['add-subscription-modal'] = 'admin/SubscriptionController/addSubscriptionModal';
 $route['add-subscription-modal/(:any)'] = 'admin/SubscriptionController/addSubscriptionModal/$1';
 $route['add-subscription'] = 'admin/SubscriptionController/addSubscription';
 $route['view-subscription-modal/(:any)'] = 'admin/SubscriptionController/viewSubscriptionModal/$1';

@@ -23,6 +23,7 @@ class Common
 		$headerData = $session_data;
 
 		$customerDBSettingRow = $this->ci->MaintenanceModel->getTableRow('customer_db_setting', 'customer_db_setting_id', $customer_db_setting_id);
+		$customerRow = $this->ci->MaintenanceModel->getTableRow('customer', 'customer_id', $customerDBSettingRow->customer_id);
 		$moduleMenu = $this->ci->MaintenanceModel->getTableRow('m_module', 'module_id', array('path'=>$toolBarMenu));
 		$headerData["moduleMenu"] = $moduleMenu;
 		if ($subToolBarMenu != NULL)
@@ -48,8 +49,36 @@ class Common
 		$stateData = $this->ci->MaintenanceModel->getTable('m_state', 'state_id', array('active'=>1));
 		$activeData = $this->ci->MaintenanceModel->getTable('m_active', 'active_id', array('active'=>1));
 		$userRightData = $this->ci->MaintenanceModel->getTable('user_right');
-		$subscriptionPaymentHistoryRow = $this->ci->MaintenanceModel->getTableRow($customerDBSettingRow->database_name.'.payment_history', 'user_id', array('user_id'=>$session_data['user_id'], 'module_id'=>'17072386410'));
-		$isSubscriptionPaid = $session_data['user_type_id'] == GlobalModel::MEMBER_TYPE ? $subscriptionPaymentHistoryRow->payment_status_id == '1732371146921' : true;
+
+		if ($customerRow->time_period_id == '1771242425529')//Trial Period
+		{
+			$isSubscriptionPaid = true;
+		}
+		elseif ($customerRow->time_period_id == '1771137898281')//Monthly Subscription Period Per Head
+		{
+			$subscriptionPaymentHistoryRow = $this->ci->MaintenanceModel->getTableRow($customerDBSettingRow->database_name.'.payment_history', 'user_id', array('user_id'=>$session_data['user_id'], 'module_id'=>'17072386410'));
+			$isSubscriptionPaid = $session_data['user_type_id'] == GlobalModel::MEMBER_TYPE ? $subscriptionPaymentHistoryRow->payment_status_id == '1732371146921' : true;
+		}
+		elseif ($customerRow->time_period_id == '1771134887950')//Monthly Subscription Period Per Club
+		{
+			$subscriptionPaymentHistoryRow = $this->ci->MaintenanceModel->getTableRow($customerDBSettingRow->database_name.'.payment_history', 'user_id', array('module_id'=>'17072386410'));
+			$isSubscriptionPaid = $session_data['user_type_id'] == GlobalModel::MEMBER_TYPE ? $subscriptionPaymentHistoryRow->payment_status_id == '1732371146921' : true;
+		}
+		elseif ($customerRow->time_period_id == '1771134067077')//Annually Subscription Period Per Head
+		{
+			$subscriptionPaymentHistoryRow = $this->ci->MaintenanceModel->getTableRow($customerDBSettingRow->database_name.'.payment_history', 'user_id', array('user_id'=>$session_data['user_id'], 'module_id'=>'17072386410'));
+			$isSubscriptionPaid = $session_data['user_type_id'] == GlobalModel::MEMBER_TYPE ? $subscriptionPaymentHistoryRow->payment_status_id == '1732371146921' : true;
+		}
+		elseif ($customerRow->time_period_id == '1771135314431')//Annually Subscription Period Per Club
+		{
+			$subscriptionPaymentHistoryRow = $this->ci->MaintenanceModel->getTableRow($customerDBSettingRow->database_name.'.payment_history', 'user_id', array('module_id'=>'17072386410'));
+			$isSubscriptionPaid = $session_data['user_type_id'] == GlobalModel::MEMBER_TYPE ? $subscriptionPaymentHistoryRow->payment_status_id == '1732371146921' : true;
+		}
+		else
+		{
+			$subscriptionPaymentHistoryRow = $this->ci->MaintenanceModel->getTableRow($customerDBSettingRow->database_name.'.payment_history', 'user_id', array('user_id'=>$session_data['user_id'], 'module_id'=>'17072386410'));
+			$isSubscriptionPaid = $session_data['user_type_id'] == GlobalModel::MEMBER_TYPE ? $subscriptionPaymentHistoryRow->payment_status_id == '1732371146921' : true;
+		}
 		// print_r($session_data['user_id']);
 		// print_r(json_encode($subscriptionPaymentHistoryRow)); exit;
 

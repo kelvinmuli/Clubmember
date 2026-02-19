@@ -143,10 +143,10 @@
 														Your support helps keep the association running smoothly, thank you!
                           </p><br>
 
-													<p>Copyright @ 2026 New Muthaiga Residents Association</p><br>
+													<p>Copyright @ 2026 <?=$customerRow->full_legal_name?>. All rights reserved.</p><br>
                           
-                          <p><b>Website:</b> https://newmuthaigaresidentsassociation.com</p>
-                          <p><b>Email:</b> committee@newmuthaigaresidentsassociation.com</p>
+                          <p><b>Website:</b> <?=$customerRow->website?></p>
+                          <p><b>Email:</b> <?=$customerRow->email?></p>
 												</tr>
                                                                             
 											<tr>

@@ -136,7 +136,7 @@
 													<p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;"><b>Notes:</b> <?=$notes ?? ''?></p>
 													<br>
                           <p style="margin:0;color:#585858;font-size:14px;font-weight:400;line-height:170%;">To complete your payment:<br>
-														Visit the url: <a href="https://nmra.clubmember.app/v1/login/1705386384290" target="_blank">https://nmra.clubmember.app/v1/login/1705386384290</a><br>
+														Visit the url: <a href="https://<?=$customerDBSettingRow->host?>.clubmember.app/v1/login/<?=$customerDBSettingRow->customer_db_setting_id?>" target="_blank">https://<?=$customerDBSettingRow->host?>.clubmember.app/v1/login/<?=$customerDBSettingRow->customer_db_setting_id?></a><br>
 														Login to your ClubMember.app account with the password you just set up.<br>
 														Head to the Subscriptions section.<br>
 														Follow the prompts to pay securely.<br><br>
@@ -144,10 +144,10 @@
 														Your support helps keep the association running smoothly, thank you!
                           </p><br>
 
-													<p>Copyright @ 2026 New Muthaiga Residents Association</p><br>
+													<p>Copyright @ 2026 <?=$customerRow->full_legal_name?>. All rights reserved.</p><br>
                           
-                          <p><b>Website:</b> https://newmuthaigaresidentsassociation.com</p>
-                          <p><b>Email:</b> committee@newmuthaigaresidentsassociation.com</p>
+                          <p><b>Website:</b> <?=$customerRow->website?></p>
+                          <p><b>Email:</b> <?=$customerRow->email?></p>
 												</tr>
                                                                             
 											<tr>

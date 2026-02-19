@@ -757,9 +757,10 @@ class SubscriptionController extends CI_Controller {
 		$membershipTypeName = get_table('m_membership_type', 'membership_type_id', $userRow->membership_type_id, 'name');
 		$subscriptionPaymentData = array('full_legal_name'=>$userRow->full_legal_name, 'membershipTypeName'=>$membershipTypeName, 'club_name'=>$customerRow->full_legal_name, 'member_name'=>$session_data['full_legal_name'], 'amount'=>$subscriptionRow->amount, 'due_at'=>$subscriptionRow->due_at, 'notes'=>$subscriptionRow->remark, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id));
 		$subscriptionPaymentData['userRow'] = $userRow;
+		$subscriptionPaymentData['customerDBSettingRow'] = $customerDBSettingRow;
 		$subscriptionPaymentData['customerRow'] = $customerRow;
 		$htmlSubscriptionPayment = $this->load->view('admin/subscription_payment_temp', $subscriptionPaymentData, true);
-		$this->common->sendMail($userRow->email, 'New Muthaiga Residents Association Subscription Payment Required', $htmlSubscriptionPayment);
+		$this->common->sendMail($userRow->email, $customerRow->full_legal_name.' - Subscription Payment Required', $htmlSubscriptionPayment);
 		return 'success';
 	}
 

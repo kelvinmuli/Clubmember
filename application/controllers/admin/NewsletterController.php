@@ -241,6 +241,7 @@ class NewsletterController extends CI_Controller {
 			$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customerDBSettingRow->customer_id)->get()->row();
 			foreach ($userEmails as $user) {
 				$data['userRow'] = $user;
+				$data['customerDBSettingRow'] = $customerDBSettingRow;
 				$data['newsletterRow'] = $newsletterRow;
 				$data['customerRow'] = $customerRow;
 				$htmlContent = $this->load->view('admin/newsletter_email_temp', $data, true);

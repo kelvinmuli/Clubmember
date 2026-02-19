@@ -79,7 +79,7 @@
                 <tr>
                   <td align="center">
                     <!-- Button link -->
-                    <a href="https://nmra.clubmember.app/v1" class="btn" target="_blank" style="display:inline-block; text-decoration:none; font-family:Arial, Helvetica, sans-serif; font-size:14px; padding:12px 22px; border-radius:6px; background:#2563eb; color:#ffffff; font-weight:600;"> Read More</a>
+                    <a href="https://<?=$customerDBSettingRow->host?>.clubmember.app/v1" class="btn" target="_blank" style="display:inline-block; text-decoration:none; font-family:Arial, Helvetica, sans-serif; font-size:14px; padding:12px 22px; border-radius:6px; background:#2563eb; color:#ffffff; font-weight:600;"> Read More</a>
                   </td>
                 </tr>
               </table>
@@ -97,15 +97,15 @@
           <tr>
             <td style="padding:16px 20px 28px 20px; color:#6b7280; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:18px;">
               <p style="margin:0 0 8px 0;">
-               <strong>New Muthaiga Residents Association</strong>
+               <strong><?=$customerRow->full_legal_name?></strong>
               </p>
               <p style="margin:0;">
                 If you have any questions or need help, feel free to reach out.
               </p>
-							<p>Copyright @ 2026 New Muthaiga Residents Association</p><br>
+							<p>Copyright @ 2026 <?=$customerRow->full_legal_name?>. All rights reserved.</p><br>
                                                 
-              <p><b>Website:</b> https://newmuthaigaresidentsassociation.com</p>
-              <p><b>Email:</b> committee@newmuthaigaresidentsassociation.com</p>
+              <p><b>Website:</b> <?=$customerRow->website?></p>
+							<p><b>Email:</b> <?=$customerRow->email?></p>
             </td>
           </tr>
         </table>

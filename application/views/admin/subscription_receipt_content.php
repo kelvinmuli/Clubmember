@@ -2,13 +2,14 @@
 	$isPaid = ($paymentHistoryRow->payment_status_id ?? '') === '1732371146921';
 	$statusLabel = $isPaid ? 'Paid' : 'Unpaid';
 	$statusStyle = $isPaid ? 'background-color:#198754;color:#ffffff;' : 'background-color:#ffc107;color:#212529;';
+	$invoiceLabel = $isPaid ? 'Invoice Receipt' : 'Invoice';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Subscription Receipt</title>
+		<title><?=$invoiceLabel?></title>
 	</head>
 	<body style="margin:0;padding:0;background-color:#f5f6f8;">
 		<center>
@@ -43,7 +44,14 @@
 												<img src="<?= base_url($customerRow->logo)?>" alt="Logo" width="120" style="display:block;border:0;max-width:120px;height:auto;">
 											</td>
 											<td align="right" style="vertical-align:middle;">
-												<span style="display:inline-block;padding:6px 12px;border-radius:999px;font-size:12px;letter-spacing:0.4px;text-transform:uppercase;<?=$statusStyle?>"><?=$statusLabel?></span>
+												<span style="display:inline-block;padding:6px 12px;border-radius:999px;font-size:12px;letter-spacing:0.4px;text-transform:uppercase;<?=$statusStyle?>"><?=$statusLabel?></span><br />
+												<br />
+												<?php if ($isPaid) : ?>
+													<span style="margin-top:4px;display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7280;">Created At : <?=date('d M Y', strtotime($paymentHistoryRow->created_at))?></span><br />
+													<span style="margin-top:4px;display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7280;">Paid At : <?=date('d M Y', strtotime($paymentHistoryRow->updated_at))?></span>
+												<?php else : ?>
+													<span style="margin-top:4px;display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6b7280;">Created At : <?=date('d M Y', strtotime($paymentHistoryRow->created_at))?></span>
+												<?php endif; ?>
 											</td>
 										</tr>
 									</table>
@@ -51,7 +59,7 @@
 							</tr>
 							<tr>
 								<td style="padding:0 24px 16px 24px;">
-									<h2 style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:600;color:#111827;">Invoice Receipt</h2>
+									<h2 style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:20px;font-weight:600;color:#111827;"><?=$invoiceLabel?></h2>
 									<p style="margin:6px 0 0 0;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#6b7280;">Invoice INV/<?=substr($paymentHistoryRow->user_id, -4)?></p>
 								</td>
 							</tr>
@@ -115,16 +123,16 @@
 										<tr>
 											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;"><?=$membershipFeeTypeRow->name?></td>
 											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;" align="center">1</td>
-											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;" align="right"><?='KES ' . number_format($paymentHistoryRow->paid_amount, 2)?></td>
-											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;" align="right"><?='KES ' . number_format($paymentHistoryRow->paid_amount, 2)?></td>
+											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;" align="right"><?='KES ' . number_format($isPaid ? $paymentHistoryRow->paid_amount : $paymentHistoryRow->bill_amount, 2)?></td>
+											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#374151;" align="right"><?='KES ' . number_format($isPaid ? $paymentHistoryRow->paid_amount : $paymentHistoryRow->bill_amount, 2)?></td>
 										</tr>
 										<tr>
 											<td colspan="3" style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#111827;" align="right">Subtotal (KES)</td>
-											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#111827;" align="right"><?='KES ' . number_format($paymentHistoryRow->paid_amount, 2)?></td>
+											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#111827;" align="right"><?='KES ' . number_format($isPaid ? $paymentHistoryRow->paid_amount : $paymentHistoryRow->bill_amount, 2)?></td>
 										</tr>
 										<tr>
 											<td colspan="3" style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#111827;" align="right">Total Due (KES)</td>
-											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#111827;" align="right"><?='KES ' . number_format($paymentHistoryRow->paid_amount, 2)?></td>
+											<td style="padding:10px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;color:#111827;" align="right"><?='KES ' . number_format($isPaid ? $paymentHistoryRow->paid_amount : $paymentHistoryRow->bill_amount, 2)?></td>
 										</tr>
 									</table>
 								</td>

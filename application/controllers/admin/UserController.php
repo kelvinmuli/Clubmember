@@ -619,7 +619,8 @@ class UserController extends CI_Controller {
 		$userRow = $this->db->select('*')->from($customerDBSettingRow->database_name.'.user')->where('user_id', $user_id)->get()->row();
 		$beforeUserRow = $userRow;
 
-		$html = $this->load->view('admin/club_member_temp', array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id)), true);
+
+		$html = $this->load->view('admin/club_member_temp', array('full_legal_name'=>$userRow->full_legal_name, 'club_name'=>$customerRow->full_legal_name, 'url'=>base_url('reset/'.$userRow->user_id.'/'.$customer_db_setting_id), 'userRow'=>$userRow, 'customerRow'=>$customerRow, 'customerDBSettingRow'=>$customerDBSettingRow), true);
         $this->common->sendMail($userRow->email, 'Approval Notification', $html);
 
 		unset($postData['customer_db_setting_id'], $postData['header']);

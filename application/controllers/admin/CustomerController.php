@@ -40,148 +40,44 @@ class CustomerController extends CI_Controller {
 	public function addCustomerModal()
 	{
 		$this->common->checkSession(array('dialog'=>1));
-		
+		print_r($this->addEditCustomerModal());
+	}
+
+	protected function addEditCustomerModal($customerRow = null)
+	{
 		$customerTypeData = $this->db->select('*')->from('m_customer_type')->where('active', 1)->get()->result();
 		$countryData = $this->db->select('*')->from('m_country')->where('active', 1)->get()->result();
 		$customerStatusData = $this->db->select('*')->from('m_customer_status')->where('active', 1)->get()->result();
 		$countyData = $this->db->select('*')->from('m_county')->where('active', 1)->get()->result();
+		$timePeriodData = $this->db->select('*')->from('m_time_period')->where('active', 1)->get()->result();
 
-		$modal ='<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">New Customer</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
+		$timePeriodDataArray = [];
+		foreach ($timePeriodData as $data)
+		{
+			$timePeriodDataArray[$data->period_id][] = $data;
+		}
 
-						<form action="'.base_url('add-customer').'" method="post" enctype="multipart/form-data" class="modal-content">
-							<input id="customer_id" name="customer_id" type="text" value="'.generate_uuid().'" hidden>
-							<div class="modal-body">
-								<div class="row">					
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-logo" class="form-label">Logo (optional)</label>
-											<input type="file" name="logo" id="edit-logo" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="full_legal_name" class="form-label">Name</label>
-											<input id="full_legal_name" name="full_legal_name" type="text" class="form-control btn-pill" required>
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-short_name" class="form-label">Short Name</label>
-											<input id="short_name" name="short_name" type="text" class="form-control btn-pill" required>
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-email" class="form-label">Email Address</label>
-											<input type="email" class="form-control btn-pill" name="email" id="edit-email" required>
-										</div>
-									</div>
-								</div>	
-							</div>
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="id="customer_type_id" class="form-label">Customer Type</label>
-											<select id="customer_type_id" name="customer_type_id" class="form-select btn-pill">
-												<option selected disabled>Select Customer Type</option>';
-												if (isset($customerTypeData)): foreach($customerTypeData as $data):
-													$modal .= '<option value="'.$data->customer_type_id.'">'.$data->name.'</option>';
-												endforeach; endif;
-											$modal .= '</select>
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="phone_number" class="form-label">Telephone Number</label>
-											<input id="phone_number" name="phone_number" type="text" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="physical_address" class="form-label">Physical Address</label>
-											<input id="physical_address" name="physical_address" type="text" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="postal_address" class="form-label">Postal Address</label>
-											<input id="postal_address" name="postal_address" type="text" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="town_id" class="form-label">Town</label>
-											<input id="town_id" name="town_id" type="text" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-regno" class="form-label">Registration Number</label>
-											<input id="reg_no" name="reg_no" type="text" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label class="form-label">Country</label>
-											<select id="country_id" name="country_id" class="form-select btn-pill">
-												<option selected disabled>Select Country</option>';
-												if (isset($countryData)): foreach($countryData as $data):
-													$modal .= '<option value="'.$data->country_id.'">'.$data->name.'</option>';
-												endforeach; endif;
-											$modal .= '</select>
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label class="form-label">County</label>
-											<select id="county_id" name="county_id" class="form-select btn-pill">
-												<option selected disabled>Select County</option>';
-												if (isset($countyData)): foreach($countyData as $data):
-													$modal .= '<option value="'.$data->county_id.'">'.$data->name.'</option>';
-												endforeach; endif;
-											$modal .= '</select>
-										</div>
-									</div>
-								</div>	
-							</div>
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-agreement" class="form-label">Agreement (optional)</label>
-											<input type="file" name="agreement" id="edit-agreement" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-status" class="form-label">Customer Status</label>
-											<select id="customer_status_id" name="customer_status_id" class="form-select btn-pill">
-												<option selected disabled>Select Customer Status</option>';
-												if (isset($customerStatusData)): foreach($customerStatusData as $data):
-													$modal .= '<option value="'.$data->customer_status_id.'">'.$data->name.'</option>';
-												endforeach; endif;
-											$modal .= '</select>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<a href="#" class="btn btn-link link-secondary " data-bs-dismiss="modal">Cancel</a>
-								<button href="#" type="submit" class="btn btn-primary ms-auto btn-pill">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-									Add Customer
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>';
-		print_r($modal);
+		$isEdit = $customerRow ? true : false;
+		$customerId = $isEdit ? $customerRow->customer_id : generate_uuid();
+		$actionUrl = $isEdit ? base_url('edit-customer') : base_url('add-customer');
+		$modalTitle = $isEdit ? ('Edit '.$customerRow->full_legal_name) : 'New Customer';
+		$submitLabel = $isEdit ? 'Update' : 'Add Customer';
+
+		$data = array(
+			'isEdit' => $isEdit,
+			'actionUrl' => $actionUrl,
+			'modalTitle' => $modalTitle,
+			'submitLabel' => $submitLabel,
+			'customerId' => $customerId,
+			'customerRow' => $customerRow,
+			'customerTypeData' => $customerTypeData,
+			'countryData' => $countryData,
+			'customerStatusData' => $customerStatusData,
+			'countyData' => $countyData,
+			'timePeriodDataArray' => $timePeriodDataArray,
+		);
+
+		return $this->load->view('admin/add_edit_customer_modal', $data, true);
 	}
 
 	public function addCustomer()
@@ -217,129 +113,7 @@ class CustomerController extends CI_Controller {
 		$this->common->checkSession(array('dialog'=>1));
 
 		$customerRow = $this->db->select('*')->from('customer')->where('customer_id', $customer_id)->get()->row();
-		$customerTypeData = $this->db->select('*')->from('m_customer_type')->where('active', 1)->get()->result();
-		$countryData = $this->db->select('*')->from('m_country')->where('active', 1)->get()->result();
-		$customerStatusData = $this->db->select('*')->from('m_customer_status')->where('active', 1)->get()->result();
-
-		$modal ='<div class="modal-dialog modal-lg" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">Edit '.$customerRow->full_legal_name.'</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-
-						<form action="'.base_url('edit-customer').'" method="post" enctype="multipart/form-data" class="modal-content">
-							<input id="customer_id" name="customer_id" type="text" value="'.$customerRow->customer_id.'" hidden>
-							<div class="modal-body">
-								<div class="row">					
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-logo" class="form-label">Logo (optional)</label>
-											<input type="file" name="logo" id="edit-logo" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="full_legal_name" class="form-label">Name</label>
-											<input id="full_legal_name" name="full_legal_name" type="text" class="form-control btn-pill" value="'.$customerRow->full_legal_name.'" required>
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-short_name" class="form-label">Short Name</label>
-											<input id="short_name" name="short_name" type="text" class="form-control btn-pill" value="'.$customerRow->short_name.'" required>
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-email" class="form-label">Email Address</label>
-											<input type="email" class="form-control btn-pill" name="email" id="edit-email" value="'.$customerRow->email.'" required>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="id="customer_type_id" class="form-label">Customer Type</label>
-											<select id="customer_type_id" name="customer_type_id" class="form-select btn-pill">
-												<option selected disabled>Select Customer Type</option>';
-												if (isset($customerTypeData)): foreach($customerTypeData as $data):
-													$modal .= '<option value="'.$data->customer_type_id.'" '.($data->customer_type_id == $customerRow->customer_type_id ? 'selected' : '').'>'.$data->name.'</option>';
-												endforeach; endif;
-											$modal .= '</select>
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="phone_number" class="form-label">Telephone Number</label>
-											<input id="phone_number" name="phone_number" type="text" class="form-control btn-pill" value="'.$customerRow->phone_number.'">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="physical_address" class="form-label">Physical Address</label>
-											<input id="physical_address" name="physical_address" type="text" class="form-control btn-pill" value="'.$customerRow->physical_address.'">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="postal_address" class="form-label">Postal Address</label>
-											<input id="postal_address" name="postal_address" type="text" class="form-control btn-pill" value="'.$customerRow->postal_address.'">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-regno" class="form-label">Registration Number</label>
-											<input id="reg_no" name="reg_no" type="text" class="form-control btn-pill" value="'.$customerRow->postal_address.'">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label class="form-label">Country</label>
-											<select id="country_id" name="country_id" class="form-select btn-pill">
-												<option selected disabled>Select Country</option>';
-												if (isset($countryData)): foreach($countryData as $data):
-													$modal .= '<option value="'.$data->country_id.'" '.($data->country_id == $customerRow->country_id ? 'selected' : '').'>'.$data->name.'</option>';
-												endforeach; endif;
-											$modal .= '</select>
-										</div>
-									</div>
-								</div>	
-							</div>
-							<div class="modal-body">
-								<div class="row">
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-agreement" class="form-label">Agreement (optional)</label>
-											<input type="file" name="agreement" id="edit-agreement" class="form-control btn-pill">
-										</div>
-									</div>
-									<div class="col-lg-6">
-										<div class="mb-3">
-											<label for="edit-status" class="form-label">Customer Status</label>
-											<select id="customer_status_id" name="customer_status_id" class="form-select btn-pill">
-												<option selected disabled>Select Customer Status</option>';
-												if (isset($customerStatusData)): foreach($customerStatusData as $data):
-													$modal .= '<option value="'.$data->customer_status_id.'" '.($data->customer_status_id == $customerRow->customer_status_id ? 'selected' : '').'>'.$data->name.'</option>';
-												endforeach; endif;
-											$modal .= '</select>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="modal-footer">
-								<a href="#" class="btn btn-link link-secondary " data-bs-dismiss="modal">Cancel</a>
-								<button href="#" type="submit" class="btn btn-primary ms-auto btn-pill">
-									<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-									Update
-								</button>
-							</div>
-						</form>
-					</div>
-				</div>';
-		print_r($modal);
+		print_r($this->addEditCustomerModal($customerRow));
 	}
 
 	public function editCustomer()
